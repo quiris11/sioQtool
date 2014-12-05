@@ -43,6 +43,8 @@ def lista(i, a):
         xs(a.get('kodPoczt')),
         xs(a.get('poczta')),
         xs(i.get('nazwaOrganuProw')),
+        xs(i.get('orgWydPow')),
+        xs(i.get('orgWydGm')),
         xs(a.get('emailKomorki'))
     ]
     return lista
@@ -98,7 +100,9 @@ def set_header(file):
              'kod',
              'poczta',
              'organ prow',
-             'email kom.\n')
+             'kod pow. org. wyd.',
+             'kod gm. org. wyd.',
+             'email kom.\n',)
         ))
 
 
