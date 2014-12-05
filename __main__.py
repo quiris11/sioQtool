@@ -60,7 +60,7 @@ def no_rspo(tree, file):
     for i in i2s:
         itree = etree.ElementTree(i)
         a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-        if i.get('nrRspo') is None:
+        if i.get('nrRspo') is None and int(i.get('typJed')) < 101:
             l = lista(i, a)
             out_dane(l, file)
 
