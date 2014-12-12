@@ -93,6 +93,8 @@ def set_header(file):
              'powiat',
              'gmina',
              'typ',
+             'publicz.',
+             'kat. ucz.',
              'nazwa',
              'email',
              'telefon',
