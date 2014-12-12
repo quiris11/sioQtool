@@ -34,6 +34,8 @@ def lista(i, a):
         xs(i.get('pow')),
         xs(i.get('gm')),
         xs(i.get('typJed')),
+        xs(i.get('publicznosc')),
+        xs(i.get('kategoriaUczniow')),
         xs(i.get('nazwa')),
         xs(a.get('email')),
         xs(a.get('telefon')),
