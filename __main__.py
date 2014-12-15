@@ -8,17 +8,39 @@
 
 from __future__ import print_function
 import os
+import sys
 from lxml import etree
+from collections import Counter
 import argparse
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 
 parser = argparse.ArgumentParser()
 parser.add_argument("path", help="path to xml files")
-parser.add_argument("--rspo", help="no rspo", action="store_true")
+parser.add_argument("--norspo", help="no rspo", action="store_true")
+parser.add_argument("--dregon", help="duplicate REGON", action="store_true")
+parser.add_argument("--drspo", help="duplicate RSPO", action="store_true")
 parser.add_argument("--nomail", help="no mail", action="store_true")
 parser.add_argument("--all", help="all", action="store_true")
 args = parser.parse_args()
+
+
+def find_duplicates(mylist):
+    return [k for k, v in Counter(mylist).items() if v > 1]
+
+
+def list_ids(wpath, id):
+    listids = []
+    for root, dirs, files in os.walk(wpath):
+        for f in files:
+            if f.endswith('.xml'):
+                ff = os.path.join(root, f)
+                tree = etree.parse(ff)
+                i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
+                for i in i2s:
+                    if i.get(id):
+                        listids.append(i.get(id))
+    return listids
 
 
 def xs(s):
@@ -112,7 +134,16 @@ def set_header(file):
 
 os.system('clear')
 
-if args.rspo:
+
+if args.dregon:
+    regons = list_ids(args.path, 'regon')
+    print(find_duplicates(regons))
+    sys.exit()
+elif args.drspo:
+    rspos = list_ids(args.path, 'nrRspo')
+    print(find_duplicates(rspos))
+    sys.exit()
+elif args.norspo:
     file = open('no_rspo.txt', 'w')
 elif args.nomail:
     file = open('no_mail.txt', 'w')
@@ -126,7 +157,7 @@ for root, dirs, files in os.walk(args.path):
         if f.endswith('.xml'):
             ff = os.path.join(root, f)
             tree = etree.parse(ff)
-            if args.rspo:
+            if args.norspo:
                 no_rspo(tree, file)
             elif args.nomail:
                 no_email(tree, file)
