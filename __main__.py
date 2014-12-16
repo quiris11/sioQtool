@@ -5,21 +5,21 @@
 # Copyright © Robert Błaut. See NOTICE for more information.
 #
 
-
 from __future__ import print_function
-import os
-import sys
 from lxml import etree
 from collections import Counter
 import argparse
+import os
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 
 parser = argparse.ArgumentParser()
 parser.add_argument("path", help="path to xml files")
 parser.add_argument("-S", "--norspo", help="no rspo", action="store_true")
-parser.add_argument("-r", "--dregon", help="duplicate REGON", action="store_true")
-parser.add_argument("-s", "--drspo", help="duplicate RSPO", action="store_true")
+parser.add_argument("-r", "--dregon", help="duplicate REGON",
+                    action="store_true")
+parser.add_argument("-s", "--drspo", help="duplicate RSPO",
+                    action="store_true")
 parser.add_argument("-m", "--nomail", help="no mail", action="store_true")
 parser.add_argument("-a", "--all", help="all", action="store_true")
 args = parser.parse_args()
