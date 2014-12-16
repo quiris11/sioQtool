@@ -17,11 +17,11 @@ XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 
 parser = argparse.ArgumentParser()
 parser.add_argument("path", help="path to xml files")
-parser.add_argument("--norspo", help="no rspo", action="store_true")
-parser.add_argument("--dregon", help="duplicate REGON", action="store_true")
-parser.add_argument("--drspo", help="duplicate RSPO", action="store_true")
-parser.add_argument("--nomail", help="no mail", action="store_true")
-parser.add_argument("--all", help="all", action="store_true")
+parser.add_argument("-S", "--norspo", help="no rspo", action="store_true")
+parser.add_argument("-r", "--dregon", help="duplicate REGON", action="store_true")
+parser.add_argument("-s", "--drspo", help="duplicate RSPO", action="store_true")
+parser.add_argument("-m", "--nomail", help="no mail", action="store_true")
+parser.add_argument("-a", "--all", help="all", action="store_true")
 args = parser.parse_args()
 
 
@@ -99,7 +99,7 @@ def no_email(tree, file):
             out_dane(l, file)
 
 
-def all_addresses(tree, file):
+def all_items(tree, file):
     i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
     for i in i2s:
         itree = etree.ElementTree(i)
@@ -132,35 +132,76 @@ def set_header(file):
         ))
 
 
+def print_duplicates(dlist, tree, file, id):
+    i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
+    for i in i2s:
+        itree = etree.ElementTree(i)
+        a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
+        if i.get(id) in dlist:
+            l = lista(i, a)
+            out_dane(l, file)
+
+
 os.system('clear')
 
-
 if args.dregon:
+    print('*** Duplicate REGON ***')
+    dregonf = open('d_regon.txt', 'w')
     regons = list_ids(args.path, 'regon')
-    print(find_duplicates(regons))
-    sys.exit()
-elif args.drspo:
+    dregons = find_duplicates(regons)
+    set_header(dregonf)
+if args.drspo:
+    print('*** Duplicate RSPO ***')
+    drspof = open('d_rspo.txt', 'w')
     rspos = list_ids(args.path, 'nrRspo')
-    print(find_duplicates(rspos))
-    sys.exit()
-elif args.norspo:
-    file = open('no_rspo.txt', 'w')
-elif args.nomail:
-    file = open('no_mail.txt', 'w')
-elif args.all:
-    file = open('all_addresses.txt', 'w')
-else:
-    exit("No required option...")
-set_header(file)
+    drspos = find_duplicates(rspos)
+    set_header(drspof)
+if args.norspo:
+    print('*** No RSPO ***')
+    norspof = open('no_rspo.txt', 'w')
+    set_header(norspof)
+if args.nomail:
+    print('*** No e-mail ***')
+    nomailf = open('no_mail.txt', 'w')
+    set_header(nomailf)
+if args.all:
+    print('*** All items ***')
+    allf = open('all_items.txt', 'w')
+    set_header(allf)
+# else:
+    # exit("No required option...")
 for root, dirs, files in os.walk(args.path):
     for f in files:
         if f.endswith('.xml'):
             ff = os.path.join(root, f)
             tree = etree.parse(ff)
+            if args.dregon:
+                print_duplicates(dregons, tree, dregonf, 'regon')
+            if args.drspo:
+                print_duplicates(drspos, tree, drspof, 'nrRspo')
             if args.norspo:
-                no_rspo(tree, file)
-            elif args.nomail:
-                no_email(tree, file)
-            elif args.all:
-                all_addresses(tree, file)
-file.close()
+                no_rspo(tree, norspof)
+            if args.nomail:
+                no_email(tree, nomailf)
+            if args.all:
+                all_items(tree, allf)
+try:
+    dregonf.close()
+except:
+    pass
+try:
+    drspof.close()
+except:
+    pass
+try:
+    norspof.close()
+except:
+    pass
+try:
+    nomailf.close()
+except:
+    pass
+try:
+    allf.close()
+except:
+    pass
