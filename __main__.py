@@ -146,23 +146,23 @@ os.system('clear')
 
 if args.dregon:
     print('*** Duplicate REGON ***')
-    dregonf = open('d_regon.txt', 'w')
+    dregonf = open('zduplikowane_regony.txt', 'w')
     regons = list_ids(args.path, 'regon')
     dregons = find_duplicates(regons)
     set_header(dregonf)
 if args.drspo:
     print('*** Duplicate RSPO ***')
-    drspof = open('d_rspo.txt', 'w')
+    drspof = open('zduplikowane_nr_rspo.txt', 'w')
     rspos = list_ids(args.path, 'nrRspo')
     drspos = find_duplicates(rspos)
     set_header(drspof)
 if args.norspo:
     print('*** No RSPO ***')
-    norspof = open('no_rspo.txt', 'w')
+    norspof = open('brak_nr_rspo.txt', 'w')
     set_header(norspof)
 if args.nomail:
     print('*** No e-mail ***')
-    nomailf = open('no_mail.txt', 'w')
+    nomailf = open('brak_adresu_email.txt', 'w')
     set_header(nomailf)
 if args.all:
     print('*** All items ***')
