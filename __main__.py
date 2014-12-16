@@ -10,6 +10,7 @@ from lxml import etree
 from collections import Counter
 import argparse
 import os
+import csv
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 
@@ -49,21 +50,27 @@ def xs(s):
     return unicode(s).encode('utf8')
 
 
+def xi(s):
+    if s is None:
+        return 0
+    return int(s)
+
+
 def lista(i, a):
     lista = [
-        xs(i.get('nrRspo')),
-        "'" + xs(i.get('regon')),
+        xi(i.get('nrRspo')),
+        xs(i.get('regon')),
         xs(i.get('pow')),
         xs(i.get('gm')),
-        xs(i.get('typJed')),
-        xs(i.get('publicznosc')),
-        xs(i.get('kategoriaUczniow')),
+        xi(i.get('typJed')),
+        xi(i.get('publicznosc')),
+        xi(i.get('kategoriaUczniow')),
         xs(i.get('nazwa')),
         xs(a.get('email')),
         xs(a.get('telefon')),
         xs(a.get('nazwaMiejsc')),
-        "'" + xs(a.get('ulica')),
-        "'" + xs(a.get('nrDomu')),
+        xs(a.get('ulica')),
+        xs(a.get('nrDomu')),
         xs(a.get('kodPoczt')),
         xs(a.get('poczta')),
         xs(i.get('nazwaOrganuProw')),
@@ -75,8 +82,9 @@ def lista(i, a):
 
 
 def out_dane(dane, file):
-    file.write('\t'.join(dane) + '\n')
-    print('\t'.join(dane))
+    # file.write('\t'.join(dane) + '\n')
+    file.writerow(dane)
+    # print('\t'.join(dane))
 
 
 def no_rspo(tree, file):
@@ -109,27 +117,28 @@ def all_items(tree, file):
 
 
 def set_header(file):
-        file.write('\t'.join(
-            ('RSPO',
-             'REGON',
-             'powiat',
-             'gmina',
-             'typ',
-             'publicz.',
-             'kat. ucz.',
-             'nazwa',
-             'email',
-             'telefon',
-             'miejscowosc',
-             'ulica',
-             'nr',
-             'kod',
-             'poczta',
-             'organ prow',
-             'kod pow. org. wyd.',
-             'kod gm. org. wyd.',
-             'email kom.\n',)
-        ))
+    naglowki = [
+        'RSPO',
+        'REGON',
+        'powiat',
+        'gmina',
+        'typ',
+        'publicz.',
+        'kat. ucz.',
+        'nazwa',
+        'email',
+        'telefon',
+        'miejscowosc',
+        'ulica',
+        'nr',
+        'kod',
+        'poczta',
+        'organ prow',
+        'kod pow. org. wyd.',
+        'kod gm. org. wyd.',
+        'email kom.'
+        ]
+    file.writerow(naglowki)
 
 
 def print_duplicates(dlist, tree, file, id):
@@ -146,27 +155,37 @@ os.system('clear')
 
 if args.dregon:
     print('*** Duplicate REGON ***')
-    dregonf = open('zduplikowane_regony.txt', 'w')
+    dfb = open('zduplikowane_regony.csv', 'wb')
+    dregonf = csv.writer(dfb, delimiter=";", quotechar='"',
+                         quoting=csv.QUOTE_NONNUMERIC)
     regons = list_ids(args.path, 'regon')
     dregons = find_duplicates(regons)
     set_header(dregonf)
 if args.drspo:
     print('*** Duplicate RSPO ***')
-    drspof = open('zduplikowane_nr_rspo.txt', 'w')
+    drb = open('zduplikowane_nr_rspo.csv', 'wb')
+    drspof = csv.writer(drb, delimiter=";", quotechar='"',
+                        quoting=csv.QUOTE_NONNUMERIC)
     rspos = list_ids(args.path, 'nrRspo')
     drspos = find_duplicates(rspos)
     set_header(drspof)
 if args.norspo:
     print('*** No RSPO ***')
-    norspof = open('brak_nr_rspo.txt', 'w')
+    nrb = open('brak_nr_rspo.csv', 'wb')
+    norspof = csv.writer(nrb, delimiter=";", quotechar='"',
+                         quoting=csv.QUOTE_NONNUMERIC)
     set_header(norspof)
 if args.nomail:
     print('*** No e-mail ***')
-    nomailf = open('brak_adresu_email.txt', 'w')
+    nmf = open('brak_adresu_email.csv', 'wb')
+    nomailf = csv.writer(nmf, delimiter=";", quotechar='"',
+                         quoting=csv.QUOTE_NONNUMERIC)
     set_header(nomailf)
 if args.all:
     print('*** All items ***')
-    allf = open('all_items.txt', 'w')
+    allfb = open('all_items.csv', 'wb')
+    allf = csv.writer(allfb, delimiter=";", quotechar='"',
+                      quoting=csv.QUOTE_NONNUMERIC)
     set_header(allf)
 # else:
     # exit("No required option...")
@@ -186,22 +205,22 @@ for root, dirs, files in os.walk(args.path):
             if args.all:
                 all_items(tree, allf)
 try:
-    dregonf.close()
+    dfb.close()
 except:
     pass
 try:
-    drspof.close()
+    drb.close()
 except:
     pass
 try:
-    norspof.close()
+    nrb.close()
 except:
     pass
 try:
-    nomailf.close()
+    nmf.close()
 except:
     pass
 try:
-    allf.close()
+    allfb.close()
 except:
     pass
