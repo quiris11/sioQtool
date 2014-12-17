@@ -19,7 +19,9 @@ XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
 
 parser = argparse.ArgumentParser()
-parser.add_argument("path", help="path to xml files")
+parser.add_argument("path", nargs='?', help="path to xml files")
+parser.add_argument('-x', '--xls', nargs='?', metavar='FILE', default='',
+                    help='path to xls file with NSIO data')
 parser.add_argument("-S", "--norspo", help="no rspo", action="store_true")
 parser.add_argument("-r", "--dregon", help="duplicate REGON",
                     action="store_true")
@@ -183,7 +185,7 @@ def find_ns_no_mails(path):
         csvf = csv.writer(f, delimiter=";", quotechar='"',
                           quoting=csv.QUOTE_NONNUMERIC)
         for i, j, k, l, m, n in data:
-                if m.text is None or 'E-mail':
+                if n.text is None or 'E-mail':
                     print(i, j, len(j), k, l, m, n.text)
                     csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
                                   n.text])
@@ -206,9 +208,9 @@ def ns_all_items(path):
 
 os.system('clear')
 if args.ns_nomail:
-    find_ns_no_mails(args.path)
+    find_ns_no_mails(args.xls)
 if args.ns_all:
-    ns_all_items(args.path)
+    ns_all_items(args.xls)
 if args.dregon:
     print('*** Duplicate REGON ***')
     dfb = open('zdublowane_regony.csv', 'wb')
@@ -243,41 +245,39 @@ if args.all:
     allf = csv.writer(allfb, delimiter=";", quotechar='"',
                       quoting=csv.QUOTE_NONNUMERIC)
     set_header(allf)
-# else:
-    # exit("No required option...")
-
-for root, dirs, files in os.walk(args.path):
-    for f in files:
-        if f.endswith('.xml'):
-            ff = os.path.join(root, f)
-            tree = etree.parse(ff)
-            if args.dregon:
-                print_duplicates(dregons, tree, dregonf, 'regon')
-            if args.drspo:
-                print_duplicates(drspos, tree, drspof, 'nrRspo')
-            if args.norspo:
-                no_rspo(tree, norspof)
-            if args.nomail:
-                no_email(tree, nomailf)
-            if args.all:
-                all_items(tree, allf)
-try:
-    dfb.close()
-except:
-    pass
-try:
-    drb.close()
-except:
-    pass
-try:
-    nrb.close()
-except:
-    pass
-try:
-    nmf.close()
-except:
-    pass
-try:
-    allfb.close()
-except:
-    pass
+if args.path:
+    for root, dirs, files in os.walk(args.path):
+        for f in files:
+            if f.endswith('.xml'):
+                ff = os.path.join(root, f)
+                tree = etree.parse(ff)
+                if args.dregon:
+                    print_duplicates(dregons, tree, dregonf, 'regon')
+                if args.drspo:
+                    print_duplicates(drspos, tree, drspof, 'nrRspo')
+                if args.norspo:
+                    no_rspo(tree, norspof)
+                if args.nomail:
+                    no_email(tree, nomailf)
+                if args.all:
+                    all_items(tree, allf)
+    try:
+        dfb.close()
+    except:
+        pass
+    try:
+        drb.close()
+    except:
+        pass
+    try:
+        nrb.close()
+    except:
+        pass
+    try:
+        nmf.close()
+    except:
+        pass
+    try:
+        allfb.close()
+    except:
+        pass
