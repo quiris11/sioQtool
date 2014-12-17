@@ -34,6 +34,8 @@ parser.add_argument("-M", "--ns-nomail", help="no mail in NSIO",
                     action="store_true")
 parser.add_argument("-b", "--bad-rspo", help="bad RSPO in OSIO",
                     action="store_true")
+parser.add_argument("-B", "--bad-regon", help="bad REGON in OSIO",
+                    action="store_true")
 args = parser.parse_args()
 
 
@@ -185,6 +187,8 @@ def list_ns_ids(path, id):
     l = tree.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
                    namespaces=XLSNS)
     treez = etree.parse(os.path.join(path, '000038z.xls'))
+    if id == '9':
+        id = '10'
     lz = treez.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
                      namespaces=XLSNS)
     # print(l + lz)
@@ -220,6 +224,35 @@ def ns_all_items(path):
                                   n.text])
 
 os.system('clear')
+if args.bad_regon:
+    print('*** OS: bad REGON ***')
+    bad_regons = []
+    os_regons = list_ids(args.path, 'regon')
+    ns_regons = list_ns_ids(args.xls, '9')
+    for i in ns_regons:
+        if len(i) == 9:
+            ns_regons[ns_regons.index(i)] = i + '00000'
+    # print(ns_regons)
+    for i in os_regons:
+        if i not in ns_regons:
+            bad_regons.append(i)
+    # print(bad_regons)
+    with open('niepoprawne_numery_regon.csv', 'wb') as f:
+        csvf = csv.writer(f, delimiter=";", quotechar='"',
+                          quoting=csv.QUOTE_NONNUMERIC)
+        set_header(csvf)
+        for root, dirs, files in os.walk(args.path):
+            for f in files:
+                if f.endswith('.xml'):
+                    ff = os.path.join(root, f)
+                    tree = etree.parse(ff)
+                    i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
+                    for i in i2s:
+                        itree = etree.ElementTree(i)
+                        a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
+                        if (i.get('regon') in bad_regons and
+                                i.get('nrRspo') is not None):
+                            csvf.writerow(lista(i, a))
 if args.bad_rspo:
     print('*** OS: bad RSPO ***')
     bad_rspos = []
