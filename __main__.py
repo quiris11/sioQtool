@@ -20,8 +20,8 @@ XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
 
 parser = argparse.ArgumentParser()
 parser.add_argument("path", nargs='?', help="path to xml files")
-parser.add_argument('-x', '--xls', nargs='?', metavar='FILE', default='',
-                    help='path to xls file with NSIO data')
+parser.add_argument('-x', '--xls', nargs='?', metavar='DIR', default='',
+                    help='path to DIR with NSIO xls files')
 parser.add_argument("-S", "--norspo", help="no rspo", action="store_true")
 parser.add_argument("-r", "--dregon", help="duplicate REGON",
                     action="store_true")
@@ -31,6 +31,8 @@ parser.add_argument("-m", "--nomail", help="no mail", action="store_true")
 parser.add_argument("-a", "--all", help="all", action="store_true")
 parser.add_argument("-A", "--ns-all", help="all in NSIO", action="store_true")
 parser.add_argument("-M", "--ns-nomail", help="no mail in NSIO",
+                    action="store_true")
+parser.add_argument("-b", "--bad-rspo", help="bad RSPO in OSIO",
                     action="store_true")
 args = parser.parse_args()
 
@@ -161,7 +163,7 @@ def print_duplicates(dlist, tree, file, id):
 
 
 def get_ns_data(path):
-    tree = etree.parse(os.path.join(path))
+    tree = etree.parse(os.path.join(path, '000038.xls'))
     nsTRspos = tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                           namespaces=XLSNS)
     nsTRegons = tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
@@ -176,6 +178,17 @@ def get_ns_data(path):
                           namespaces=XLSNS)
     data = zip(nsTRspos, nsTRegons, nsTTyp, nsTNames, nsTOrgRej, nsEmails)
     return data
+
+
+def list_ns_ids(path, id):
+    tree = etree.parse(os.path.join(path, '000038.xls'))
+    l = tree.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
+                   namespaces=XLSNS)
+    treez = etree.parse(os.path.join(path, '000038z.xls'))
+    lz = treez.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
+                     namespaces=XLSNS)
+    # print(l + lz)
+    return l + lz
 
 
 def find_ns_no_mails(path):
@@ -207,12 +220,36 @@ def ns_all_items(path):
                                   n.text])
 
 os.system('clear')
+if args.bad_rspo:
+    print('*** OS: bad RSPO ***')
+    bad_rspos = []
+    os_rspos = list_ids(args.path, 'nrRspo')
+    ns_rspos = list_ns_ids(args.xls, '1')
+    for i in os_rspos:
+        if i not in ns_rspos:
+            bad_rspos.append(i)
+    # print(bad_rspos)
+    with open('niepoprawne_numery_rspo.csv', 'wb') as f:
+        csvf = csv.writer(f, delimiter=";", quotechar='"',
+                          quoting=csv.QUOTE_NONNUMERIC)
+        set_header(csvf)
+        for root, dirs, files in os.walk(args.path):
+            for f in files:
+                if f.endswith('.xml'):
+                    ff = os.path.join(root, f)
+                    tree = etree.parse(ff)
+                    i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
+                    for i in i2s:
+                        itree = etree.ElementTree(i)
+                        a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
+                        if i.get('nrRspo') in bad_rspos:
+                            csvf.writerow(lista(i, a))
 if args.ns_nomail:
     find_ns_no_mails(args.xls)
 if args.ns_all:
     ns_all_items(args.xls)
 if args.dregon:
-    print('*** Duplicate REGON ***')
+    print('*** OS: duplicate REGON ***')
     dfb = open('zdublowane_regony.csv', 'wb')
     dregonf = csv.writer(dfb, delimiter=";", quotechar='"',
                          quoting=csv.QUOTE_NONNUMERIC)
@@ -220,7 +257,7 @@ if args.dregon:
     dregons = find_duplicates(regons)
     set_header(dregonf)
 if args.drspo:
-    print('*** Duplicate RSPO ***')
+    print('*** OS: duplicate RSPO ***')
     drb = open('zdublowane_nr_rspo.csv', 'wb')
     drspof = csv.writer(drb, delimiter=";", quotechar='"',
                         quoting=csv.QUOTE_NONNUMERIC)
@@ -228,13 +265,13 @@ if args.drspo:
     drspos = find_duplicates(rspos)
     set_header(drspof)
 if args.norspo:
-    print('*** No RSPO ***')
+    print('*** OS: no RSPO ***')
     nrb = open('brak_nr_rspo.csv', 'wb')
     norspof = csv.writer(nrb, delimiter=";", quotechar='"',
                          quoting=csv.QUOTE_NONNUMERIC)
     set_header(norspof)
 if args.nomail:
-    print('*** No e-mail ***')
+    print('*** OS: no e-mail ***')
     nmf = open('brak_adresu_email.csv', 'wb')
     nomailf = csv.writer(nmf, delimiter=";", quotechar='"',
                          quoting=csv.QUOTE_NONNUMERIC)
