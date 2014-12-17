@@ -11,8 +11,12 @@ from collections import Counter
 import argparse
 import os
 import csv
+import sys
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
+XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
+         'x': 'urn:schemas-microsoft-com:office:excel',
+         'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
 
 parser = argparse.ArgumentParser()
 parser.add_argument("path", help="path to xml files")
@@ -23,6 +27,8 @@ parser.add_argument("-s", "--drspo", help="duplicate RSPO",
                     action="store_true")
 parser.add_argument("-m", "--nomail", help="no mail", action="store_true")
 parser.add_argument("-a", "--all", help="all", action="store_true")
+parser.add_argument("-M", "--ns-nomail", help="no mail in NSIO",
+                    action="store_true")
 args = parser.parse_args()
 
 
@@ -151,11 +157,42 @@ def print_duplicates(dlist, tree, file, id):
             out_dane(l, file)
 
 
-os.system('clear')
+def get_ns_data(path):
+    tree = etree.parse(os.path.join(path))
+    nsTRspos = tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
+                          namespaces=XLSNS)
+    nsTRegons = tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
+                           namespaces=XLSNS)
+    nsTNames = tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
+                          namespaces=XLSNS)
+    nsTOrgRej = tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
+                           namespaces=XLSNS)
+    nsEmails = tree.xpath('//ss:Cell[@ss:Index="21"]/ss:Data',
+                          namespaces=XLSNS)
+    return(nsTRspos, nsTRegons, nsTNames, nsTOrgRej, nsEmails)
 
+
+def find_ns_no_mails(path):
+    counter = 0
+    print('*** NS: no Emails ***')
+    nsTRspos, nsTRegons, nsTNames, nsTOrgRej, nsEmails = get_ns_data(path)
+    with open('ns_no_emails.csv', 'wb') as f:
+        csvf = csv.writer(f, delimiter=";", quotechar='"',
+                          quoting=csv.QUOTE_NONNUMERIC)
+        for i, j, k, l, m in zip(nsTRspos, nsTRegons, nsTNames, nsTOrgRej,
+                                 nsEmails):
+                if m.text is None or 'E-mail':
+                    counter += 1
+                    print(counter, i, j, len(j), k, l, m.text)
+                    csvf.writerow([counter, i, j, len(j), xs(k), xs(l), m.text])
+
+
+os.system('clear')
+if args.ns_nomail:
+    find_ns_no_mails(args.path)
 if args.dregon:
     print('*** Duplicate REGON ***')
-    dfb = open('zduplikowane_regony.csv', 'wb')
+    dfb = open('zdublowane_regony.csv', 'wb')
     dregonf = csv.writer(dfb, delimiter=";", quotechar='"',
                          quoting=csv.QUOTE_NONNUMERIC)
     regons = list_ids(args.path, 'regon')
@@ -163,7 +200,7 @@ if args.dregon:
     set_header(dregonf)
 if args.drspo:
     print('*** Duplicate RSPO ***')
-    drb = open('zduplikowane_nr_rspo.csv', 'wb')
+    drb = open('zdublowane_nr_rspo.csv', 'wb')
     drspof = csv.writer(drb, delimiter=";", quotechar='"',
                         quoting=csv.QUOTE_NONNUMERIC)
     rspos = list_ids(args.path, 'nrRspo')
@@ -189,6 +226,7 @@ if args.all:
     set_header(allf)
 # else:
     # exit("No required option...")
+
 for root, dirs, files in os.walk(args.path):
     for f in files:
         if f.endswith('.xml'):
