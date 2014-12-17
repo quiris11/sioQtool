@@ -27,6 +27,7 @@ parser.add_argument("-s", "--drspo", help="duplicate RSPO",
                     action="store_true")
 parser.add_argument("-m", "--nomail", help="no mail", action="store_true")
 parser.add_argument("-a", "--all", help="all", action="store_true")
+parser.add_argument("-A", "--ns-all", help="all in NSIO", action="store_true")
 parser.add_argument("-M", "--ns-nomail", help="no mail in NSIO",
                     action="store_true")
 args = parser.parse_args()
@@ -163,33 +164,51 @@ def get_ns_data(path):
                           namespaces=XLSNS)
     nsTRegons = tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
                            namespaces=XLSNS)
+    nsTTyp = tree.xpath('//ss:Cell[@ss:Index="2"]/ss:Data/text()',
+                        namespaces=XLSNS)
     nsTNames = tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
                           namespaces=XLSNS)
     nsTOrgRej = tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
                            namespaces=XLSNS)
     nsEmails = tree.xpath('//ss:Cell[@ss:Index="21"]/ss:Data',
                           namespaces=XLSNS)
-    return(nsTRspos, nsTRegons, nsTNames, nsTOrgRej, nsEmails)
+    data = zip(nsTRspos, nsTRegons, nsTTyp, nsTNames, nsTOrgRej, nsEmails)
+    return data
 
 
 def find_ns_no_mails(path):
-    counter = 0
     print('*** NS: no Emails ***')
-    nsTRspos, nsTRegons, nsTNames, nsTOrgRej, nsEmails = get_ns_data(path)
+    data = get_ns_data(path)
     with open('ns_no_emails.csv', 'wb') as f:
         csvf = csv.writer(f, delimiter=";", quotechar='"',
                           quoting=csv.QUOTE_NONNUMERIC)
-        for i, j, k, l, m in zip(nsTRspos, nsTRegons, nsTNames, nsTOrgRej,
-                                 nsEmails):
+        for i, j, k, l, m, n in data:
                 if m.text is None or 'E-mail':
-                    counter += 1
-                    print(counter, i, j, len(j), k, l, m.text)
-                    csvf.writerow([counter, i, j, len(j), xs(k), xs(l), m.text])
+                    print(i, j, len(j), k, l, m, n.text)
+                    csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
+                                  n.text])
 
+
+def ns_all_items(path):
+    print('*** NS: All items ***')
+    data = get_ns_data(path)
+    with open('ns_all_items.csv', 'wb') as f:
+        csvf = csv.writer(f, delimiter=";", quotechar='"',
+                          quoting=csv.QUOTE_NONNUMERIC)
+        for i, j, k, l, m, n in data:
+                print(i, j, len(j), k, l, m, n.text)
+                try:
+                    csvf.writerow([xi(i), j, len(j), xs(k), xs(l), xs(m),
+                                  n.text])
+                except:
+                    csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
+                                  n.text])
 
 os.system('clear')
 if args.ns_nomail:
     find_ns_no_mails(args.path)
+if args.ns_all:
+    ns_all_items(args.path)
 if args.dregon:
     print('*** Duplicate REGON ***')
     dfb = open('zdublowane_regony.csv', 'wb')
