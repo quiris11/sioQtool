@@ -176,9 +176,13 @@ def get_ns_data(path):
 
 def list_ns_ids(path, id):
     tree = etree.parse(os.path.join(path, '000038.xls'))
+    print('*** ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                              namespaces=XLSNS)[0])
     l = tree.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
                    namespaces=XLSNS)
     treez = etree.parse(os.path.join(path, '000038z.xls'))
+    print('*** ' + treez.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                               namespaces=XLSNS)[0])
     if id == '9':
         id = '10'
     lz = treez.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
@@ -220,7 +224,8 @@ print('*** OS: Missing REGONs existing in NSIO with start earlier than ' +
       str(BORDER_DATE) + ' ***')
 missing_regons = []
 os_regons = list_ids(args.oldpath, 'regon')
-ns_regons = etree.parse(os.path.join(args.newpath, '000038.xls')).xpath(
+ns_tree = etree.parse(os.path.join(args.newpath, '000038.xls'))
+ns_regons = ns_tree.xpath(
     '//ss:Cell[@ss:Index="9"]/ss:Data/text()', namespaces=XLSNS
 )
 for i in ns_regons:
