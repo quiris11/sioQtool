@@ -8,15 +8,18 @@
 from __future__ import print_function
 from lxml import etree
 from collections import Counter
+from datetime import datetime
 import argparse
 import os
 import csv
-import sys
+# import sys
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'x': 'urn:schemas-microsoft-com:office:excel',
          'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
+
+BORDER_DATE = datetime.strptime('2014-09-30', '%Y-%m-%d')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("oldpath", help="path to DIR with OSIO XML files")
@@ -164,7 +167,10 @@ def get_ns_data(path):
                            namespaces=XLSNS)
     nsEmails = tree.xpath('//ss:Cell[@ss:Index="21"]/ss:Data',
                           namespaces=XLSNS)
-    data = zip(nsTRspos, nsTRegons, nsTTyp, nsTNames, nsTOrgRej, nsEmails)
+    nsDRozDzi = tree.xpath('//ss:Cell[@ss:Index="34"]/ss:Data/text()',
+                           namespaces=XLSNS)
+    data = zip(nsTRspos, nsTRegons, nsTTyp, nsTNames, nsTOrgRej, nsEmails,
+               nsDRozDzi)
     return data
 
 
@@ -186,11 +192,11 @@ def find_ns_no_mails(path):
     with open('ns_no_emails.csv', 'wb') as f:
         csvf = csv.writer(f, delimiter=";", quotechar='"',
                           quoting=csv.QUOTE_NONNUMERIC)
-        for i, j, k, l, m, n in data:
+        for i, j, k, l, m, n, o in data:
                 if n.text is None or 'E-mail':
                     print(i, j, len(j), k, l, m, n.text)
                     csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
-                                  n.text])
+                                  n.text, xs(o)])
 
 
 def ns_all_items(path):
@@ -199,16 +205,48 @@ def ns_all_items(path):
     with open('ns_all_items.csv', 'wb') as f:
         csvf = csv.writer(f, delimiter=";", quotechar='"',
                           quoting=csv.QUOTE_NONNUMERIC)
-        for i, j, k, l, m, n in data:
-                print(i, j, len(j), k, l, m, n.text)
+        for i, j, k, l, m, n, o in data:
+                print(i, j, len(j), k, l, m, n.text, o)
                 try:
                     csvf.writerow([xi(i), j, len(j), xs(k), xs(l), xs(m),
-                                  n.text])
+                                  n.text, xs(o)])
                 except:
                     csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
-                                  n.text])
+                                  n.text, xs(o)])
 
 os.system('clear')
+
+print('*** OS: Missing REGONs existing in NSIO with start earlier than ' +
+      str(BORDER_DATE) + ' ***')
+missing_regons = []
+os_regons = list_ids(args.oldpath, 'regon')
+ns_regons = etree.parse(os.path.join(args.newpath, '000038.xls')).xpath(
+    '//ss:Cell[@ss:Index="9"]/ss:Data/text()', namespaces=XLSNS
+)
+for i in ns_regons:
+    if len(i) == 9:
+        i = i + '00000'
+    if i not in os_regons:
+        missing_regons.append(i)
+data = get_ns_data(args.newpath)
+with open('brakujace_nr_regon.csv', 'wb') as f:
+    csvf = csv.writer(f, delimiter=";", quotechar='"',
+                      quoting=csv.QUOTE_NONNUMERIC)
+    for i, j, k, l, m, n, o in data:
+        if len(j) == 9:
+            j = j + '00000'
+        try:
+            odate = datetime.strptime(o, '%Y-%m-%d')
+        except:
+            odate = datetime.strptime('9999-01-01', '%Y-%m-%d')
+        if (j in missing_regons and 'MINISTERSTWO' not in m and
+                odate < BORDER_DATE) or i == 'Nr RSPO':
+            try:
+                csvf.writerow([xi(i), j, len(j), xs(k), xs(l), xs(m),
+                              n.text, xs(o)])
+            except:
+                csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
+                              n.text, xs(o)])
 
 print('*** OS: bad REGONs ***')
 bad_regons = []
