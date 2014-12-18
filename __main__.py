@@ -26,7 +26,6 @@ parser.add_argument("oldpath", help="path to DIR with OSIO XML files")
 parser.add_argument('newpath', help='path to DIR with NSIO XLS files')
 parser.add_argument("--ns-nomails", help="NSIO: no mails", action="store_true")
 parser.add_argument("--ns-all", help="NSIO: all items", action="store_true")
-parser.add_argument("--os-all", help="OSIO: all items", action="store_true")
 
 args = parser.parse_args()
 
@@ -304,17 +303,16 @@ with open('os_niepoprawne_numery_rspo.csv', 'wb') as f:
                     if i.get('nrRspo') in bad_rspos:
                         csvf.writerow(lista(i, a))
 
-if args.os_all:
-    print('*** OS: all items ***')
-    with open('os_all_items.csv', 'wb') as f:
-        allf = csv.writer(f, delimiter=";", quotechar='"',
-                          quoting=csv.QUOTE_NONNUMERIC)
-        set_header(allf)
-        for root, dirs, files in os.walk(args.oldpath):
-            for f in files:
-                if f.endswith('.xml'):
-                    ff = os.path.join(root, f)
-                    all_items(tree, allf)
+print('*** OS: all items ***')
+with open('os_all_items.csv', 'wb') as fb:
+    allf = csv.writer(fb, delimiter=";", quotechar='"',
+                      quoting=csv.QUOTE_NONNUMERIC)
+    set_header(allf)
+    for root, dirs, files in os.walk(args.oldpath):
+        for f in files:
+            if f.endswith('.xml'):
+                ff = os.path.join(root, f)
+                all_items(tree, allf)
 
 if args.ns_nomails:
     find_ns_no_mails(args.newpath)
