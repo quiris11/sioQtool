@@ -220,6 +220,18 @@ def ns_all_items(path):
 
 os.system('clear')
 
+print('*** OS: all items ***')
+with open('os_all_items.csv', 'wb') as fb:
+    allf = csv.writer(fb, delimiter=";", quotechar='"',
+                      quoting=csv.QUOTE_NONNUMERIC)
+    set_header(allf)
+    for root, dirs, files in os.walk(args.oldpath):
+        for f in files:
+            if f.endswith('.xml'):
+                ff = os.path.join(root, f)
+                tree = etree.parse(ff)
+                all_items(tree, allf)
+
 print('*** OS: Missing REGONs existing in NSIO with start earlier than ' +
       str(BORDER_DATE) + ' ***')
 missing_regons = []
@@ -302,17 +314,6 @@ with open('os_niepoprawne_numery_rspo.csv', 'wb') as f:
                     a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
                     if i.get('nrRspo') in bad_rspos:
                         csvf.writerow(lista(i, a))
-
-print('*** OS: all items ***')
-with open('os_all_items.csv', 'wb') as fb:
-    allf = csv.writer(fb, delimiter=";", quotechar='"',
-                      quoting=csv.QUOTE_NONNUMERIC)
-    set_header(allf)
-    for root, dirs, files in os.walk(args.oldpath):
-        for f in files:
-            if f.endswith('.xml'):
-                ff = os.path.join(root, f)
-                all_items(tree, allf)
 
 if args.ns_nomails:
     find_ns_no_mails(args.newpath)
