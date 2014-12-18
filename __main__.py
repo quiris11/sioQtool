@@ -26,6 +26,7 @@ parser.add_argument("oldpath", help="path to DIR with OSIO XML files")
 parser.add_argument('newpath', help='path to DIR with NSIO XLS files')
 parser.add_argument("--ns-nomails", help="NSIO: no mails", action="store_true")
 parser.add_argument("--ns-all", help="NSIO: all items", action="store_true")
+parser.add_argument("--os-all", help="OSIO: all items", action="store_true")
 
 args = parser.parse_args()
 
@@ -234,7 +235,7 @@ for i in ns_regons:
     if i not in os_regons:
         missing_regons.append(i)
 data = get_ns_data(args.newpath)
-with open('brakujace_nr_regon.csv', 'wb') as f:
+with open('ns_brakujace_nr_regon.csv', 'wb') as f:
     csvf = csv.writer(f, delimiter=";", quotechar='"',
                       quoting=csv.QUOTE_NONNUMERIC)
     for i, j, k, l, m, n, o in data:
@@ -263,7 +264,7 @@ for i in ns_regons:
 for i in os_regons:
     if i not in ns_regons:
         bad_regons.append(i)
-with open('niepoprawne_numery_regon.csv', 'wb') as f:
+with open('os_niepoprawne_numery_regon.csv', 'wb') as f:
     csvf = csv.writer(f, delimiter=";", quotechar='"',
                       quoting=csv.QUOTE_NONNUMERIC)
     set_header(csvf)
@@ -287,7 +288,7 @@ ns_rspos = list_ns_ids(args.newpath, '1')
 for i in os_rspos:
     if i not in ns_rspos:
         bad_rspos.append(i)
-with open('niepoprawne_numery_rspo.csv', 'wb') as f:
+with open('os_niepoprawne_numery_rspo.csv', 'wb') as f:
     csvf = csv.writer(f, delimiter=";", quotechar='"',
                       quoting=csv.QUOTE_NONNUMERIC)
     set_header(csvf)
@@ -302,13 +303,26 @@ with open('niepoprawne_numery_rspo.csv', 'wb') as f:
                     a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
                     if i.get('nrRspo') in bad_rspos:
                         csvf.writerow(lista(i, a))
+
+if args.os_all:
+    print('*** OS: all items ***')
+    with open('os_all_items.csv', 'wb') as f:
+        allf = csv.writer(f, delimiter=";", quotechar='"',
+                          quoting=csv.QUOTE_NONNUMERIC)
+        set_header(allf)
+        for root, dirs, files in os.walk(args.oldpath):
+            for f in files:
+                if f.endswith('.xml'):
+                    ff = os.path.join(root, f)
+                    all_items(tree, allf)
+
 if args.ns_nomails:
     find_ns_no_mails(args.newpath)
 if args.ns_all:
     ns_all_items(args.newpath)
 
 print('*** OS: duplicate REGONs ***')
-dfb = open('zdublowane_regony.csv', 'wb')
+dfb = open('os_zdublowane_regony.csv', 'wb')
 dregonf = csv.writer(dfb, delimiter=";", quotechar='"',
                      quoting=csv.QUOTE_NONNUMERIC)
 regons = list_ids(args.oldpath, 'regon')
@@ -316,7 +330,7 @@ dregons = find_duplicates(regons)
 set_header(dregonf)
 
 print('*** OS: duplicate RSPOs ***')
-drb = open('zdublowane_nr_rspo.csv', 'wb')
+drb = open('os_zdublowane_nr_rspo.csv', 'wb')
 drspof = csv.writer(drb, delimiter=";", quotechar='"',
                     quoting=csv.QUOTE_NONNUMERIC)
 rspos = list_ids(args.oldpath, 'nrRspo')
@@ -324,22 +338,17 @@ drspos = find_duplicates(rspos)
 set_header(drspof)
 
 print('*** OS: no RSPOs ***')
-nrb = open('brak_nr_rspo.csv', 'wb')
+nrb = open('os_brak_nr_rspo.csv', 'wb')
 norspof = csv.writer(nrb, delimiter=";", quotechar='"',
                      quoting=csv.QUOTE_NONNUMERIC)
 set_header(norspof)
 
 print('*** OS: no e-mails ***')
-nmf = open('brak_adresu_email.csv', 'wb')
+nmf = open('os_brak_adresu_email.csv', 'wb')
 nomailf = csv.writer(nmf, delimiter=";", quotechar='"',
                      quoting=csv.QUOTE_NONNUMERIC)
 set_header(nomailf)
 
-print('*** OS: all items ***')
-allfb = open('all_items.csv', 'wb')
-allf = csv.writer(allfb, delimiter=";", quotechar='"',
-                  quoting=csv.QUOTE_NONNUMERIC)
-set_header(allf)
 
 for root, dirs, files in os.walk(args.oldpath):
     for f in files:
@@ -350,9 +359,7 @@ for root, dirs, files in os.walk(args.oldpath):
             print_duplicates(drspos, tree, drspof, 'nrRspo')
             no_rspo(tree, norspof)
             no_email(tree, nomailf)
-            all_items(tree, allf)
 dfb.close()
 drb.close()
 nrb.close()
 nmf.close()
-allfb.close()
