@@ -265,7 +265,7 @@ with open('ns_brakujace_nr_regon.csv', 'wb') as f:
                 csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
                               n.text, xs(o)])
 
-print('*** OS: bad REGONs ***')
+print('*** OS: wrong REGONs ***')
 bad_regons = []
 os_regons = list_ids(args.oldpath, 'regon')
 ns_regons = list_ns_ids(args.newpath, '9')
@@ -292,7 +292,7 @@ with open('os_niepoprawne_numery_regon.csv', 'wb') as f:
                             i.get('nrRspo') is not None):
                         csvf.writerow(lista(i, a))
 
-print('*** OS: bad RSPOs ***')
+print('*** OS: wrong RSPOs ***')
 bad_rspos = []
 os_rspos = list_ids(args.oldpath, 'nrRspo')
 ns_rspos = list_ns_ids(args.newpath, '1')
@@ -320,7 +320,7 @@ if args.ns_nomails:
 if args.ns_all:
     ns_all_items(args.newpath)
 
-print('*** OS: duplicate REGONs ***')
+print('*** OS: duplicated REGONs ***')
 dfb = open('os_zdublowane_regony.csv', 'wb')
 dregonf = csv.writer(dfb, delimiter=";", quotechar='"',
                      quoting=csv.QUOTE_NONNUMERIC)
@@ -328,7 +328,7 @@ regons = list_ids(args.oldpath, 'regon')
 dregons = find_duplicates(regons)
 set_header(dregonf)
 
-print('*** OS: duplicate RSPOs ***')
+print('*** OS: duplicated RSPOs ***')
 drb = open('os_zdublowane_nr_rspo.csv', 'wb')
 drspof = csv.writer(drb, delimiter=";", quotechar='"',
                     quoting=csv.QUOTE_NONNUMERIC)
