@@ -246,7 +246,8 @@ for i in ns_regons:
     if i not in os_regons:
         missing_regons.append(i)
 data = get_ns_data(args.newpath)
-with open('ns_brakujace_nr_regon.csv', 'wb') as f:
+with open('ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv',
+          'wb') as f:
     csvf = csv.writer(f, delimiter=";", quotechar='"',
                       quoting=csv.QUOTE_NONNUMERIC)
     for i, j, k, l, m, n, o in data:
