@@ -42,6 +42,8 @@ sio_report_list = ([
     ['OS: wrong RSPOs', 'os_niepoprawne_numery_rspo.csv'],
     ['OS: wrong REGONSs', 'os_niepoprawne_numery_regon.csv'],
     ['OS: incorrect publicznosc', 'osn_niepoprawne_pole_publicznosc.csv'],
+    ['OS: incorrect kategoria uczniow',
+        'osn_niepoprawne_pole_kategoria_uczniow.csv'],
     ['NS: all items', 'ns_all_items.csv'],
     ['NS: no e-mails', 'ns_brak_adresu_email.csv'],
     ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
@@ -155,6 +157,7 @@ def get_ns_data(path):
     ns_emails = []
     ns_tels = []
     ns_publicznosc = []
+    ns_kat_uczn = []
     for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         try:
@@ -179,6 +182,9 @@ def get_ns_data(path):
     for i in tree.xpath('//ss:Cell[@ss:Index="28"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_publicznosc.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="27"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_kat_uczn.append(xs(i))
     for i in tree.xpath('//ss:Cell[@ss:Index="21"]/ss:Data',
                         namespaces=XLSNS):
         if i.text is None:
@@ -193,7 +199,7 @@ def get_ns_data(path):
         else:
             ns_tels.append(i.text)
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
-               ns_tels, ns_datas_rozp_dzial, ns_publicznosc)
+               ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn)
     return data
 
 print('* Loading new SIO data...')
@@ -261,6 +267,21 @@ for item in sio_report_list:
             for row in os_data_list:
                 if row[0] not in ns_rspos and row[0] is not 0:
                     cfile.writerow(row)
+        elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
+            kat_ucz_dict = {
+                1: 'Dzieci lub młodzież',
+                2: 'Dorośli',
+                3: 'Bez kategorii',
+            }
+            ns_rspos = []
+            cfile.writerow(header_list + ['Stare SIO (prawdopodobnie błędnie)',
+                           'Nowe SIO (prawdopodobnie poprawnie)'])
+            for i in ns_data_list:
+                ns_rspos.append(i[0])
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    if rowo[0] == rown[0] and kat_ucz_dict[rowo[6]] != rown[9]:
+                        cfile.writerow(rowo + [kat_ucz_dict[rowo[6]], rown[9]])
         elif item[1] is 'osn_niepoprawne_pole_publicznosc.csv':
             publ_dict = {
                 1: 'publiczna',
