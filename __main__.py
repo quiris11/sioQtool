@@ -5,14 +5,17 @@
 # Copyright © Robert Błaut. See NOTICE for more information.
 #
 
+# TODO optionally more extensive e-mail checking
+
 from __future__ import print_function
 from lxml import etree
 from collections import Counter
 from datetime import datetime
+from validate_email import validate_email
 import argparse
 import os
 import csv
-# import sys
+import sys
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
@@ -22,30 +25,55 @@ XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
 BORDER_DATE = datetime.strptime('2014-09-30', '%Y-%m-%d')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("oldpath", help="path to DIR with OSIO XML files")
-parser.add_argument('newpath', help='path to DIR with NSIO XLS files')
+parser.add_argument("oldpath", help="path to DIR with old SIO XML files")
+parser.add_argument('newpath', help='path to DIR with new SIO XLS files')
 parser.add_argument("--ns-nomails", help="NSIO: no mails", action="store_true")
 parser.add_argument("--ns-all", help="NSIO: all items", action="store_true")
 
 args = parser.parse_args()
 
+sio_report_list = ([
+    ['OS: all items', 'os_all_items.csv'],
+    ['OS: duplicated REGONs', 'os_zdublowane_regony.csv'],
+    ['OS: duplicated RSPOs', 'os_zdublowane_nr_rspo.csv'],
+    ['OS: no RSPOs', 'os_brak_nr_rspo.csv'],
+    ['OS: no e-mails', 'os_brak_adresu_email.csv'],
+    ['OS: wrong e-mails', 'os_nieprawidlowe_adresy_email.csv'],
+    ['OS: wrong RSPOs', 'os_niepoprawne_numery_rspo.csv'],
+    ['OS: wrong REGONSs', 'os_niepoprawne_numery_regon.csv'],
+    ['NS: all items', 'ns_all_items.csv'],
+    ['NS: no e-mails', 'ns_brak_adresu_email.csv'],
+    ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
+        'than %s' % BORDER_DATE,
+     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv']
+])
 
-def find_duplicates(mylist):
+header_list = [
+    'RSPO',
+    'REGON',
+    'powiat',
+    'gmina',
+    'typ',
+    'publicz.',
+    'kat. ucz.',
+    'nazwa',
+    'email',
+    'telefon',
+    'miejscowosc',
+    'ulica',
+    'nr',
+    'kod',
+    'poczta',
+    'organ prow',
+    'kod woj. org. wyd.',
+    'kod pow. org. wyd.',
+    'kod gm. org. wyd.',
+    'email kom.'
+]
+
+
+def duplicated_list(mylist):
     return [k for k, v in Counter(mylist).items() if v > 1]
-
-
-def list_ids(wpath, id):
-    listids = []
-    for root, dirs, files in os.walk(wpath):
-        for f in files:
-            if f.endswith('.xml'):
-                ff = os.path.join(root, f)
-                tree = etree.parse(ff)
-                i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
-                for i in i2s:
-                    if i.get(id):
-                        listids.append(i.get(id))
-    return listids
 
 
 def xs(s):
@@ -60,7 +88,7 @@ def xi(s):
     return int(s)
 
 
-def lista(i, a):
+def os_row(i, a):
     lista = [
         xi(i.get('nrRspo')),
         xs(i.get('regon')),
@@ -78,6 +106,7 @@ def lista(i, a):
         xs(a.get('kodPoczt')),
         xs(a.get('poczta')),
         xs(i.get('nazwaOrganuProw')),
+        xs(i.get('orgWydWoj')),
         xs(i.get('orgWydPow')),
         xs(i.get('orgWydGm')),
         xs(a.get('emailKomorki'))
@@ -85,281 +114,181 @@ def lista(i, a):
     return lista
 
 
-def out_dane(dane, file):
-    file.writerow(dane)
-
-
-def no_rspo(tree, file):
+def get_os_row(tree):
+    file_rows = []
     i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
     for i in i2s:
         itree = etree.ElementTree(i)
         a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-        if i.get('nrRspo') is None and int(i.get('typJed')) < 101:
-            l = lista(i, a)
-            out_dane(l, file)
+        file_rows.append(os_row(i, a))
+    # print(file_rows)
+    return file_rows
 
 
-def no_email(tree, file):
-    i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
-    for i in i2s:
-        itree = etree.ElementTree(i)
-        a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-        if a.get('email') is None:
-            l = lista(i, a)
-            out_dane(l, file)
+def get_os_data(path):
+    data = []
+    for root, dirs, files in os.walk(path):
+        for single_file in files:
+            if single_file.endswith('.xml'):
+                single_file_path = os.path.join(root, single_file)
+                single_file_tree = etree.parse(single_file_path)
+                data = data + get_os_row(single_file_tree)
+    return(data)
 
 
-def all_items(tree, file):
-    i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
-    for i in i2s:
-        itree = etree.ElementTree(i)
-        a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-        l = lista(i, a)
-        out_dane(l, file)
-
-
-def set_header(file):
-    naglowki = [
-        'RSPO',
-        'REGON',
-        'powiat',
-        'gmina',
-        'typ',
-        'publicz.',
-        'kat. ucz.',
-        'nazwa',
-        'email',
-        'telefon',
-        'miejscowosc',
-        'ulica',
-        'nr',
-        'kod',
-        'poczta',
-        'organ prow',
-        'kod pow. org. wyd.',
-        'kod gm. org. wyd.',
-        'email kom.'
-        ]
-    file.writerow(naglowki)
-
-
-def print_duplicates(dlist, tree, file, id):
-    i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
-    for i in i2s:
-        itree = etree.ElementTree(i)
-        a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-        if i.get(id) in dlist:
-            l = lista(i, a)
-            out_dane(l, file)
+def get_terminated_id(path, id):
+    tree = etree.parse(os.path.join(path, '000038z.xls'))
+    return tree.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
+                      namespaces=XLSNS)[1:]
 
 
 def get_ns_data(path):
     tree = etree.parse(os.path.join(path, '000038.xls'))
-    nsTRspos = tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
-                          namespaces=XLSNS)
-    nsTRegons = tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
-                           namespaces=XLSNS)
-    nsTTyp = tree.xpath('//ss:Cell[@ss:Index="2"]/ss:Data/text()',
-                        namespaces=XLSNS)
-    nsTNames = tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
-                          namespaces=XLSNS)
-    nsTOrgRej = tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
-                           namespaces=XLSNS)
-    nsEmails = tree.xpath('//ss:Cell[@ss:Index="21"]/ss:Data',
-                          namespaces=XLSNS)
-    nsDRozDzi = tree.xpath('//ss:Cell[@ss:Index="34"]/ss:Data/text()',
-                           namespaces=XLSNS)
-    data = zip(nsTRspos, nsTRegons, nsTTyp, nsTNames, nsTOrgRej, nsEmails,
-               nsDRozDzi)
+    data = []
+    ns_rspos = []
+    ns_regons = []
+    ns_typs = []
+    ns_names = []
+    ns_org_rej = []
+    ns_datas_rozp_dzial = []
+    ns_emails = []
+    ns_tels = []
+    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        try:
+            ns_rspos.append(xi(i))
+        except:
+            ns_rspos.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_regons.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="2"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_typs.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_names.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_org_rej.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="34"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_datas_rozp_dzial.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="21"]/ss:Data',
+                        namespaces=XLSNS):
+        if i.text is None:
+            ns_emails.append('')
+        else:
+            ns_emails.append(i.text)
+    # for Telefon col skipped first merged cell
+    for i in tree.xpath('//ss:Cell[@ss:Index="19"]/ss:Data',
+                        namespaces=XLSNS)[1:]:
+        if i.text is None:
+            ns_tels.append('')
+        else:
+            ns_tels.append(i.text)
+    data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
+               ns_tels, ns_datas_rozp_dzial)
     return data
 
-
-def list_ns_ids(path, id):
-    tree = etree.parse(os.path.join(path, '000038.xls'))
-    print('*** ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                              namespaces=XLSNS)[0])
-    l = tree.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
-                   namespaces=XLSNS)
-    treez = etree.parse(os.path.join(path, '000038z.xls'))
-    print('*** ' + treez.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                               namespaces=XLSNS)[0])
-    if id == '9':
-        id = '10'
-    lz = treez.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
-                     namespaces=XLSNS)
-    return l + lz
-
-
-def find_ns_no_mails(path):
-    print('*** NS: no e-mails ***')
-    data = get_ns_data(path)
-    with open('ns_no_emails.csv', 'wb') as f:
-        csvf = csv.writer(f, delimiter=";", quotechar='"',
-                          quoting=csv.QUOTE_NONNUMERIC)
-        for i, j, k, l, m, n, o in data:
-                if n.text is None or 'E-mail':
-                    print(i, j, len(j), k, l, m, n.text)
-                    csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
-                                  n.text, xs(o)])
-
-
-def ns_all_items(path):
-    print('*** NS: all items ***')
-    data = get_ns_data(path)
-    with open('ns_all_items.csv', 'wb') as f:
-        csvf = csv.writer(f, delimiter=";", quotechar='"',
-                          quoting=csv.QUOTE_NONNUMERIC)
-        for i, j, k, l, m, n, o in data:
-                print(i, j, len(j), k, l, m, n.text, o)
+print('* Loading new SIO data...')
+ns_data_list = get_ns_data(args.newpath)
+# print(ns_data_list)
+# sys.exit()
+print('* Loading old SIO data...')
+os_data_list = get_os_data(args.oldpath)
+for item in sio_report_list:
+    print('* Generating %s...' % item[0])
+    with open(item[1], 'wb') as f:
+        cfile = csv.writer(f, delimiter=";", quotechar='"',
+                           quoting=csv.QUOTE_NONNUMERIC)
+        if item[1].startswith('os_'):
+            cfile.writerow(header_list)
+        if item[1] is 'os_all_items.csv':
+            for row in os_data_list:
+                cfile.writerow(row)
+        elif item[1] is 'os_brak_nr_rspo.csv':
+            for row in os_data_list:
+                if row[0] is 0 and row[4] not in (102, 103, 104):
+                    cfile.writerow(row)
+        elif item[1] is 'os_brak_adresu_email.csv':
+            for row in os_data_list:
+                if row[8] is '':
+                    cfile.writerow(row)
+        elif item[1] is 'os_zdublowane_regony.csv':
+            regon_list = [row[1] for row in os_data_list]
+            dup_regon_list = duplicated_list(regon_list)
+            for row in os_data_list:
+                if row[1] in dup_regon_list:
+                    cfile.writerow(row)
+        elif item[1] is 'os_zdublowane_nr_rspo.csv':
+            rspo_list = [row[0] for row in os_data_list]
+            dup_rspo_list = duplicated_list(rspo_list)
+            for row in os_data_list:
+                if row[0] in dup_rspo_list and row[0] is not 0:
+                    cfile.writerow(row)
+        elif item[1] is 'os_nieprawidlowe_adresy_email.csv':
+            for row in os_data_list:
+                if (not validate_email(row[8])
+                        and row[8] is not ''):
+                    cfile.writerow(row)
+        elif item[1] is 'os_niepoprawne_numery_regon.csv':
+            ns_long_regons = []
+            for i in ns_data_list:
+                if len(i[1]) == 9:
+                    ns_long_regons.append(i[1] + '00000')
+                else:
+                    ns_long_regons.append(i[1])
+            for i in get_terminated_id(args.newpath, '10'):
+                if len(i) == 9:
+                    ns_long_regons.append(i + '00000')
+                else:
+                    ns_long_regons.append(i)
+            for row in os_data_list:
+                if row[1] not in ns_long_regons and row[0] is not 0:
+                    cfile.writerow(row)
+        elif item[1] is 'os_niepoprawne_numery_rspo.csv':
+            ns_rspos = []
+            for i in ns_data_list:
+                ns_rspos.append(i[0])
+            for i in get_terminated_id(args.newpath, '1'):
+                ns_rspos.append(int(i))
+            for row in os_data_list:
+                if row[0] not in ns_rspos and row[0] is not 0:
+                    cfile.writerow(row)
+        elif item[1] is 'ns_all_items.csv':
+            for row in ns_data_list:
+                cfile.writerow(row)
+        elif item[1] is 'ns_brak_adresu_email.csv':
+            for row in ns_data_list:
+                if row[5] is '' or 'E-mail' in row[5]:
+                    cfile.writerow(row)
+        elif (item[1] is
+                'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
+            os_regons = []
+            for i in os_data_list:
+                os_regons.append(i[1])
+            for row in ns_data_list:
+                if len(row[1]) == 9:
+                    reg_long = row[1] + '00000'
+                else:
+                    reg_long = row[1]
                 try:
-                    csvf.writerow([xi(i), j, len(j), xs(k), xs(l), xs(m),
-                                  n.text, xs(o)])
+                    roz_date = datetime.strptime(row[7], '%Y-%m-%d')
                 except:
-                    csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
-                                  n.text, xs(o)])
+                    roz_date = datetime.strptime('9999-01-01', '%Y-%m-%d')
+                if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
+                        and roz_date < BORDER_DATE) or row[0] == 'Nr RSPO':
+                    cfile.writerow(row)
 
-os.system('clear')
-
-print('*** OS: all items ***')
-with open('os_all_items.csv', 'wb') as fb:
-    allf = csv.writer(fb, delimiter=";", quotechar='"',
-                      quoting=csv.QUOTE_NONNUMERIC)
-    set_header(allf)
-    for root, dirs, files in os.walk(args.oldpath):
-        for f in files:
-            if f.endswith('.xml'):
-                ff = os.path.join(root, f)
-                tree = etree.parse(ff)
-                all_items(tree, allf)
-
-print('*** OS: Missing REGONs existing in NSIO with start earlier than ' +
-      str(BORDER_DATE) + ' ***')
-missing_regons = []
-os_regons = list_ids(args.oldpath, 'regon')
-ns_tree = etree.parse(os.path.join(args.newpath, '000038.xls'))
-ns_regons = ns_tree.xpath(
-    '//ss:Cell[@ss:Index="9"]/ss:Data/text()', namespaces=XLSNS
-)
-for i in ns_regons:
-    if len(i) == 9:
-        i = i + '00000'
-    if i not in os_regons:
-        missing_regons.append(i)
-data = get_ns_data(args.newpath)
-with open('ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv',
-          'wb') as f:
-    csvf = csv.writer(f, delimiter=";", quotechar='"',
-                      quoting=csv.QUOTE_NONNUMERIC)
-    for i, j, k, l, m, n, o in data:
-        if len(j) == 9:
-            j = j + '00000'
-        try:
-            odate = datetime.strptime(o, '%Y-%m-%d')
-        except:
-            odate = datetime.strptime('9999-01-01', '%Y-%m-%d')
-        if (j in missing_regons and 'MINISTERSTWO' not in m and
-                odate < BORDER_DATE) or i == 'Nr RSPO':
-            try:
-                csvf.writerow([xi(i), j, len(j), xs(k), xs(l), xs(m),
-                              n.text, xs(o)])
-            except:
-                csvf.writerow([i, j, len(j), xs(k), xs(l), xs(m),
-                              n.text, xs(o)])
-
-print('*** OS: wrong REGONs ***')
-bad_regons = []
-os_regons = list_ids(args.oldpath, 'regon')
-ns_regons = list_ns_ids(args.newpath, '9')
-for i in ns_regons:
-    if len(i) == 9:
-        ns_regons[ns_regons.index(i)] = i + '00000'
-for i in os_regons:
-    if i not in ns_regons:
-        bad_regons.append(i)
-with open('os_niepoprawne_numery_regon.csv', 'wb') as f:
-    csvf = csv.writer(f, delimiter=";", quotechar='"',
-                      quoting=csv.QUOTE_NONNUMERIC)
-    set_header(csvf)
-    for root, dirs, files in os.walk(args.oldpath):
-        for f in files:
-            if f.endswith('.xml'):
-                ff = os.path.join(root, f)
-                tree = etree.parse(ff)
-                i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
-                for i in i2s:
-                    itree = etree.ElementTree(i)
-                    a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-                    if (i.get('regon') in bad_regons and
-                            i.get('nrRspo') is not None):
-                        csvf.writerow(lista(i, a))
-
-print('*** OS: wrong RSPOs ***')
-bad_rspos = []
-os_rspos = list_ids(args.oldpath, 'nrRspo')
-ns_rspos = list_ns_ids(args.newpath, '1')
-for i in os_rspos:
-    if i not in ns_rspos:
-        bad_rspos.append(i)
-with open('os_niepoprawne_numery_rspo.csv', 'wb') as f:
-    csvf = csv.writer(f, delimiter=";", quotechar='"',
-                      quoting=csv.QUOTE_NONNUMERIC)
-    set_header(csvf)
-    for root, dirs, files in os.walk(args.oldpath):
-        for f in files:
-            if f.endswith('.xml'):
-                ff = os.path.join(root, f)
-                tree = etree.parse(ff)
-                i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
-                for i in i2s:
-                    itree = etree.ElementTree(i)
-                    a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-                    if i.get('nrRspo') in bad_rspos:
-                        csvf.writerow(lista(i, a))
-
-if args.ns_nomails:
-    find_ns_no_mails(args.newpath)
-if args.ns_all:
-    ns_all_items(args.newpath)
-
-print('*** OS: duplicated REGONs ***')
-dfb = open('os_zdublowane_regony.csv', 'wb')
-dregonf = csv.writer(dfb, delimiter=";", quotechar='"',
-                     quoting=csv.QUOTE_NONNUMERIC)
-regons = list_ids(args.oldpath, 'regon')
-dregons = find_duplicates(regons)
-set_header(dregonf)
-
-print('*** OS: duplicated RSPOs ***')
-drb = open('os_zdublowane_nr_rspo.csv', 'wb')
-drspof = csv.writer(drb, delimiter=";", quotechar='"',
-                    quoting=csv.QUOTE_NONNUMERIC)
-rspos = list_ids(args.oldpath, 'nrRspo')
-drspos = find_duplicates(rspos)
-set_header(drspof)
-
-print('*** OS: no RSPOs ***')
-nrb = open('os_brak_nr_rspo.csv', 'wb')
-norspof = csv.writer(nrb, delimiter=";", quotechar='"',
-                     quoting=csv.QUOTE_NONNUMERIC)
-set_header(norspof)
-
-print('*** OS: no e-mails ***')
-nmf = open('os_brak_adresu_email.csv', 'wb')
-nomailf = csv.writer(nmf, delimiter=";", quotechar='"',
-                     quoting=csv.QUOTE_NONNUMERIC)
-set_header(nomailf)
-
-
-for root, dirs, files in os.walk(args.oldpath):
-    for f in files:
-        if f.endswith('.xml'):
-            ff = os.path.join(root, f)
-            tree = etree.parse(ff)
-            print_duplicates(dregons, tree, dregonf, 'regon')
-            print_duplicates(drspos, tree, drspof, 'nrRspo')
-            no_rspo(tree, norspof)
-            no_email(tree, nomailf)
-dfb.close()
-drb.close()
-nrb.close()
-nmf.close()
+print('### TESTS ###')
+for i in sio_report_list:
+    num_lines_new = sum(1 for line in open(os.path.join(i[1])))
+    try:
+        num_lines_old = sum(1 for line in open(os.path.join('1', i[1])))
+    except:
+        continue
+    if num_lines_new != num_lines_old:
+        print('* Different output: %s' % i[1])
+    else:
+        print('* OK: %s' % i[1])
