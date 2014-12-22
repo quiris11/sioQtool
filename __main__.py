@@ -15,7 +15,7 @@ from validate_email import validate_email
 import argparse
 import os
 import csv
-import sys
+# import sys
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
@@ -214,8 +214,6 @@ def get_ns_data(path):
 
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
-# print(ns_data_list)
-# sys.exit()
 print('* Loading old SIO data...')
 os_data_list = get_os_data(args.oldpath)
 for item in sio_report_list:
@@ -348,15 +346,3 @@ for item in sio_report_list:
                         if (not validate_email(m)
                                 and m is not '') or '@02.pl' in m:
                             cfile.writerow(row)
-
-# print('### TESTS ###')
-# for i in sio_report_list:
-#     num_lines_new = sum(1 for line in open(os.path.join(i[1])))
-#     try:
-#         num_lines_old = sum(1 for line in open(os.path.join('1', i[1])))
-#     except:
-#         continue
-#     if num_lines_new != num_lines_old:
-#         print('* Different output: %s' % i[1])
-#     else:
-#         print('* OK: %s' % i[1])
