@@ -141,11 +141,16 @@ def get_os_data(path):
 
 
 def get_terminated_id(path, id):
-    tree = etree.parse(os.path.join(path, '000038z.xls'))
-    print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                            namespaces=XLSNS)[0])
-    return tree.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
-                      namespaces=XLSNS)[1:]
+    lista = []
+    for i in ('000038z.xls', '000038b.xls'):
+        tree = etree.parse(os.path.join(path, i))
+        print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                                namespaces=XLSNS)[0])
+        lista = lista + tree.xpath(
+            '//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
+            namespaces=XLSNS
+        )[1:]
+    return lista
 
 
 def get_ns_data(path):
