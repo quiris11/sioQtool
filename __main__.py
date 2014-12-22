@@ -292,14 +292,16 @@ for item in sio_report_list:
                 4: 'niepubliczna'
             }
             ns_rspos = []
-            cfile.writerow(header_list + ['Stare SIO (prawdopodobnie błędnie)',
-                           'Nowe SIO (prawdopodobnie poprawnie)'])
+            cfile.writerow(['Stare SIO (na 95 proc. błędnie)',
+                            'Nowe SIO (na 95 proc. poprawnie)',
+                            'Organ rejestrujący'] + header_list)
             for i in ns_data_list:
                 ns_rspos.append(i[0])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and publ_dict[rowo[5]] != rown[8]:
-                        cfile.writerow(rowo + [publ_dict[rowo[5]], rown[8]])
+                        cfile.writerow([publ_dict[rowo[5]], rown[8],
+                                        rown[2]] + rowo)
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
@@ -325,14 +327,14 @@ for item in sio_report_list:
                         and roz_date < BORDER_DATE) or row[0] == 'Nr RSPO':
                     cfile.writerow(row)
 
-print('### TESTS ###')
-for i in sio_report_list:
-    num_lines_new = sum(1 for line in open(os.path.join(i[1])))
-    try:
-        num_lines_old = sum(1 for line in open(os.path.join('1', i[1])))
-    except:
-        continue
-    if num_lines_new != num_lines_old:
-        print('* Different output: %s' % i[1])
-    else:
-        print('* OK: %s' % i[1])
+# print('### TESTS ###')
+# for i in sio_report_list:
+#     num_lines_new = sum(1 for line in open(os.path.join(i[1])))
+#     try:
+#         num_lines_old = sum(1 for line in open(os.path.join('1', i[1])))
+#     except:
+#         continue
+#     if num_lines_new != num_lines_old:
+#         print('* Different output: %s' % i[1])
+#     else:
+#         print('* OK: %s' % i[1])
