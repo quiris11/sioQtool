@@ -141,6 +141,8 @@ def get_os_data(path):
 
 def get_terminated_id(path, id):
     tree = etree.parse(os.path.join(path, '000038z.xls'))
+    print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                            namespaces=XLSNS)[0])
     return tree.xpath('//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
                       namespaces=XLSNS)[1:]
 
@@ -307,7 +309,8 @@ for item in sio_report_list:
                 cfile.writerow(row)
         elif item[1] is 'ns_brak_adresu_email.csv':
             for row in ns_data_list:
-                if row[5] is '' or 'E-mail' in row[5]:
+                if ((row[5] is '' or 'E-mail' in row[5])
+                        and ('MINISTERSTWO' not in row[2])):
                     cfile.writerow(row)
         elif (item[1] is
                 'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
