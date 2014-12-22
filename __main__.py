@@ -27,9 +27,9 @@ BORDER_DATE = datetime.strptime('2014-09-30', '%Y-%m-%d')
 parser = argparse.ArgumentParser()
 parser.add_argument("oldpath", help="path to DIR with old SIO XML files")
 parser.add_argument('newpath', help='path to DIR with new SIO XLS files')
-parser.add_argument("--ns-nomails", help="NSIO: no mails", action="store_true")
-parser.add_argument("--ns-all", help="NSIO: all items", action="store_true")
-
+parser.add_argument('-t', "--ns-mail-tough-check",
+                    help="NSIO: e-mails tough checking",
+                    action="store_true")
 args = parser.parse_args()
 
 sio_report_list = ([
@@ -38,9 +38,9 @@ sio_report_list = ([
     ['OS: duplicated RSPOs', 'os_zdublowane_nr_rspo.csv'],
     ['OS: no RSPOs', 'os_brak_nr_rspo.csv'],
     ['OS: no e-mails', 'os_brak_adresu_email.csv'],
-    ['OS: wrong e-mails', 'os_nieprawidlowe_adresy_email.csv'],
-    ['OS: wrong RSPOs', 'os_niepoprawne_numery_rspo.csv'],
-    ['OS: wrong REGONSs', 'os_niepoprawne_numery_regon.csv'],
+    ['OS: incorrect e-mails', 'os_nieprawidlowe_adresy_email.csv'],
+    ['OS: incorrect RSPOs', 'os_niepoprawne_numery_rspo.csv'],
+    ['OS: incorrect REGONSs', 'os_niepoprawne_numery_regon.csv'],
     ['OS: incorrect publicznosc', 'osn_niepoprawne_pole_publicznosc.csv'],
     ['OS: incorrect kategoria uczniow',
         'osn_niepoprawne_pole_kategoria_uczniow.csv'],
@@ -48,7 +48,8 @@ sio_report_list = ([
     ['NS: no e-mails', 'ns_brak_adresu_email.csv'],
     ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
         'than %s' % BORDER_DATE,
-     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv']
+     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'],
+    ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv']
 ])
 
 header_list = [
@@ -329,6 +330,19 @@ for item in sio_report_list:
                 if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
                         and roz_date < BORDER_DATE) or row[0] == 'Nr RSPO':
                     cfile.writerow(row)
+        elif item[1] is 'ns_nieprawidlowe_adresy_email.csv':
+            for row in ns_data_list:
+                ms = row[5].split(' , ')
+                for m in ms:
+                    if args.ns_mail_tough_check:
+                        print('* Checking: ' + m)
+                        if (not validate_email(m, check_mx=True)
+                                and m is not '') or '@02.pl' in m:
+                            cfile.writerow(row)
+                    else:
+                        if (not validate_email(m)
+                                and m is not '') or '@02.pl' in m:
+                            cfile.writerow(row)
 
 # print('### TESTS ###')
 # for i in sio_report_list:
