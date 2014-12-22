@@ -147,6 +147,8 @@ def get_terminated_id(path, id):
 
 def get_ns_data(path):
     tree = etree.parse(os.path.join(path, '000038.xls'))
+    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                              namespaces=XLSNS)[0])
     data = []
     ns_rspos = []
     ns_regons = []
@@ -241,7 +243,7 @@ for item in sio_report_list:
         elif item[1] is 'os_nieprawidlowe_adresy_email.csv':
             for row in os_data_list:
                 if (not validate_email(row[8])
-                        and row[8] is not ''):
+                        and row[8] is not '') or '@02.pl' in row[8]:
                     cfile.writerow(row)
         elif item[1] is 'os_niepoprawne_numery_regon.csv':
             ns_long_regons = []
