@@ -30,6 +30,9 @@ parser.add_argument('newpath', help='path to DIR with new SIO XLS files')
 parser.add_argument('-t', "--ns-mail-tough-check",
                     help="NSIO: e-mails tough checking",
                     action="store_true")
+parser.add_argument("--stages",
+                    help="NSIO: education stages reports",
+                    action="store_true")
 args = parser.parse_args()
 
 sio_report_list = ([
@@ -119,6 +122,46 @@ def os_row(i, a):
     return lista
 
 
+def get_os_ee_data(path, etap):
+    if etap == 'pon_zero':
+        u3 = 'u3_3_1'
+    elif etap == 'zero':
+        u3 = 'u3_3_2'
+
+    def get_os_ee_row(tree, u3):
+        file_rows = []
+        for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
+            ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
+            for i in ids:
+                try:
+                    nrRspo = int(tree.xpath(
+                        '//' + typ + '/identyfikacja[@numerIdent="' +
+                        i.get('numerIdent') +
+                        '"]/i2c',
+                        namespaces=XSNS)[0].get('nrRspo'))
+                except:
+                    nrRspo = 0
+                try:
+                    l_ucz = tree.xpath(
+                        '//' + typ + '/uczniowieSzkolyPodst/'
+                        'oddzialyPrzedszkolne[@numerIdent="' +
+                        i.get('numerIdent')[:-1] + '1' +
+                        '"]/dzieciWgOddzialow/u3_3/' + u3,
+                        namespaces=XSNS)[0].get('kol2')
+                except:
+                    l_ucz = '0'
+                file_rows.append([nrRspo, l_ucz])
+        return file_rows
+    data = []
+    for root, dirs, files in os.walk(path):
+        for single_file in files:
+            if single_file.endswith('.xml'):
+                single_file_path = os.path.join(root, single_file)
+                single_file_tree = etree.parse(single_file_path)
+                data = data + get_os_ee_row(single_file_tree, u3)
+    return(data)
+
+
 def get_os_row(tree):
     file_rows = []
     i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
@@ -151,6 +194,88 @@ def get_terminated_id(path, id):
             namespaces=XLSNS
         )[1:]
     return lista
+
+
+def get_ns_ee_data(path, typ):
+    tree = etree.parse(os.path.join(path, '000038ee' + typ + '.xls'))
+    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                              namespaces=XLSNS)[0])
+    dataee = []
+    ns_rspos = []
+    ns_regons = []
+    ns_typs = []
+    ns_names = []
+    ns_org_rej = []
+    ns_datas_rozp_dzial = []
+    ns_emails = []
+    ns_tels = []
+    ns_publicznosc = []
+    ns_kat_uczn = []
+    ns_ee_pzero = []
+    ns_ee_zero = []
+    ns_ee_first = []
+    ns_ee_second = []
+    ns_ee_irrelevant = []
+    # for 'ponizej zero' col skipped first merged cell
+    for i in tree.xpath('//ss:Cell[@ss:Index="4"]/ss:Data/text()',
+                        namespaces=XLSNS)[1:]:
+        ns_ee_pzero.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="5"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_zero.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_first.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_second.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="8"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_irrelevant.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        try:
+            ns_rspos.append(xi(i))
+        except:
+            ns_rspos.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="13"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_regons.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="2"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_typs.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_names.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="10"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_org_rej.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="36"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_datas_rozp_dzial.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="33"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_publicznosc.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="32"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_kat_uczn.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="26"]/ss:Data',
+                        namespaces=XLSNS):
+        if i.text is None:
+            ns_emails.append('')
+        else:
+            ns_emails.append(i.text)
+    for i in tree.xpath('//ss:Cell[@ss:Index="24"]/ss:Data',
+                        namespaces=XLSNS):
+        if i.text is None:
+            ns_tels.append('')
+        else:
+            ns_tels.append(i.text)
+    dataee = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
+                 ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
+                 ns_ee_pzero, ns_ee_zero, ns_ee_first, ns_ee_second,
+                 ns_ee_irrelevant)
+    return dataee
 
 
 def get_ns_data(path):
@@ -216,6 +341,35 @@ print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
 print('* Loading old SIO data...')
 os_data_list = get_os_data(args.oldpath)
+if args.stages:
+    if not os.path.exists(os.path.join('!ee!')):
+        os.makedirs(os.path.join('!ee!'))
+    ee_report_list = ([
+        ['EE SP: ponizej zero', 'ee_sp_ponizej_zero.csv', '!ee!'],
+        ['EE SP: zero', 'ee_sp_zero.csv', '!ee!'],
+        ['EE P: ponizej zero', 'ee_p_ponizej_zero.csv', '!ee!'],
+        ['EE P: zero', 'ee_p_zero.csv', '!ee!'],
+        ['EE SP: pierwszy etap', 'ee_sp_pierwszy_etap.csv', '!ee!'],
+        ['EE SP: drugi etap', 'ee_sp_drugi_etap.csv', '!ee!']
+    ])
+    print('* Loading education stages old SIO data...')
+    os_eesze_list = get_os_ee_data(args.oldpath, 'zero')
+    os_eespz_list = get_os_ee_data(args.oldpath, 'pon_zero')
+    print('* Loading education stages new SIO data...')
+    ns_ees_data_list = get_ns_ee_data(os.path.join(args.newpath), 's')
+    ns_eep_data_list = get_ns_ee_data(os.path.join(args.newpath), 'p')
+    for item in ee_report_list:
+        print('* Generating %s...' % item[0])
+        with open(os.path.join(item[2], item[1]), 'wb') as f:
+            cfile = csv.writer(f, delimiter=";", quotechar='"',
+                               quoting=csv.QUOTE_NONNUMERIC)
+            if item[1] is 'ee_sp_ponizej_zero.csv':
+                for rn in ns_ees_data_list:
+                    for ro in os_eespz_list:
+                        if rn[0] == ro[0] and (
+                                (rn[10] == '.' and ro[1] != '0') or
+                                (rn[10] == '1' and ro[1] == '0')):
+                            cfile.writerow(rn)
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
 if not os.path.exists(os.path.join('!critical!')):
