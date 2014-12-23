@@ -33,23 +33,24 @@ parser.add_argument('-t', "--ns-mail-tough-check",
 args = parser.parse_args()
 
 sio_report_list = ([
-    ['OS: all items', 'os_all_items.csv'],
-    ['OS: duplicated REGONs', 'os_zdublowane_regony.csv'],
-    ['OS: duplicated RSPOs', 'os_zdublowane_nr_rspo.csv'],
-    ['OS: no RSPOs', 'os_brak_nr_rspo.csv'],
-    ['OS: no e-mails', 'os_brak_adresu_email.csv'],
-    ['OS: incorrect e-mails', 'os_nieprawidlowe_adresy_email.csv'],
-    ['OS: incorrect RSPOs', 'os_niepoprawne_numery_rspo.csv'],
-    ['OS: incorrect REGONSs', 'os_niepoprawne_numery_regon.csv'],
-    ['OS: incorrect publicznosc', 'osn_niepoprawne_pole_publicznosc.csv'],
+    ['OS: all items', 'os_all_items.csv', '!normal!'],
+    ['OS: duplicated REGONs', 'os_zdublowane_regony.csv', '!critical!'],
+    ['OS: duplicated RSPOs', 'os_zdublowane_nr_rspo.csv', '!critical!'],
+    ['OS: no RSPOs', 'os_brak_nr_rspo.csv', '!critical!'],
+    ['OS: no e-mails', 'os_brak_adresu_email.csv', '!critical!'],
+    ['OS: incorrect e-mails', 'os_nieprawidlowe_adresy_email.csv', '!normal!'],
+    ['OS: incorrect RSPOs', 'os_niepoprawne_numery_rspo.csv', '!critical!'],
+    ['OS: incorrect REGONSs', 'os_niepoprawne_numery_regon.csv', '!critical!'],
+    ['OS: incorrect publicznosc', 'osn_niepoprawne_pole_publicznosc.csv',
+        '!critical!'],
     ['OS: incorrect kategoria uczniow',
-        'osn_niepoprawne_pole_kategoria_uczniow.csv'],
-    ['NS: all items', 'ns_all_items.csv'],
-    ['NS: no e-mails', 'ns_brak_adresu_email.csv'],
+        'osn_niepoprawne_pole_kategoria_uczniow.csv', '!normal!'],
+    ['NS: all items', 'ns_all_items.csv', '!normal!'],
+    ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
     ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
         'than %s' % BORDER_DATE,
-     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'],
-    ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv']
+     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
+    ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!']
 ])
 
 header_list = [
@@ -125,7 +126,6 @@ def get_os_row(tree):
         itree = etree.ElementTree(i)
         a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
         file_rows.append(os_row(i, a))
-    # print(file_rows)
     return file_rows
 
 
@@ -216,9 +216,13 @@ print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
 print('* Loading old SIO data...')
 os_data_list = get_os_data(args.oldpath)
+if not os.path.exists(os.path.join('!normal!')):
+    os.makedirs(os.path.join('!normal!'))
+if not os.path.exists(os.path.join('!critical!')):
+    os.makedirs(os.path.join('!critical!'))
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
-    with open(item[1], 'wb') as f:
+    with open(os.path.join(item[2], item[1]), 'wb') as f:
         cfile = csv.writer(f, delimiter=";", quotechar='"',
                            quoting=csv.QUOTE_NONNUMERIC)
         if item[1].startswith('os_'):
