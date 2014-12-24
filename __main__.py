@@ -12,6 +12,9 @@ from lxml import etree
 from collections import Counter
 from datetime import datetime
 from validate_email import validate_email
+from dictionaries import kat_ucz_dict
+from dictionaries import publ_dict
+from dictionaries import type_dict
 import argparse
 import os
 import csv
@@ -53,6 +56,7 @@ sio_report_list = ([
     ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
         'than %s' % BORDER_DATE,
      'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
+    ['OS: incorrect type', 'osn_nieprawidlowe_typy.csv', '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!']
 ])
 
@@ -434,11 +438,6 @@ for item in sio_report_list:
                 if row[0] not in ns_rspos and row[0] is not 0:
                     cfile.writerow(row)
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
-            kat_ucz_dict = {
-                1: 'Dzieci lub młodzież',
-                2: 'Dorośli',
-                3: 'Bez kategorii',
-            }
             ns_rspos = []
             cfile.writerow(header_list + ['Stare SIO (prawdopodobnie błędnie)',
                            'Nowe SIO (prawdopodobnie poprawnie)'])
@@ -448,13 +447,19 @@ for item in sio_report_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and kat_ucz_dict[rowo[6]] != rown[9]:
                         cfile.writerow(rowo + [kat_ucz_dict[rowo[6]], rown[9]])
+        elif item[1] is 'osn_nieprawidlowe_typy.csv':
+            ns_rspos = []
+            cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
+                            'Nowe SIO (prawdopodobnie poprawnie)',
+                            'Organ rejestrujący'] + header_list)
+            for i in ns_data_list:
+                ns_rspos.append(i[0])
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    if rowo[0] == rown[0] and type_dict[rowo[4]] != rown[4]:
+                        cfile.writerow([type_dict[rowo[4]], rown[4],
+                                        rown[2]] + rowo)
         elif item[1] is 'osn_niepoprawne_pole_publicznosc.csv':
-            publ_dict = {
-                1: 'publiczna',
-                2: 'niepubliczna o uprawnieniach szkoły publicznej',
-                3: 'niepubliczna bez uprawnień szkoły publicznej',
-                4: 'niepubliczna'
-            }
             ns_rspos = []
             cfile.writerow(['Stare SIO (na 95 proc. błędnie)',
                             'Nowe SIO (na 95 proc. poprawnie)',
