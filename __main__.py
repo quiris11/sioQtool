@@ -56,7 +56,7 @@ sio_report_list = ([
     ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
         'than %s' % BORDER_DATE,
      'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
-    ['OS: incorrect type', 'osn_nieprawidlowe_typy.csv', '!critical!'],
+    ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!']
 ])
 
@@ -370,9 +370,7 @@ if args.stages:
             if item[1] is 'ee_sp_ponizej_zero.csv':
                 for rn in ns_ees_data_list:
                     for ro in os_eespz_list:
-                        if rn[0] == ro[0] and (
-                                (rn[10] == '.' and ro[1] != '0') or
-                                (rn[10] == '1' and ro[1] == '0')):
+                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
                             cfile.writerow(rn)
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
@@ -447,7 +445,7 @@ for item in sio_report_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and kat_ucz_dict[rowo[6]] != rown[9]:
                         cfile.writerow(rowo + [kat_ucz_dict[rowo[6]], rown[9]])
-        elif item[1] is 'osn_nieprawidlowe_typy.csv':
+        elif item[1] is 'osn_niepoprawne_pole_typ.csv':
             ns_rspos = []
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
