@@ -35,8 +35,8 @@ type_dict = {
         'upośledzeniem umysłowym w stopniu umiarkowanym lub znacznym oraz '
         'dla uczniów z  więcej niż jedną niepełnosprawnością',
     21: 'Sześcioletnia ogólnokształcąca szkoła muzyczna I stopnia',
-    22: 'Sześcioletnia szkoła muzyczna I stopnia',
-    23: 'Czteroletnia szkoła muzyczna I stopnia',
+    22: 'Szkoła muzyczna I stopnia',  # changed in NSIO
+    23: 'Szkoła muzyczna I stopnia',  # changed in NSIO
     24: 'Sześcioletnia ogólnokształcąca szkoła muzyczna II stopnia',
     25: 'Sześcioletnia szkoła muzyczna II stopnia',
     26: 'Sześcioletnia ogólnokształcąca szkoła sztuk pięknych',
