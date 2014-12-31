@@ -190,7 +190,10 @@ def get_os_data(path):
 def get_terminated_id(path, id):
     lista = []
     for i in ('000038z.xls', '000038b.xls'):
-        tree = etree.parse(os.path.join(path, i))
+        try:
+            tree = etree.parse(os.path.join(path, i))
+        except:
+            continue
         print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                 namespaces=XLSNS)[0])
         lista = lista + tree.xpath(
