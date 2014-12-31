@@ -375,6 +375,11 @@ if args.stages:
                     for ro in os_eespz_list:
                         if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
                             cfile.writerow(rn)
+            elif item[1] is 'ee_p_ponizej_zero.csv':
+                for rn in ns_eep_data_list:
+                    for ro in os_eespz_list:
+                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
+                            cfile.writerow(rn)
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
 if not os.path.exists(os.path.join('!critical!')):
