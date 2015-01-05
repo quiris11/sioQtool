@@ -6,9 +6,9 @@
 #
 
 kat_ucz_dict = {
-    1: 'Dzieci lub młodzież',
-    2: 'Dorośli',
-    3: 'Bez kategorii',
+    1: ['Dzieci lub młodzież', 'Młodzież'],
+    2: ['Dorośli'],
+    3: ['Bez kategorii']
 }
 
 publ_dict = {

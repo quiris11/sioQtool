@@ -50,7 +50,7 @@ sio_report_list = ([
     ['OS: incorrect publicznosc', 'osn_niepoprawne_pole_publicznosc.csv',
         '!critical!'],
     ['OS: incorrect kategoria uczniow',
-        'osn_niepoprawne_pole_kategoria_uczniow.csv', '!normal!'],
+        'osn_niepoprawne_pole_kategoria_uczniow.csv', '!critical!'],
     ['NS: all items', 'ns_all_items.csv', '!normal!'],
     ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
     ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
@@ -445,14 +445,21 @@ for item in sio_report_list:
                     cfile.writerow(row)
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
             ns_rspos = []
-            cfile.writerow(header_list + ['Stare SIO (prawdopodobnie błędnie)',
-                           'Nowe SIO (prawdopodobnie poprawnie)'])
+            cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
+                            'Nowe SIO (prawdopodobnie poprawnie)',
+                            'Organ rejestrujący'] + header_list)
             for i in ns_data_list:
                 ns_rspos.append(i[0])
             for rowo in os_data_list:
                 for rown in ns_data_list:
-                    if rowo[0] == rown[0] and kat_ucz_dict[rowo[6]] != rown[9]:
-                        cfile.writerow(rowo + [kat_ucz_dict[rowo[6]], rown[9]])
+                    if rowo[0] == rown[0]:
+                        kfound = False
+                        for k in kat_ucz_dict[rowo[6]]:
+                            if k in rown[9]:
+                                kfound = True
+                        if not kfound:
+                            cfile.writerow([kat_ucz_dict[rowo[6]][0],
+                                            rown[9], rown[2]] + rowo)
         elif item[1] is 'osn_niepoprawne_pole_typ.csv':
             ns_rspos = []
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
