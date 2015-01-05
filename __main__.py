@@ -444,12 +444,12 @@ for item in sio_report_list:
                 if row[0] not in ns_rspos and row[0] is not 0:
                     cfile.writerow(row)
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
-            ns_rspos = []
+            # ns_rspos = []
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
                             'Organ rejestrujący'] + header_list)
-            for i in ns_data_list:
-                ns_rspos.append(i[0])
+            # for i in ns_data_list:
+            #     ns_rspos.append(i[0])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0]:
@@ -461,24 +461,24 @@ for item in sio_report_list:
                             cfile.writerow([kat_ucz_dict[rowo[6]][0],
                                             rown[9], rown[2]] + rowo)
         elif item[1] is 'osn_niepoprawne_pole_typ.csv':
-            ns_rspos = []
+            # ns_rspos = []
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
                             'Organ rejestrujący'] + header_list)
-            for i in ns_data_list:
-                ns_rspos.append(i[0])
+            # for i in ns_data_list:
+            #     ns_rspos.append(i[0])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and type_dict[rowo[4]] != rown[4]:
                         cfile.writerow([type_dict[rowo[4]], rown[4],
                                         rown[2]] + rowo)
         elif item[1] is 'osn_niepoprawne_pole_publicznosc.csv':
-            ns_rspos = []
+            # ns_rspos = []
             cfile.writerow(['Stare SIO (na 95 proc. błędnie)',
                             'Nowe SIO (na 95 proc. poprawnie)',
                             'Organ rejestrujący'] + header_list)
-            for i in ns_data_list:
-                ns_rspos.append(i[0])
+            # for i in ns_data_list:
+            #     ns_rspos.append(i[0])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and publ_dict[rowo[5]] != rown[8]:
