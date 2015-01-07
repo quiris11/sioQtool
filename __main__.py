@@ -57,7 +57,8 @@ sio_report_list = ([
         'than %s' % BORDER_DATE,
      'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
     ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
-    ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!']
+    ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
+    ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!normal!']
 ])
 
 header_list = [
@@ -492,6 +493,15 @@ for item in sio_report_list:
                 if ((row[5] is '' or 'E-mail' in row[5])
                         and ('MINISTERSTWO' not in row[2])):
                     cfile.writerow(row)
+        elif item[1] is 'osn_rozne_adresy_email.csv':
+            cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
+                            'Nowe SIO (prawdopodobnie poprawnie)',
+                            'Organ rejestrujący'] + header_list)
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    if (rowo[0] == rown[0] and
+                            rowo[8].lower() not in rown[5].lower()):
+                        cfile.writerow([rowo[8], rown[5], rown[2]] + rowo)
         elif (item[1] is
                 'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
             os_regons = []
