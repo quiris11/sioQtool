@@ -190,22 +190,18 @@ def get_os_data(path):
 
 def get_terminated_id(path, id):
     lista = []
-    for i in ('000038z.xls', '000038b.xls'):
-        try:
-            tree = etree.parse(os.path.join(path, i))
-        except:
-            continue
-        print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                                namespaces=XLSNS)[0])
-        lista = lista + tree.xpath(
-            '//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
-            namespaces=XLSNS
-        )[1:]
+    tree = etree.parse(os.path.join(path, 'rspo_inactive.xls'))
+    print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                            namespaces=XLSNS)[0])
+    lista = lista + tree.xpath(
+        '//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
+        namespaces=XLSNS
+    )[1:]
     return lista
 
 
 def get_ns_ee_data(path, typ):
-    tree = etree.parse(os.path.join(path, '000038ee' + typ + '.xls'))
+    tree = etree.parse(os.path.join(path, 'ee_' + typ + '.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     dataee = []
@@ -287,7 +283,7 @@ def get_ns_ee_data(path, typ):
 
 
 def get_ns_data(path):
-    tree = etree.parse(os.path.join(path, '000038.xls'))
+    tree = etree.parse(os.path.join(path, 'rspo_active.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
@@ -364,8 +360,8 @@ if args.stages:
     os_eesze_list = get_os_ee_data(args.oldpath, 'zero')
     os_eespz_list = get_os_ee_data(args.oldpath, 'pon_zero')
     print('* Loading education stages new SIO data...')
-    ns_ees_data_list = get_ns_ee_data(os.path.join(args.newpath), 's')
-    ns_eep_data_list = get_ns_ee_data(os.path.join(args.newpath), 'p')
+    ns_ees_data_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
+    ns_eep_data_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
     for item in ee_report_list:
         print('* Generating %s...' % item[0])
         with open(os.path.join(item[2], item[1]), 'wb') as f:
