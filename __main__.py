@@ -190,7 +190,7 @@ def get_os_data(path):
 
 def get_terminated_id(path, id):
     lista = []
-    tree = etree.parse(os.path.join(path, 'rspo_inactive.xls'))
+    tree = etree.parse(os.path.join(path, 'rspo_nieaktywne.xls'))
     print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                             namespaces=XLSNS)[0])
     lista = lista + tree.xpath(
@@ -283,7 +283,7 @@ def get_ns_ee_data(path, typ):
 
 
 def get_ns_data(path):
-    tree = etree.parse(os.path.join(path, 'rspo_active.xls'))
+    tree = etree.parse(os.path.join(path, 'rspo_aktywne.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
