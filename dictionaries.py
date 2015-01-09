@@ -5,6 +5,12 @@
 # Copyright © Robert Błaut. See NOTICE for more information.
 #
 
+specyfika_dict = {
+    0: 'brak specyfiki',
+    1:	'specjalna',
+    100: 'brak specyfiki'
+}
+
 kat_ucz_dict = {
     1: ['Dzieci lub młodzież', 'Młodzież'],
     2: ['Dorośli'],

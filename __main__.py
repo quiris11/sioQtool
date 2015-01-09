@@ -15,6 +15,7 @@ from validate_email import validate_email
 from dictionaries import kat_ucz_dict
 from dictionaries import publ_dict
 from dictionaries import type_dict
+from dictionaries import specyfika_dict
 import argparse
 import os
 import csv
@@ -57,6 +58,8 @@ sio_report_list = ([
         'than %s' % BORDER_DATE,
      'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
     ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
+    ['OS: incorrect specyfika', 'osn_niepoprawne_pole_specyfika.csv',
+        '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!normal!']
 ])
@@ -81,7 +84,8 @@ header_list = [
     'kod woj. org. wyd.',
     'kod pow. org. wyd.',
     'kod gm. org. wyd.',
-    'email kom.'
+    'email kom.',
+    'specyfika'
 ]
 
 
@@ -122,7 +126,8 @@ def os_row(i, a):
         xs(i.get('orgWydWoj')),
         xs(i.get('orgWydPow')),
         xs(i.get('orgWydGm')),
-        xs(a.get('emailKomorki'))
+        xs(a.get('emailKomorki')),
+        xi(i.get('specyfikaSzkoly'))
     ]
     return lista
 
@@ -297,6 +302,7 @@ def get_ns_data(path):
     ns_tels = []
     ns_publicznosc = []
     ns_kat_uczn = []
+    ns_specyfika = []
     for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         try:
@@ -337,8 +343,12 @@ def get_ns_data(path):
             ns_tels.append('')
         else:
             ns_tels.append(i.text)
+    for i in tree.xpath('//ss:Cell[@ss:Index="26"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_specyfika.append(xs(i))
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
-               ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn)
+               ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
+               ns_specyfika)
     return data
 
 print('* Loading new SIO data...')
@@ -441,12 +451,9 @@ for item in sio_report_list:
                 if row[0] not in ns_rspos and row[0] is not 0:
                     cfile.writerow(row)
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
-            # ns_rspos = []
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Organ rejestrujący'] + header_list)
-            # for i in ns_data_list:
-            #     ns_rspos.append(i[0])
+                            'Organ rejestrujący'] + header_list[:-5])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0]:
@@ -456,31 +463,25 @@ for item in sio_report_list:
                                 kfound = True
                         if not kfound:
                             cfile.writerow([kat_ucz_dict[rowo[6]][0],
-                                            rown[9], rown[2]] + rowo)
+                                            rown[9], rown[2]] + rowo[:-5])
         elif item[1] is 'osn_niepoprawne_pole_typ.csv':
-            # ns_rspos = []
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Organ rejestrujący'] + header_list)
-            # for i in ns_data_list:
-            #     ns_rspos.append(i[0])
+                            'Organ rejestrujący'] + header_list[:-5])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and type_dict[rowo[4]] != rown[4]:
                         cfile.writerow([type_dict[rowo[4]], rown[4],
-                                        rown[2]] + rowo)
+                                        rown[2]] + rowo[:-5])
         elif item[1] is 'osn_niepoprawne_pole_publicznosc.csv':
-            # ns_rspos = []
             cfile.writerow(['Stare SIO (na 95 proc. błędnie)',
                             'Nowe SIO (na 95 proc. poprawnie)',
-                            'Organ rejestrujący'] + header_list)
-            # for i in ns_data_list:
-            #     ns_rspos.append(i[0])
+                            'Organ rejestrujący'] + header_list[:-5])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and publ_dict[rowo[5]] != rown[8]:
                         cfile.writerow([publ_dict[rowo[5]], rown[8],
-                                        rown[2]] + rowo)
+                                        rown[2]] + rowo[:-5])
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
@@ -498,6 +499,16 @@ for item in sio_report_list:
                     if (rowo[0] == rown[0] and
                             rowo[8].lower() not in rown[5].lower()):
                         cfile.writerow([rowo[8], rown[5], rown[2]] + rowo)
+        elif (item[1] is 'osn_niepoprawne_pole_specyfika.csv'):
+            cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
+                            'Nowe SIO (prawdopodobnie poprawnie)',
+                            'Organ rejestrujący'] + header_list[:-5])
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    if (rowo[0] == rown[0] and
+                            specyfika_dict[rowo[20]] != rown[10]):
+                        cfile.writerow([specyfika_dict[rowo[20]], rown[10],
+                                        rown[2]] + rowo[:-5])
         elif (item[1] is
                 'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
             os_regons = []
