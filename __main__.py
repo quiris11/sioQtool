@@ -19,7 +19,8 @@ from dictionaries import specyfika_dict
 import argparse
 import os
 import csv
-# import sys
+import difflib
+import sys
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
@@ -38,6 +39,18 @@ parser.add_argument("--stages",
                     help="NSIO: education stages reports",
                     action="store_true")
 args = parser.parse_args()
+
+
+def compare_csvs(sio_report_list):
+    for item in sio_report_list:
+        if item[2] == '!critical!':
+            with open(os.path.join(item[2], 's', item[1]), 'r') as f:
+                lines1 = f.read().split('\n')
+            with open(os.path.join(item[2], item[1]), 'r') as f:
+                lines2 = f.read().split('\n')
+                for line in difflib.unified_diff(lines1, lines2, fromfile='stary',
+                                                 tofile='nowy', lineterm='', n=0):
+                    print(line)
 
 sio_report_list = ([
     ['OS: all items', 'os_all_items.csv', '!normal!'],
@@ -539,3 +552,4 @@ for item in sio_report_list:
                         if (not validate_email(m)
                                 and m is not '') or '@02.pl' in m:
                             cfile.writerow(row)
+compare_csvs(sio_report_list)
