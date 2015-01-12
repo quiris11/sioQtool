@@ -7,3 +7,4 @@ wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.p
 wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_61 --output-document=$HOME/NSIO/ee_przedszk.xls
 wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_62 --output-document=$HOME/NSIO/ee_sp.xls
 rm my_cookies.txt
+more ~/NSIO/rspo_nieaktywne.xls | grep ">Wykaz"
