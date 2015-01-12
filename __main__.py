@@ -20,6 +20,7 @@ import argparse
 import os
 import csv
 import difflib
+import shutil
 import sys
 
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
@@ -38,19 +39,26 @@ parser.add_argument('-t', "--ns-mail-tough-check",
 parser.add_argument("--stages",
                     help="NSIO: education stages reports",
                     action="store_true")
+parser.add_argument("--move",
+                    help="move reports to 'src' directory",
+                    action="store_true")
+parser.add_argument("--compare",
+                    help="compare new reports with old reports",
+                    action="store_true")
 args = parser.parse_args()
 
 
 def compare_csvs(sio_report_list):
     for item in sio_report_list:
-        if item[2] == '!critical!':
-            with open(os.path.join(item[2], 's', item[1]), 'r') as f:
-                lines1 = f.read().split('\n')
-            with open(os.path.join(item[2], item[1]), 'r') as f:
-                lines2 = f.read().split('\n')
-                for line in difflib.unified_diff(lines1, lines2, fromfile='stary',
-                                                 tofile='nowy', lineterm='', n=0):
-                    print(line)
+        with open(os.path.join(item[2], 'src', item[1]), 'r') as f:
+            lines1 = f.read().split('\n')
+        with open(os.path.join(item[2], item[1]), 'r') as f:
+            lines2 = f.read().split('\n')
+            for line in difflib.unified_diff(
+                lines1, lines2, fromfile='stary',
+                tofile='nowy', lineterm='', n=0
+            ):
+                print(line)
 
 sio_report_list = ([
     ['OS: all items', 'os_all_items.csv', '!normal!'],
@@ -364,6 +372,20 @@ def get_ns_data(path):
                ns_specyfika)
     return data
 
+if args.move:
+    print('* Moving new reports to src directory...')
+    for item in sio_report_list:
+        if not os.path.exists(os.path.join(item[2], 'src')):
+            os.makedirs(os.path.join(item[2], 'src'))
+        shutil.copyfile(os.path.join(item[2], item[1]),
+                        os.path.join(item[2], 'src', item[1]))
+    sys.exit()
+
+if args.compare:
+    print('* Comparing new reports with old reports...')
+    compare_csvs(sio_report_list)
+    sys.exit()
+
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
 print('* Loading old SIO data...')
@@ -552,4 +574,3 @@ for item in sio_report_list:
                         if (not validate_email(m)
                                 and m is not '') or '@02.pl' in m:
                             cfile.writerow(row)
-compare_csvs(sio_report_list)
