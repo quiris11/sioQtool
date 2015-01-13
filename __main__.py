@@ -55,10 +55,13 @@ def compare_csvs(sio_report_list):
         with open(os.path.join(item[2], item[1]), 'r') as f:
             lines2 = f.read().split('\n')
             for line in difflib.unified_diff(
-                lines1, lines2, fromfile='stary',
-                tofile='nowy', lineterm='', n=0
+                lines1, lines2,
+                fromfile='stary: ' + item[2] + '/src/' + item[1],
+                tofile='nowy: ' + item[2] + '/' + item[1],
+                lineterm='', n=0
             ):
                 print(line)
+        print('******')
 
 sio_report_list = ([
     ['OS: all items', 'os_all_items.csv', '!normal!'],
