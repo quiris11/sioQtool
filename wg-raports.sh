@@ -6,6 +6,7 @@ wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.p
 wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_65 --output-document=$HOME/NSIO/rspo_nieaktywne.xls
 wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_61 --output-document=$HOME/NSIO/ee_przedszk.xls
 wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_62 --output-document=$HOME/NSIO/ee_sp.xls
+wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_64 --output-document=$HOME/NSIO/obwody.xls
 wget --load-cookies=my_cookies.txt https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_64 --output-document=$HOME/NSIO/zawody.xls
 rm my_cookies.txt
 more ~/NSIO/rspo_nieaktywne.xls | grep ">Wykaz"
