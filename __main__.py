@@ -50,17 +50,20 @@ args = parser.parse_args()
 
 def compare_csvs(sio_report_list):
     for item in sio_report_list:
-        with open(os.path.join(item[2], 'src', item[1]), 'r') as f:
-            lines1 = f.read().split('\n')
-        with open(os.path.join(item[2], item[1]), 'r') as f:
-            lines2 = f.read().split('\n')
-            for line in difflib.unified_diff(
-                lines1, lines2,
-                fromfile='stary: ' + item[2] + '/src/' + item[1],
-                tofile='nowy: ' + item[2] + '/' + item[1],
-                lineterm='', n=0
-            ):
-                print(line)
+        try:
+            with open(os.path.join(item[2], 'src', item[1]), 'r') as f:
+                lines1 = f.read().split('\n')
+            with open(os.path.join(item[2], item[1]), 'r') as f:
+                lines2 = f.read().split('\n')
+                for line in difflib.unified_diff(
+                    lines1, lines2,
+                    fromfile='stary: ' + item[2] + '/src/' + item[1],
+                    tofile='nowy: ' + item[2] + '/' + item[1],
+                    lineterm='', n=0
+                ):
+                    print(line)
+        except IOError:
+            continue
         print('******')
 
 sio_report_list = ([
@@ -380,8 +383,11 @@ if args.move:
     for item in sio_report_list:
         if not os.path.exists(os.path.join(item[2], 'src')):
             os.makedirs(os.path.join(item[2], 'src'))
-        shutil.copyfile(os.path.join(item[2], item[1]),
-                        os.path.join(item[2], 'src', item[1]))
+        try:
+            shutil.copyfile(os.path.join(item[2], item[1]),
+                            os.path.join(item[2], 'src', item[1]))
+        except IOError:
+            continue
     sys.exit()
 
 if args.compare:
