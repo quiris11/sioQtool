@@ -391,6 +391,7 @@ if args.move:
     sys.exit()
 
 if args.compare:
+    os.system('cls' if os.name == 'nt' else 'clear')
     print('* Comparing new reports with old reports...')
     compare_csvs(sio_report_list)
     sys.exit()
