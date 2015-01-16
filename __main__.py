@@ -82,9 +82,11 @@ sio_report_list = ([
         'osn_niepoprawne_pole_kategoria_uczniow.csv', '!critical!'],
     ['NS: all items', 'ns_all_items.csv', '!normal!'],
     ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
-    ['NS: Missing REGONs existing in a new SIO with birthdate earlier '
-        'than %s' % BORDER_DATE,
+    ['NS: Missing REGONs in old SIO existing in a new SIO with birthdate '
+        'earlier than %s' % BORDER_DATE,
      'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
+    ['NS: Missing REGONs in new SIO existing in a old SIO',
+     'ns_brakujace_w_nowym_sio_numery_regon_ze_starego_sio.csv', '!critical!'],
     ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
     ['OS: incorrect specyfika', 'osn_niepoprawne_pole_specyfika.csv',
         '!critical!'],
@@ -637,6 +639,18 @@ for item in sio_report_list:
                     roz_date = datetime.strptime('9999-01-01', '%Y-%m-%d')
                 if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
                         and roz_date < BORDER_DATE) or row[0] == 'Nr RSPO':
+                    cfile.writerow(row)
+        elif (item[1] is
+                'ns_brakujace_w_nowym_sio_numery_regon_ze_starego_sio.csv'):
+            ns_regons = []
+            for row in ns_data_list:
+                if len(row[1]) == 9:
+                    reg_long = row[1] + '00000'
+                else:
+                    reg_long = row[1]
+                ns_regons.append(reg_long)
+            for row in os_data_list:
+                if row[1] not in ns_regons and row[4] < 101:
                     cfile.writerow(row)
         elif item[1] is 'ns_nieprawidlowe_adresy_email.csv':
             for row in ns_data_list:
