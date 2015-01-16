@@ -30,6 +30,7 @@ XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
 
 BORDER_DATE = datetime.strptime('2014-09-30', '%Y-%m-%d')
+BORDER_DATEZ = datetime.strptime('2013-08-31', '%Y-%m-%d')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("oldpath", help="path to DIR with old SIO XML files")
@@ -645,10 +646,19 @@ for item in sio_report_list:
             ns_regons = []
             for row in ns_data_list:
                 if len(row[1]) == 9:
-                    reg_long = row[1] + '00000'
+                    ns_regons.append(row[1] + '00000')
                 else:
-                    reg_long = row[1]
-                ns_regons.append(reg_long)
+                    ns_regons.append(row[1])
+            ns_term_list = zip(
+                get_terminated_id(args.newpath, '10'),
+                get_terminated_id(args.newpath, '5')
+            )
+            for i in ns_term_list:
+                if datetime.strptime(i[1], '%Y-%m-%d') >= BORDER_DATEZ:
+                    if len(i[0]) == 9:
+                        ns_regons.append(i[0] + '00000')
+                    else:
+                        ns_regons.append(i[0])
             for row in os_data_list:
                 if row[1] not in ns_regons and row[4] < 101:
                     cfile.writerow(row)
