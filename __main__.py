@@ -16,6 +16,7 @@ from dictionaries import kat_ucz_dict
 from dictionaries import publ_dict
 from dictionaries import type_dict
 from dictionaries import specyfika_dict
+from dictionaries import zawod_dict
 import argparse
 import os
 import csv
@@ -87,6 +88,9 @@ sio_report_list = ([
     ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
     ['OS: incorrect specyfika', 'osn_niepoprawne_pole_specyfika.csv',
         '!critical!'],
+    ['OS: different jobs',
+        'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv',
+        '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!normal!']
 ])
@@ -114,6 +118,47 @@ header_list = [
     'email kom.',
     'specyfika'
 ]
+
+
+def get_ns_zawody(path):
+    tree = etree.parse(os.path.join(path, 'zawody.xls'))
+    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                              namespaces=XLSNS)[0])
+    data = []
+    ns_rspos = []
+    ns_zawody = []
+    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_rspos.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="4"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_zawody.append(xs(i))
+    data = zip(ns_rspos, ns_zawody)
+    return data
+
+
+def get_os_zawody(tree):
+    rows = []
+    zawody_tags = tree.xpath('//zawody', namespaces=XSNS)
+    if zawody_tags is None:
+        return None
+    for zt in zawody_tags:
+        parent = zt.getparent()
+        numerIdent = parent.get('numerIdent')
+        if numerIdent is None:
+            continue
+        try:
+            nrRspo = int(tree.xpath(
+                '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
+                namespaces=XSNS
+            )[0].get('nrRspo'))
+        except:
+            nrRspo = 0
+        ztree = etree.ElementTree(zt)
+        zs = ztree.xpath('//zawod', namespaces=XSNS)
+        for z in zs:
+            rows.append([nrRspo, int(z.get('idZawodu'))])
+    return rows
 
 
 def duplicated_list(mylist):
@@ -211,13 +256,17 @@ def get_os_row(tree):
 
 def get_os_data(path):
     data = []
+    os_zawody = []
     for root, dirs, files in os.walk(path):
         for single_file in files:
             if single_file.endswith('.xml'):
                 single_file_path = os.path.join(root, single_file)
                 single_file_tree = etree.parse(single_file_path)
                 data = data + get_os_row(single_file_tree)
-    return(data)
+                if get_os_zawody(single_file_tree) != []:
+                    for r in get_os_zawody(single_file_tree):
+                        os_zawody.append(r)
+    return(data, os_zawody)
 
 
 def get_terminated_id(path, id):
@@ -395,11 +444,11 @@ if args.compare:
     print('* Comparing new reports with old reports...')
     compare_csvs(sio_report_list)
     sys.exit()
-
+ns_zawody_list = get_ns_zawody(args.newpath)
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
 print('* Loading old SIO data...')
-os_data_list = get_os_data(args.oldpath)
+os_data_list, os_zawody_list = get_os_data(args.oldpath)
 if args.stages:
     if not os.path.exists(os.path.join('!ee!')):
         os.makedirs(os.path.join('!ee!'))
@@ -471,6 +520,24 @@ for item in sio_report_list:
                 if (not validate_email(row[8])
                         and row[8] is not '') or '@02.pl' in row[8]:
                     cfile.writerow(row)
+        elif (
+            item[1] is
+            'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv'
+        ):
+            found = []
+            for ro in os_zawody_list:
+                rofnd = False
+                for rn in ns_zawody_list:
+                    if str(ro[0]) + zawod_dict[ro[1]] == str(rn[0]) + rn[1]:
+                        rofnd = True
+                if rofnd == False:
+                    found.append([ro[0], zawod_dict[ro[1]]])
+            cfile.writerow(['Nieznalezione w nowym SIO zawody',
+                            ] + header_list[:-5])
+            for rowo in os_data_list:
+                for rowf in found:
+                    if rowo[0] == rowf[0] and rowf[0] != 0:
+                        cfile.writerow([rowf[1]] + rowo[:-5])
         elif item[1] is 'os_niepoprawne_numery_regon.csv':
             ns_long_regons = []
             for i in ns_data_list:
@@ -544,7 +611,7 @@ for item in sio_report_list:
                     if (rowo[0] == rown[0] and
                             rowo[8].lower() not in rown[5].lower()):
                         cfile.writerow([rowo[8], rown[5], rown[2]] + rowo)
-        elif (item[1] is 'osn_niepoprawne_pole_specyfika.csv'):
+        elif item[1] is 'osn_niepoprawne_pole_specyfika.csv':
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
                             'Organ rejestrujący'] + header_list[:-5])
