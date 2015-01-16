@@ -17,6 +17,7 @@ from dictionaries import publ_dict
 from dictionaries import type_dict
 from dictionaries import specyfika_dict
 from dictionaries import zawod_dict
+from dictionaries import typ_organu_prow_dict
 import argparse
 import os
 import csv
@@ -91,6 +92,8 @@ sio_report_list = ([
     ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
     ['OS: incorrect specyfika', 'osn_niepoprawne_pole_specyfika.csv',
         '!critical!'],
+    ['OS: incorrect typ organu', 'osn_niezgodny_typ_organu_prow.csv',
+        '!critical!'],
     ['OS: different jobs',
         'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv',
         '!critical!'],
@@ -119,7 +122,8 @@ header_list = [
     'kod pow. org. wyd.',
     'kod gm. org. wyd.',
     'email kom.',
-    'specyfika'
+    'specyfika',
+    'typ organu prow'
 ]
 
 
@@ -202,7 +206,8 @@ def os_row(i, a):
         xs(i.get('orgWydPow')),
         xs(i.get('orgWydGm')),
         xs(a.get('emailKomorki')),
-        xi(i.get('specyfikaSzkoly'))
+        xi(i.get('specyfikaSzkoly')),
+        xi(i.get('typOrganuProw'))
     ]
     return lista
 
@@ -382,6 +387,7 @@ def get_ns_data(path):
     ns_publicznosc = []
     ns_kat_uczn = []
     ns_specyfika = []
+    ns_typ_org_prow = []
     for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         try:
@@ -425,9 +431,12 @@ def get_ns_data(path):
     for i in tree.xpath('//ss:Cell[@ss:Index="26"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_specyfika.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_typ_org_prow.append(xs(i))
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
-               ns_specyfika)
+               ns_specyfika, ns_typ_org_prow)
     return data
 
 if args.move:
@@ -536,11 +545,11 @@ for item in sio_report_list:
                 if rofnd == False:
                     found.append([ro[0], zawod_dict[ro[1]]])
             cfile.writerow(['Nieznalezione w nowym SIO zawody',
-                            ] + header_list[:-5])
+                            ] + header_list[:-6])
             for rowo in os_data_list:
                 for rowf in found:
                     if rowo[0] == rowf[0] and rowf[0] != 0:
-                        cfile.writerow([rowf[1]] + rowo[:-5])
+                        cfile.writerow([rowf[1]] + rowo[:-6])
         elif item[1] is 'os_niepoprawne_numery_regon.csv':
             ns_long_regons = []
             for i in ns_data_list:
@@ -568,7 +577,7 @@ for item in sio_report_list:
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Organ rejestrujący'] + header_list[:-5])
+                            'Organ rejestrujący'] + header_list[:-6])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0]:
@@ -578,25 +587,25 @@ for item in sio_report_list:
                                 kfound = True
                         if not kfound:
                             cfile.writerow([kat_ucz_dict[rowo[6]][0],
-                                            rown[9], rown[2]] + rowo[:-5])
+                                            rown[9], rown[2]] + rowo[:-6])
         elif item[1] is 'osn_niepoprawne_pole_typ.csv':
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Organ rejestrujący'] + header_list[:-5])
+                            'Organ rejestrujący'] + header_list[:-6])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and type_dict[rowo[4]] != rown[4]:
                         cfile.writerow([type_dict[rowo[4]], rown[4],
-                                        rown[2]] + rowo[:-5])
+                                        rown[2]] + rowo[:-6])
         elif item[1] is 'osn_niepoprawne_pole_publicznosc.csv':
             cfile.writerow(['Stare SIO (na 95 proc. błędnie)',
                             'Nowe SIO (na 95 proc. poprawnie)',
-                            'Organ rejestrujący'] + header_list[:-5])
+                            'Organ rejestrujący'] + header_list[:-6])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and publ_dict[rowo[5]] != rown[8]:
                         cfile.writerow([publ_dict[rowo[5]], rown[8],
-                                        rown[2]] + rowo[:-5])
+                                        rown[2]] + rowo[:-6])
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
@@ -614,16 +623,29 @@ for item in sio_report_list:
                     if (rowo[0] == rown[0] and
                             rowo[8].lower() not in rown[5].lower()):
                         cfile.writerow([rowo[8], rown[5], rown[2]] + rowo)
+        elif item[1] is 'osn_niezgodny_typ_organu_prow.csv':
+            cfile.writerow(['Stare SIO - typ organu prow.',
+                            'Nowe SIO - typ organu prow.',
+                            'Stare SIO - nazwa organu prow.',
+                            'Organ rejestrujący'] + header_list[:-6])
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    if (rowo[0] == rown[0] and
+                            typ_organu_prow_dict[rowo[21]] != rown[11]):
+                        cfile.writerow([typ_organu_prow_dict[rowo[21]],
+                                        rown[11],
+                                        rowo[15],
+                                        rown[2]] + rowo[:-6])
         elif item[1] is 'osn_niepoprawne_pole_specyfika.csv':
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
                             'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Organ rejestrujący'] + header_list[:-5])
+                            'Organ rejestrujący'] + header_list[:-6])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if (rowo[0] == rown[0] and
                             specyfika_dict[rowo[20]] != rown[10]):
                         cfile.writerow([specyfika_dict[rowo[20]], rown[10],
-                                        rown[2]] + rowo[:-5])
+                                        rown[2]] + rowo[:-6])
         elif (item[1] is
                 'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
             os_regons = []

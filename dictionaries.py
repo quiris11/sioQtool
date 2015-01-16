@@ -437,3 +437,37 @@ zawod_dict = {
     349: 'Murarz-tynkarz',
     350: 'Wędliniarz'
 }
+
+typ_organu_prow_dict = {
+    1: 'Gmina',
+    2: 'Miasto na prawach powiatu',
+    3: 'Powiat ziemski',
+    4: 'Samorząd województwa',
+    5: 'Minister ds. oświaty i wychowania',
+    6: 'Minister ds. kultury i dziedzictwa narodowego',
+    7: 'Minister ds. wewnętrznych',
+    8: 'Minister ds. obrony',
+    9: 'Minister ds. pomocy społecznej',
+    10: 'Minister ds. sprawiedliwości',
+    11: 'Minister ds. zagranicznych',
+    12: 'Minister ds. rolnictwa i rozwoju wsi',
+    13: 'Minister ds. środowiska',
+    20: 'Kurator oświaty',
+    21: 'Przedsiębiorstwo Państwowe',  # changed in NSIO
+    22: 'Stowarzyszenia',
+    23: 'Organizacje Społeczne inne niż wymienione',
+    24: 'Związek Rzemiosła Polskiego',
+    25: 'Krajowa Rada Spółdzielcza',
+    26: 'Samorząd Gospodarczy i Zawodowy',
+    27: 'Organizacje Związkowe',
+    28: 'Organizacje Wyznaniowe',
+    29: 'Przedsiębiorstwa Osób Fizycznych',
+    30: 'Szkoły Wyższe Niepubliczne',  # changed in NSIO
+    31: 'Spółki Handlowe',  # changed in NSIO
+    32: 'Fundacje',
+    33: 'Osoba fizyczna',  # changed in NSIO
+    34: 'Szkoły Wyższe Publiczne',  # changed in NSIO
+    35: 'Administracja rządowa na szczeblu centralnym',
+    36: 'Administracja rządowa na szczeblu wojewódzkim',
+    67: 'Delegatura kuratorium oświaty'
+}
