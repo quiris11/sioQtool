@@ -388,6 +388,7 @@ def get_ns_data(path):
     ns_kat_uczn = []
     ns_specyfika = []
     ns_typ_org_prow = []
+    ns_org_prow = []
     for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         try:
@@ -434,9 +435,13 @@ def get_ns_data(path):
     for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_typ_org_prow.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="8"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_org_prow.append(xs(i))
+
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
-               ns_specyfika, ns_typ_org_prow)
+               ns_specyfika, ns_typ_org_prow, ns_org_prow)
     return data
 
 if args.move:
@@ -627,6 +632,7 @@ for item in sio_report_list:
             cfile.writerow(['Stare SIO - typ organu prow.',
                             'Nowe SIO - typ organu prow.',
                             'Stare SIO - nazwa organu prow.',
+                            'Nowe SIO - nazwa organu prow.',                            
                             'Organ rejestrujący'] + header_list[:-6])
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -635,6 +641,7 @@ for item in sio_report_list:
                         cfile.writerow([typ_organu_prow_dict[rowo[21]],
                                         rown[11],
                                         rowo[15],
+                                        rown[12],
                                         rown[2]] + rowo[:-6])
         elif item[1] is 'osn_niepoprawne_pole_specyfika.csv':
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
