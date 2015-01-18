@@ -277,9 +277,8 @@ def get_os_data(path):
     return(data, os_zawody)
 
 
-def get_terminated_id(path, id):
+def get_terminated_id(tree, id):
     lista = []
-    tree = etree.parse(os.path.join(path, 'rspo_nieaktywne.xls'))
     print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                             namespaces=XLSNS)[0])
     lista = lista + tree.xpath(
@@ -468,6 +467,12 @@ if args.compare:
 ns_zawody_list = get_ns_zawody(args.newpath)
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
+term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
+ns_term_list = zip(
+    get_terminated_id(term_tree, '10'),  # REGON
+    get_terminated_id(term_tree, '5'),   # Termination date
+    get_terminated_id(term_tree, '1')    # Nr RSPO
+)
 print('* Loading old SIO data...')
 os_data_list, os_zawody_list = get_os_data(args.oldpath)
 if args.stages:
@@ -546,6 +551,10 @@ for item in sio_report_list:
             'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv'
         ):
             found = []
+            ns_term_rspos = []
+            for i in ns_term_list:
+                if datetime.strptime(i[1], '%Y-%m-%d') < BORDER_DATE:
+                    ns_term_rspos.append(i[2])
             for ro in os_zawody_list:
                 rofnd = False
                 for rn in ns_zawody_list:
@@ -557,6 +566,8 @@ for item in sio_report_list:
                             ] + header_list[:-6])
             for rowo in os_data_list:
                 for rowf in found:
+                    if str(rowf[0]) in ns_term_rspos:
+                        continue
                     if rowo[0] == rowf[0] and rowf[0] != 0:
                         cfile.writerow([rowf[1]] + rowo[:-6])
         elif item[1] is 'os_niepoprawne_numery_regon.csv':
@@ -566,11 +577,11 @@ for item in sio_report_list:
                     ns_long_regons.append(i[1] + '00000')
                 else:
                     ns_long_regons.append(i[1])
-            for i in get_terminated_id(args.newpath, '10'):
-                if len(i) == 9:
-                    ns_long_regons.append(i + '00000')
+            for r in ns_term_list:
+                if len(r[0]) == 9:
+                    ns_long_regons.append(r[0] + '00000')
                 else:
-                    ns_long_regons.append(i)
+                    ns_long_regons.append(r[0])
             for row in os_data_list:
                 if row[1] not in ns_long_regons and row[0] is not 0:
                     cfile.writerow(row)
@@ -578,8 +589,8 @@ for item in sio_report_list:
             ns_rspos = []
             for i in ns_data_list:
                 ns_rspos.append(i[0])
-            for i in get_terminated_id(args.newpath, '1'):
-                ns_rspos.append(int(i))
+            for i in ns_term_list:
+                ns_rspos.append(int(i[2]))
             for row in os_data_list:
                 if row[0] not in ns_rspos and row[0] is not 0:
                     cfile.writerow(row)
@@ -710,10 +721,6 @@ for item in sio_report_list:
                     ns_regons.append(row[1] + '00000')
                 else:
                     ns_regons.append(row[1])
-            ns_term_list = zip(
-                get_terminated_id(args.newpath, '10'),
-                get_terminated_id(args.newpath, '5')
-            )
             for i in ns_term_list:
                 if datetime.strptime(i[1], '%Y-%m-%d') >= BORDER_DATEZ:
                     if len(i[0]) == 9:
