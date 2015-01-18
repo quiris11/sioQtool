@@ -389,6 +389,7 @@ def get_ns_data(path):
     ns_specyfika = []
     ns_typ_org_prow = []
     ns_org_prow = []
+    ns_czesc_miejska = []
     for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         try:
@@ -438,10 +439,13 @@ def get_ns_data(path):
     for i in tree.xpath('//ss:Cell[@ss:Index="8"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_org_prow.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="23"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_czesc_miejska.append(xs(i))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
-               ns_specyfika, ns_typ_org_prow, ns_org_prow)
+               ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska)
     return data
 
 if args.move:
@@ -630,18 +634,46 @@ for item in sio_report_list:
                         cfile.writerow([rowo[8], rown[5], rown[2]] + rowo)
         elif item[1] is 'osn_niezgodny_typ_organu_prow.csv':
             cfile.writerow(['Stare SIO - typ organu prow.',
-                            'Nowe SIO - typ organu prow.',
                             'Stare SIO - nazwa organu prow.',
-                            'Nowe SIO - nazwa organu prow.',                            
+                            'Nowe SIO - typ organu prow.',
+                            'Nowe SIO - nazwa organu prow.',
+                            'Nowe SIO - część miejska',
                             'Organ rejestrujący'] + header_list[:-6])
             for rowo in os_data_list:
                 for rown in ns_data_list:
-                    if (rowo[0] == rown[0] and
-                            typ_organu_prow_dict[rowo[21]] != rown[11]):
+                    if (
+                        rowo[0] == rown[0] and
+                        typ_organu_prow_dict[rowo[21]] != rown[11] and
+                        rown[13] == 'Nie dotyczy'
+                    ):
                         cfile.writerow([typ_organu_prow_dict[rowo[21]],
-                                        rown[11],
                                         rowo[15],
+                                        rown[11],
                                         rown[12],
+                                        rown[13],
+                                        rown[2]] + rowo[:-6])
+                    elif (
+                        rowo[0] == rown[0] and
+                        rown[13] == 'Część gminna' and
+                        (typ_organu_prow_dict[rowo[21]] != rown[11] and
+                         typ_organu_prow_dict[rowo[21]] != 'Gmina')
+                    ):
+                        cfile.writerow([typ_organu_prow_dict[rowo[21]],
+                                        rowo[15],
+                                        rown[11],
+                                        rown[12],
+                                        rown[13],
+                                        rown[2]] + rowo[:-6])
+                    elif (
+                        rowo[0] == rown[0] and
+                        rown[13] == 'Część powiatowa' and
+                        typ_organu_prow_dict[rowo[21]] != rown[11]
+                    ):
+                        cfile.writerow([typ_organu_prow_dict[rowo[21]],
+                                        rowo[15],
+                                        rown[11],
+                                        rown[12],
+                                        rown[13],
                                         rown[2]] + rowo[:-6])
         elif item[1] is 'osn_niepoprawne_pole_specyfika.csv':
             cfile.writerow(['Stare SIO (prawdopodobnie błędnie)',
