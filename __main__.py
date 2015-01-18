@@ -97,6 +97,9 @@ sio_report_list = ([
     ['OS: different jobs',
         'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv',
         '!critical!'],
+    ['NS: different jobs',
+        'osn_nieznalezione_w_starym_sio_zawody_wykazane_w_nowym_sio.csv',
+        '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!normal!']
 ])
@@ -570,6 +573,29 @@ for item in sio_report_list:
                         continue
                     if rowo[0] == rowf[0] and rowf[0] != 0:
                         cfile.writerow([rowf[1]] + rowo[:-6])
+        elif (
+            item[1] is
+            'osn_nieznalezione_w_starym_sio_zawody_wykazane_w_nowym_sio.csv'
+        ):
+            foundn = []
+            for rn in ns_zawody_list:
+                rofod = False
+                for ro in os_zawody_list:
+                    if str(ro[0]) + zawod_dict[ro[1]] == str(rn[0]) + rn[1]:
+                        rofod = True
+                if rofod == False:
+                    foundn.append([rn[0], rn[1]])
+            cfile.writerow(
+                ['Nieznalezione w starym SIO zawody'] + list(ns_data_list[0])
+            )
+            for rown in ns_data_list[1:]:
+                for rowf in foundn[1:]:
+                    if (
+                        rown[0] == int(rowf[0]) and
+                        int(rowf[0]) != 0 and
+                        'MINISTERSTWO' not in rown[2]
+                    ):
+                        cfile.writerow([rowf[1]] + list(rown))
         elif item[1] is 'os_niepoprawne_numery_regon.csv':
             ns_long_regons = []
             for i in ns_data_list:
