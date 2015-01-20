@@ -575,8 +575,7 @@ for item in sio_report_list:
             found = []
             ns_term_rspos = []
             for i in ns_term_list:
-                if datetime.strptime(i[1], '%Y-%m-%d') < BORDER_DATE:
-                    ns_term_rspos.append(i[2])
+                ns_term_rspos.append(i[2])
             for ro in os_zawody_list:
                 rofnd = False
                 for rn in ns_zawody_list:
