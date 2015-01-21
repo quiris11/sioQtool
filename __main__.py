@@ -234,7 +234,7 @@ def os_row(i, a):
     return lista
 
 
-def get_os_ee_data(path, etap):
+def get_os_ee_data(path, etap, typ_szk):
     if etap == 'pon_zero':
         u3 = 'u3_3_1'
     elif etap == 'zero':
@@ -509,8 +509,10 @@ if args.stages:
         ['EE SP: drugi etap', 'ee_sp_drugi_etap.csv', '!ee!']
     ])
     print('* Loading education stages old SIO data...')
-    os_eesze_list = get_os_ee_data(args.oldpath, 'zero')
-    os_eespz_list = get_os_ee_data(args.oldpath, 'pon_zero')
+    os_ee_sp_zero_list = get_os_ee_data(args.oldpath, 'zero', 'sp')
+    os_ee_sp_ponzero_list = get_os_ee_data(args.oldpath, 'pon_zero', 'sp')
+    os_ee_p_zero_list = get_os_ee_data(args.oldpath, 'zero', 'p')
+    os_ee_p_ponzero_list = get_os_ee_data(args.oldpath, 'pon_zero', 'p')
     print('* Loading education stages new SIO data...')
     ns_ees_data_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
     ns_eep_data_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
@@ -521,14 +523,17 @@ if args.stages:
                                quoting=csv.QUOTE_NONNUMERIC)
             if item[1] is 'ee_sp_ponizej_zero.csv':
                 for rn in ns_ees_data_list:
-                    for ro in os_eespz_list:
+                    for ro in os_ee_sp_ponzero_list:
                         if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
                             cfile.writerow(rn)
             elif item[1] is 'ee_p_ponizej_zero.csv':
                 for rn in ns_eep_data_list:
-                    for ro in os_eespz_list:
+                    for ro in os_ee_p_ponzero_list:
+                        if(rn[0] == ro[0]):
+                            print(rn[0], ro[0], rn[10], ro[1])
                         if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
                             cfile.writerow(rn)
+    sys.exit()
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
 if not os.path.exists(os.path.join('!critical!')):
