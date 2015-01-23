@@ -569,7 +569,7 @@ for item in ee_report_list:
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
-                        cfile.writerow(['Nie wpisane w RSPO',
+                        cfile.writerow(['Niewpisane w RSPO',
                                         ro[1]] + list(rn))
         elif (item[1] is
                 'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv'):
@@ -581,7 +581,7 @@ for item in ee_report_list:
             for rn in ns_ee_p_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
-                        cfile.writerow(['Nie wpisane w RSPO',
+                        cfile.writerow(['Niewpisane w RSPO',
                                         ro[1]] + list(rn))
         if item[1] is 'etapy_eduk_szk_podst_zero.csv':
             cfile.writerow([
@@ -592,7 +592,7 @@ for item in ee_report_list:
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
-                        cfile.writerow(['Nie wpisane w RSPO',
+                        cfile.writerow(['Niewpisane w RSPO',
                                         ro[2]] + list(rn))
         elif item[1] is 'etapy_eduk_przedszk_i_inne_formy_zero.csv':
             cfile.writerow([
@@ -603,7 +603,7 @@ for item in ee_report_list:
             for rn in ns_ee_p_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
-                        cfile.writerow(['Nie wpisane w RSPO',
+                        cfile.writerow(['Niewpisane w RSPO',
                                         ro[2]] + list(rn))
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
