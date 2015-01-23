@@ -39,9 +39,6 @@ parser.add_argument('newpath', help='path to DIR with new SIO XLS files')
 parser.add_argument('-t', "--ns-mail-tough-check",
                     help="NSIO: e-mails tough checking",
                     action="store_true")
-parser.add_argument("--stages",
-                    help="NSIO: education stages reports",
-                    action="store_true")
 parser.add_argument("--move",
                     help="move reports to 'src' directory",
                     action="store_true")
@@ -52,22 +49,37 @@ args = parser.parse_args()
 
 
 def compare_csvs(sio_report_list):
-    for item in sio_report_list:
-        try:
-            with open(os.path.join(item[2], 'src', item[1]), 'r') as f:
-                lines1 = f.read().split('\n')
-            with open(os.path.join(item[2], item[1]), 'r') as f:
-                lines2 = f.read().split('\n')
-                for line in difflib.unified_diff(
-                    lines1, lines2,
-                    fromfile='stary: ' + item[2] + '/src/' + item[1],
-                    tofile='nowy: ' + item[2] + '/' + item[1],
-                    lineterm='', n=0
-                ):
-                    print(line)
-        except IOError:
-            continue
-        print('******')
+    for i in (ee_report_list, sio_report_list):
+        for item in i:
+            print('*** ' + item[1] + ' ***')
+            try:
+                with open(os.path.join(item[2], 'src', item[1]), 'r') as f:
+                    lines1 = f.read().split('\n')
+                with open(os.path.join(item[2], item[1]), 'r') as f:
+                    lines2 = f.read().split('\n')
+                    for line in difflib.unified_diff(
+                        lines1, lines2,
+                        fromfile='stary: ' + item[2] + '/src/' + item[1],
+                        tofile='nowy: ' + item[2] + '/' + item[1],
+                        lineterm='', n=0
+                    ):
+                        print(line)
+            except IOError:
+                print('* Error')
+                continue
+            print('* OK')
+
+ee_report_list = ([
+    ['EE SP: ponizej zero', 'etapy_eduk_szk_podst_ponizej_zero.csv',
+     '!ee!'],
+    ['EE SP: zero', 'etapy_eduk_szk_podst_zero.csv', '!ee!'],
+    ['EE P: ponizej zero',
+     'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv', '!ee!'],
+    ['EE P: zero', 'etapy_eduk_przedszk_i_inne_formy_zero.csv', '!ee!'],
+    ['EE SP: pierwszy etap', 'etapy_eduk_szk_podst_pierwszy_etap.csv',
+     '!ee!'],
+    ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!ee!']
+])
 
 sio_report_list = ([
     ['OS: all items', 'os_all_items.csv', '!normal!'],
@@ -509,14 +521,15 @@ def get_ns_data(path):
 
 if args.move:
     print('* Moving new reports to src directory...')
-    for item in sio_report_list:
-        if not os.path.exists(os.path.join(item[2], 'src')):
-            os.makedirs(os.path.join(item[2], 'src'))
-        try:
-            shutil.copyfile(os.path.join(item[2], item[1]),
-                            os.path.join(item[2], 'src', item[1]))
-        except IOError:
-            continue
+    for i in (ee_report_list, sio_report_list):
+        for item in i:
+            if not os.path.exists(os.path.join(item[2], 'src')):
+                os.makedirs(os.path.join(item[2], 'src'))
+            try:
+                shutil.copyfile(os.path.join(item[2], item[1]),
+                                os.path.join(item[2], 'src', item[1]))
+            except IOError:
+                continue
     sys.exit()
 
 if args.compare:
@@ -535,76 +548,63 @@ ns_term_list = zip(
 )
 print('* Loading old SIO data...')
 os_data_list, os_zawody_list = get_os_data(args.oldpath)
-if args.stages:
-    if not os.path.exists(os.path.join('!ee!')):
-        os.makedirs(os.path.join('!ee!'))
-    ee_report_list = ([
-        ['EE SP: ponizej zero', 'etapy_eduk_szk_podst_ponizej_zero.csv',
-         '!ee!'],
-        ['EE SP: zero', 'etapy_eduk_szk_podst_zero.csv', '!ee!'],
-        ['EE P: ponizej zero',
-         'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv', '!ee!'],
-        ['EE P: zero', 'etapy_eduk_przedszk_i_inne_formy_zero.csv', '!ee!'],
-        ['EE SP: pierwszy etap', 'etapy_eduk_szk_podst_pierwszy_etap.csv',
-         '!ee!'],
-        ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!ee!']
-    ])
-    print('* Loading education stages old SIO data...')
-    os_ee_sp_p_list = get_os_ee_data(args.oldpath)
-    print('* Loading education stages new SIO data...')
-    ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
-    ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
-    for item in ee_report_list:
-        print('* Generating %s...' % item[0])
-        with open(os.path.join(item[2], item[1]), 'wb') as f:
-            cfile = csv.writer(f, delimiter=";", quotechar='"',
-                               quoting=csv.QUOTE_NONNUMERIC)
-            if item[1] is 'etapy_eduk_szk_podst_ponizej_zero.csv':
-                cfile.writerow([
-                    'Nauczanie poniżej oddziału "0" w RSPO',
-                    'Liczba dzieci nauczanych poniżej oddziału "0" '
-                    'wykazanych w starym SIO'
-                ] + list(ns_ee_sp_list[0]))
-                for rn in ns_ee_sp_list:
-                    for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
-                            cfile.writerow(['Nie wpisane w RSPO',
-                                            ro[1]] + list(rn))
-            elif (item[1] is
-                    'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv'):
-                cfile.writerow([
-                    'Nauczanie poniżej oddziału "0" w RSPO',
-                    'Liczba dzieci nauczanych poniżej oddziału "0" '
-                    'wykazanych w starym SIO'
-                ] + list(ns_ee_p_list[0]))
-                for rn in ns_ee_p_list:
-                    for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
-                            cfile.writerow(['Nie wpisane w RSPO',
-                                            ro[1]] + list(rn))
-            if item[1] is 'etapy_eduk_szk_podst_zero.csv':
-                cfile.writerow([
-                    'Nauczanie w oddziale "0" w RSPO',
-                    'Liczba dzieci nauczanych w oddziałach "0" '
-                    'wykazanych w starym SIO'
-                ] + list(ns_ee_sp_list[0]))
-                for rn in ns_ee_sp_list:
-                    for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
-                            cfile.writerow(['Nie wpisane w RSPO',
-                                            ro[2]] + list(rn))
-            elif item[1] is 'etapy_eduk_przedszk_i_inne_formy_zero.csv':
-                cfile.writerow([
-                    'Nauczanie w oddziale "0" w RSPO',
-                    'Liczba dzieci nauczanych w oddziałach "0" '
-                    'wykazanych w starym SIO'
-                ] + list(ns_ee_p_list[0]))
-                for rn in ns_ee_p_list:
-                    for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
-                            cfile.writerow(['Nie wpisane w RSPO',
-                                            ro[2]] + list(rn))
-    sys.exit()
+if not os.path.exists(os.path.join('!ee!')):
+    os.makedirs(os.path.join('!ee!'))
+print('* Loading education stages old SIO data...')
+os_ee_sp_p_list = get_os_ee_data(args.oldpath)
+print('* Loading education stages new SIO data...')
+ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
+ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
+for item in ee_report_list:
+    print('* Generating %s...' % item[0])
+    with open(os.path.join(item[2], item[1]), 'wb') as f:
+        cfile = csv.writer(f, delimiter=";", quotechar='"',
+                           quoting=csv.QUOTE_NONNUMERIC)
+        if item[1] is 'etapy_eduk_szk_podst_ponizej_zero.csv':
+            cfile.writerow([
+                'Nauczanie poniżej oddziału "0" w RSPO',
+                'Liczba dzieci nauczanych poniżej oddziału "0" '
+                'wykazanych w starym SIO'
+            ] + list(ns_ee_sp_list[0]))
+            for rn in ns_ee_sp_list:
+                for ro in os_ee_sp_p_list:
+                    if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
+                        cfile.writerow(['Nie wpisane w RSPO',
+                                        ro[1]] + list(rn))
+        elif (item[1] is
+                'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv'):
+            cfile.writerow([
+                'Nauczanie poniżej oddziału "0" w RSPO',
+                'Liczba dzieci nauczanych poniżej oddziału "0" '
+                'wykazanych w starym SIO'
+            ] + list(ns_ee_p_list[0]))
+            for rn in ns_ee_p_list:
+                for ro in os_ee_sp_p_list:
+                    if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
+                        cfile.writerow(['Nie wpisane w RSPO',
+                                        ro[1]] + list(rn))
+        if item[1] is 'etapy_eduk_szk_podst_zero.csv':
+            cfile.writerow([
+                'Nauczanie w oddziale "0" w RSPO',
+                'Liczba dzieci nauczanych w oddziałach "0" '
+                'wykazanych w starym SIO'
+            ] + list(ns_ee_sp_list[0]))
+            for rn in ns_ee_sp_list:
+                for ro in os_ee_sp_p_list:
+                    if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
+                        cfile.writerow(['Nie wpisane w RSPO',
+                                        ro[2]] + list(rn))
+        elif item[1] is 'etapy_eduk_przedszk_i_inne_formy_zero.csv':
+            cfile.writerow([
+                'Nauczanie w oddziale "0" w RSPO',
+                'Liczba dzieci nauczanych w oddziałach "0" '
+                'wykazanych w starym SIO'
+            ] + list(ns_ee_p_list[0]))
+            for rn in ns_ee_p_list:
+                for ro in os_ee_sp_p_list:
+                    if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
+                        cfile.writerow(['Nie wpisane w RSPO',
+                                        ro[2]] + list(rn))
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
 if not os.path.exists(os.path.join('!critical!')):
