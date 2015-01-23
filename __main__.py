@@ -248,25 +248,30 @@ def get_os_ee_data(path):
                         namespaces=XSNS)[0].get('nrRspo'))
                 except:
                     nrRspo = 0
-                try:
-                    l_ucz_pon_zero = tree.xpath(
-                        '//' + typ + '/uczniowieSzkolyPodst/'
-                        'oddzialyPrzedszkolne[@numerIdent="' +
-                        i.get('numerIdent')[:-1] + '1' +
-                        '"]/dzieciWgOddzialow/u3_3/u3_3_1',
-                        namespaces=XSNS)[0].get('kol2')
-                except:
-                    l_ucz_pon_zero = '0'
-                try:
-                    l_ucz_zero = tree.xpath(
-                        '//' + typ + '/uczniowieSzkolyPodst/'
-                        'oddzialyPrzedszkolne[@numerIdent="' +
-                        i.get('numerIdent')[:-1] + '1' +
-                        '"]/dzieciWgOddzialow/u3_3/u3_3_2',
-                        namespaces=XSNS)[0].get('kol2')
-                except:
-                    l_ucz_zero = '0'
-                file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
+                u331s = tree.xpath(
+                    '//' + typ + '/uczniowieSzkolyPodst/'
+                    'oddzialyPrzedszkolne[@numerIdent="' +
+                    i.get('numerIdent')[:-1] + '1' +
+                    '"]/dzieciWgOddzialow/u3_3/u3_3_1',
+                    namespaces=XSNS)
+                u332s = tree.xpath(
+                    '//' + typ + '/uczniowieSzkolyPodst/'
+                    'oddzialyPrzedszkolne[@numerIdent="' +
+                    i.get('numerIdent')[:-1] + '1' +
+                    '"]/dzieciWgOddzialow/u3_3/u3_3_2',
+                    namespaces=XSNS)
+                # if len(u331s) > 1:
+                #     print(nrRspo, len(u331s))
+                for u in u331s:
+                    try:
+                        l_ucz_pon_zero = u.get('kol2')
+                    except:
+                        l_ucz_pon_zero = '0'
+                    try:
+                        l_ucz_zero = u332s[u331s.index(u)].get('kol2')
+                    except:
+                        l_ucz_zero = '0'
+                    file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
         for typ in ('punktPrzedszkolny',
                     'zespolWychowaniaPrzedszkolnego',
                     'przedszkole'):
@@ -278,19 +283,24 @@ def get_os_ee_data(path):
                                  namespaces=XSNS)[0].get('nrRspo'))
                 except:
                     nrRspo = 0
-                try:
-                    l_ucz_pon_zero = ttree.xpath(
-                        '//dzieciWgOddzialow/u3_3/u3_3_1',
-                        namespaces=XSNS)[0].get('kol2')
-                except:
-                    l_ucz_pon_zero = '0'
-                try:
-                    l_ucz_zero = ttree.xpath(
-                        '//dzieciWgOddzialow/u3_3/u3_3_2',
-                        namespaces=XSNS)[0].get('kol2')
-                except:
-                    l_ucz_zero = '0'
-                file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
+                u331p = ttree.xpath(
+                    '//dzieciWgOddzialow/u3_3/u3_3_1',
+                    namespaces=XSNS)
+                u332p = ttree.xpath(
+                    '//dzieciWgOddzialow/u3_3/u3_3_2',
+                    namespaces=XSNS)
+                # if len(u331p) > 1:
+                #     print(nrRspo, len(u331p))
+                for u in u331p:
+                    try:
+                        l_ucz_pon_zero = u.get('kol2')
+                    except:
+                        l_ucz_pon_zero = '0'
+                    try:
+                        l_ucz_zero = u332p[u331p.index(u)].get('kol2')
+                    except:
+                        l_ucz_zero = '0'
+                    file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
         return file_rows
     data = []
     for root, dirs, files in os.walk(path):
@@ -529,12 +539,15 @@ if args.stages:
     if not os.path.exists(os.path.join('!ee!')):
         os.makedirs(os.path.join('!ee!'))
     ee_report_list = ([
-        ['EE SP: ponizej zero', 'ee_sp_ponizej_zero.csv', '!ee!'],
-        ['EE SP: zero', 'ee_sp_zero.csv', '!ee!'],
-        ['EE P: ponizej zero', 'ee_p_ponizej_zero.csv', '!ee!'],
-        ['EE P: zero', 'ee_p_zero.csv', '!ee!'],
-        ['EE SP: pierwszy etap', 'ee_sp_pierwszy_etap.csv', '!ee!'],
-        ['EE SP: drugi etap', 'ee_sp_drugi_etap.csv', '!ee!']
+        ['EE SP: ponizej zero', 'etapy_eduk_szk_podst_ponizej_zero.csv',
+         '!ee!'],
+        ['EE SP: zero', 'etapy_eduk_szk_podst_zero.csv', '!ee!'],
+        ['EE P: ponizej zero',
+         'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv', '!ee!'],
+        ['EE P: zero', 'etapy_eduk_przedszk_i_inne_formy_zero.csv', '!ee!'],
+        ['EE SP: pierwszy etap', 'etapy_eduk_szk_podst_pierwszy_etap.csv',
+         '!ee!'],
+        ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!ee!']
     ])
     print('* Loading education stages old SIO data...')
     os_ee_sp_p_list = get_os_ee_data(args.oldpath)
@@ -546,18 +559,51 @@ if args.stages:
         with open(os.path.join(item[2], item[1]), 'wb') as f:
             cfile = csv.writer(f, delimiter=";", quotechar='"',
                                quoting=csv.QUOTE_NONNUMERIC)
-            if item[1] is 'ee_sp_ponizej_zero.csv':
+            if item[1] is 'etapy_eduk_szk_podst_ponizej_zero.csv':
+                cfile.writerow([
+                    'Nauczanie poniżej oddziału "0" w RSPO',
+                    'Liczba dzieci nauczanych poniżej oddziału "0" '
+                    'wykazanych w starym SIO'
+                ] + list(ns_ee_sp_list[0]))
                 for rn in ns_ee_sp_list:
                     for ro in os_ee_sp_p_list:
                         if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
-                            cfile.writerow([rn[10], ro[1]] + list(rn))
-            elif item[1] is 'ee_p_ponizej_zero.csv':
+                            cfile.writerow(['Nie wpisane w RSPO',
+                                            ro[1]] + list(rn))
+            elif (item[1] is
+                    'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv'):
+                cfile.writerow([
+                    'Nauczanie poniżej oddziału "0" w RSPO',
+                    'Liczba dzieci nauczanych poniżej oddziału "0" '
+                    'wykazanych w starym SIO'
+                ] + list(ns_ee_p_list[0]))
                 for rn in ns_ee_p_list:
                     for ro in os_ee_sp_p_list:
-                        # if(rn[0] == ro[0]):
-                        #     print(rn[0], ro[0], rn[10], ro[1])
                         if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
-                            cfile.writerow([rn[10], ro[1]] + list(rn))
+                            cfile.writerow(['Nie wpisane w RSPO',
+                                            ro[1]] + list(rn))
+            if item[1] is 'etapy_eduk_szk_podst_zero.csv':
+                cfile.writerow([
+                    'Nauczanie w oddziale "0" w RSPO',
+                    'Liczba dzieci nauczanych w oddziałach "0" '
+                    'wykazanych w starym SIO'
+                ] + list(ns_ee_sp_list[0]))
+                for rn in ns_ee_sp_list:
+                    for ro in os_ee_sp_p_list:
+                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != '0':
+                            cfile.writerow(['Nie wpisane w RSPO',
+                                            ro[2]] + list(rn))
+            elif item[1] is 'etapy_eduk_przedszk_i_inne_formy_zero.csv':
+                cfile.writerow([
+                    'Nauczanie w oddziale "0" w RSPO',
+                    'Liczba dzieci nauczanych w oddziałach "0" '
+                    'wykazanych w starym SIO'
+                ] + list(ns_ee_p_list[0]))
+                for rn in ns_ee_p_list:
+                    for ro in os_ee_sp_p_list:
+                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != '0':
+                            cfile.writerow(['Nie wpisane w RSPO',
+                                            ro[2]] + list(rn))
     sys.exit()
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
