@@ -264,13 +264,13 @@ def get_os_ee_data(path):
                 #     print(nrRspo, len(u331s))
                 for u in u331s:
                     try:
-                        l_ucz_pon_zero = u.get('kol2')
+                        l_ucz_pon_zero = int(u.get('kol2'))
                     except:
-                        l_ucz_pon_zero = '0'
+                        l_ucz_pon_zero = 0
                     try:
-                        l_ucz_zero = u332s[u331s.index(u)].get('kol2')
+                        l_ucz_zero = int(u332s[u331s.index(u)].get('kol2'))
                     except:
-                        l_ucz_zero = '0'
+                        l_ucz_zero = 0
                     file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
         for typ in ('punktPrzedszkolny',
                     'zespolWychowaniaPrzedszkolnego',
@@ -293,13 +293,13 @@ def get_os_ee_data(path):
                 #     print(nrRspo, len(u331p))
                 for u in u331p:
                     try:
-                        l_ucz_pon_zero = u.get('kol2')
+                        l_ucz_pon_zero = int(u.get('kol2'))
                     except:
-                        l_ucz_pon_zero = '0'
+                        l_ucz_pon_zero = 0
                     try:
-                        l_ucz_zero = u332p[u331p.index(u)].get('kol2')
+                        l_ucz_zero = int(u332p[u331p.index(u)].get('kol2'))
                     except:
-                        l_ucz_zero = '0'
+                        l_ucz_zero = 0
                     file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
         return file_rows
     data = []
@@ -567,7 +567,7 @@ if args.stages:
                 ] + list(ns_ee_sp_list[0]))
                 for rn in ns_ee_sp_list:
                     for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
+                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
                             cfile.writerow(['Nie wpisane w RSPO',
                                             ro[1]] + list(rn))
             elif (item[1] is
@@ -579,7 +579,7 @@ if args.stages:
                 ] + list(ns_ee_p_list[0]))
                 for rn in ns_ee_p_list:
                     for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
+                        if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
                             cfile.writerow(['Nie wpisane w RSPO',
                                             ro[1]] + list(rn))
             if item[1] is 'etapy_eduk_szk_podst_zero.csv':
@@ -590,7 +590,7 @@ if args.stages:
                 ] + list(ns_ee_sp_list[0]))
                 for rn in ns_ee_sp_list:
                     for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != '0':
+                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
                             cfile.writerow(['Nie wpisane w RSPO',
                                             ro[2]] + list(rn))
             elif item[1] is 'etapy_eduk_przedszk_i_inne_formy_zero.csv':
@@ -601,7 +601,7 @@ if args.stages:
                 ] + list(ns_ee_p_list[0]))
                 for rn in ns_ee_p_list:
                     for ro in os_ee_sp_p_list:
-                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != '0':
+                        if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
                             cfile.writerow(['Nie wpisane w RSPO',
                                             ro[2]] + list(rn))
     sys.exit()
