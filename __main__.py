@@ -234,16 +234,10 @@ def os_row(i, a):
     return lista
 
 
-def get_os_ee_data(path, etap):
-    if etap == 'pon_zero':
-        u3 = 'u3_3_1'
-    elif etap == 'zero':
-        u3 = 'u3_3_2'
-
-    def get_os_ee_row(tree, u3):
+def get_os_ee_data(path):
+    def get_os_ee_row(tree):
         file_rows = []
-        for typ in ('szkolaPodst', 'filiaSzkolyPodst', 'punktPrzedszkolny',
-                    'zespolWychowaniaPrzedszkolnego', 'przedszkole'):
+        for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
             ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
             for i in ids:
                 try:
@@ -255,15 +249,48 @@ def get_os_ee_data(path, etap):
                 except:
                     nrRspo = 0
                 try:
-                    l_ucz = tree.xpath(
+                    l_ucz_pon_zero = tree.xpath(
                         '//' + typ + '/uczniowieSzkolyPodst/'
                         'oddzialyPrzedszkolne[@numerIdent="' +
                         i.get('numerIdent')[:-1] + '1' +
-                        '"]/dzieciWgOddzialow/u3_3/' + u3,
+                        '"]/dzieciWgOddzialow/u3_3/u3_3_1',
                         namespaces=XSNS)[0].get('kol2')
                 except:
-                    l_ucz = '0'
-                file_rows.append([nrRspo, l_ucz])
+                    l_ucz_pon_zero = '0'
+                try:
+                    l_ucz_zero = tree.xpath(
+                        '//' + typ + '/uczniowieSzkolyPodst/'
+                        'oddzialyPrzedszkolne[@numerIdent="' +
+                        i.get('numerIdent')[:-1] + '1' +
+                        '"]/dzieciWgOddzialow/u3_3/u3_3_2',
+                        namespaces=XSNS)[0].get('kol2')
+                except:
+                    l_ucz_zero = '0'
+                file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
+        for typ in ('punktPrzedszkolny',
+                    'zespolWychowaniaPrzedszkolnego',
+                    'przedszkole'):
+            typels = tree.xpath('//' + typ, namespaces=XSNS)
+            for t in typels:
+                ttree = etree.ElementTree(t)
+                try:
+                    nrRspo = int(ttree.xpath('//identyfikacja/i2c',
+                                 namespaces=XSNS)[0].get('nrRspo'))
+                except:
+                    nrRspo = 0
+                try:
+                    l_ucz_pon_zero = ttree.xpath(
+                        '//dzieciWgOddzialow/u3_3/u3_3_1',
+                        namespaces=XSNS)[0].get('kol2')
+                except:
+                    l_ucz_pon_zero = '0'
+                try:
+                    l_ucz_zero = ttree.xpath(
+                        '//dzieciWgOddzialow/u3_3/u3_3_2',
+                        namespaces=XSNS)[0].get('kol2')
+                except:
+                    l_ucz_zero = '0'
+                file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero])
         return file_rows
     data = []
     for root, dirs, files in os.walk(path):
@@ -271,7 +298,7 @@ def get_os_ee_data(path, etap):
             if single_file.endswith('.xml'):
                 single_file_path = os.path.join(root, single_file)
                 single_file_tree = etree.parse(single_file_path)
-                data = data + get_os_ee_row(single_file_tree, u3)
+                data = data + get_os_ee_row(single_file_tree)
     return(data)
 
 
@@ -510,30 +537,27 @@ if args.stages:
         ['EE SP: drugi etap', 'ee_sp_drugi_etap.csv', '!ee!']
     ])
     print('* Loading education stages old SIO data...')
-    os_ee_sp_p_zero_list = get_os_ee_data(args.oldpath, 'zero')
-    os_ee_sp_p_ponzero_list = get_os_ee_data(args.oldpath, 'pon_zero')
-    # os_ee_p_zero_list = get_os_ee_data(args.oldpath, 'zero', 'p')
-    # os_ee_p_ponzero_list = get_os_ee_data(args.oldpath, 'pon_zero', 'p')
+    os_ee_sp_p_list = get_os_ee_data(args.oldpath)
     print('* Loading education stages new SIO data...')
-    ns_ees_data_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
-    ns_eep_data_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
+    ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
+    ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
     for item in ee_report_list:
         print('* Generating %s...' % item[0])
         with open(os.path.join(item[2], item[1]), 'wb') as f:
             cfile = csv.writer(f, delimiter=";", quotechar='"',
                                quoting=csv.QUOTE_NONNUMERIC)
             if item[1] is 'ee_sp_ponizej_zero.csv':
-                for rn in ns_ees_data_list:
-                    for ro in os_ee_sp_p_ponzero_list:
+                for rn in ns_ee_sp_list:
+                    for ro in os_ee_sp_p_list:
                         if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
-                            cfile.writerow(rn)
+                            cfile.writerow([rn[10], ro[1]] + list(rn))
             elif item[1] is 'ee_p_ponizej_zero.csv':
-                for rn in ns_eep_data_list:
-                    for ro in os_ee_sp_p_ponzero_list:
-                        if(rn[0] == ro[0]):
-                            print(rn[0], ro[0], rn[10], ro[1])
+                for rn in ns_ee_p_list:
+                    for ro in os_ee_sp_p_list:
+                        # if(rn[0] == ro[0]):
+                        #     print(rn[0], ro[0], rn[10], ro[1])
                         if rn[0] == ro[0] and rn[10] == '.' and ro[1] != '0':
-                            cfile.writerow(rn)
+                            cfile.writerow([rn[10], ro[1]] + list(rn))
     sys.exit()
 if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
