@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# This file is part of sioQtool, licensed under GNU Affero GPLv3 or later.
+# Copyright © Robert Błaut. See NOTICE for more information.
+#
 read -p "Username: " UNAME
 read -s -p "Password: " PASSWD
 wget --delete-after --keep-session-cookies --save-cookies=my_cookies.txt --post-data="nazwaUzytkownika=$UNAME&hasloUzytkownika=$PASSWD&param=Start_login" https://sio.men.gov.pl/dodatki/strefa/index.php
