@@ -109,9 +109,10 @@ sio_report_list = ([
     ['OS: different jobs',
         'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv',
         '!critical!'],
-    ['NS: different jobs',
-        'osn_nieznalezione_w_starym_sio_zawody_wykazane_w_nowym_sio.csv',
-        '!critical!'],
+    # disabled - not possible to check due differences between NSIO and OSIO
+    # ['NS: different jobs',
+    #     'osn_nieznalezione_w_starym_sio_zawody_wykazane_w_nowym_sio.csv',
+    #     '!critical!'],
     ['NS: incorrect szkolaObwodowa',
         'osn_niezgodne_dane_o_obowodowosci.csv',
         '!critical!'],
