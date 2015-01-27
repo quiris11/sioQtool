@@ -71,8 +71,8 @@ for i in report_list:
         print('Error! Incorrect file: %s/NSIO/new_%s' % (home, i[1]))
         os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
         continue
-    # print('old: ' + title_old)
-    # print('new: ' + title_new)
+    print('Local file title: ' + title_old)
+    print('Remote file title: ' + title_new)
     if title_old == title_new:
         print('Remote file: %s/NSIO/new_%s NOT upadated...' % (home, i[1]))
         os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
