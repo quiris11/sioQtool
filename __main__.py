@@ -71,11 +71,11 @@ def compare_csvs(sio_report_list):
 
 ee_report_list = ([
     ['EE SP: ponizej zero', 'etapy_eduk_szk_podst_ponizej_zero.csv',
-     '!ee!'],
-    ['EE SP: zero', 'etapy_eduk_szk_podst_zero.csv', '!ee!'],
+     '!critical!'],
+    ['EE SP: zero', 'etapy_eduk_szk_podst_zero.csv', '!critical!'],
     ['EE P: ponizej zero',
-     'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv', '!ee!'],
-    ['EE P: zero', 'etapy_eduk_przedszk_i_inne_formy_zero.csv', '!ee!'],
+     'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv', '!critical!'],
+    ['EE P: zero', 'etapy_eduk_przedszk_i_inne_formy_zero.csv', '!critical!'],
     ['EE SP: pierwszy etap', 'etapy_eduk_szk_podst_pierwszy_etap.csv',
      '!ee!'],
     ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!ee!']
