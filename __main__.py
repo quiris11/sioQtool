@@ -96,11 +96,12 @@ sio_report_list = ([
         'osn_niepoprawne_pole_kategoria_uczniow.csv', '!critical!'],
     ['NS: all items', 'ns_all_items.csv', '!normal!'],
     ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
-    ['NS: Missing REGONs in old SIO existing in a new SIO with birthdate '
+    ['NS: Missing REGONs in old SIO existing in a new SIO\n  with birthdate '
         'earlier than %s' % BORDER_DATE,
      'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
-    ['NS: Missing REGONs in new SIO existing in a old SIO',
-     'ns_brakujace_w_nowym_sio_numery_regon_ze_starego_sio.csv', '!critical!'],
+    ['OS: Terminated items existing in old SIO (REGON checked)'
+        '\n  with termination date older than %s' % BORDER_DATEZ,
+     'os_nieistniejace_szkoly_wykazane_w_starym_sio.csv', '!critical!'],
     ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
     ['OS: incorrect specyfika', 'osn_niepoprawne_pole_specyfika.csv',
         '!critical!'],
@@ -848,7 +849,7 @@ for item in sio_report_list:
                         and roz_date < BORDER_DATE) or row[0] == 'Nr RSPO':
                     cfile.writerow(row)
         elif (item[1] is
-                'ns_brakujace_w_nowym_sio_numery_regon_ze_starego_sio.csv'):
+                'os_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
             ns_regons = []
             for row in ns_data_list:
                 if len(row[1]) == 9:
