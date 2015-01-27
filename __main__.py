@@ -42,7 +42,7 @@ parser.add_argument('-t', "--ns-mail-tough-check",
 parser.add_argument("--move",
                     help="move reports to 'src' directory",
                     action="store_true")
-parser.add_argument("--compare",
+parser.add_argument("-c", "--compare",
                     help="compare new reports with old reports",
                     action="store_true")
 args = parser.parse_args()
