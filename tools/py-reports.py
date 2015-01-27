@@ -5,7 +5,6 @@
 # Copyright © Robert Błaut. See NOTICE for more information.
 #
 from __future__ import print_function
-import argparse
 import os
 import shutil
 import getpass
@@ -14,18 +13,10 @@ from lxml import etree
 import subprocess
 
 home = expanduser("~")
+
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'x': 'urn:schemas-microsoft-com:office:excel',
          'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--move",
-                    help="move reports to 'src' directory",
-                    action="store_true")
-parser.add_argument("--compare",
-                    help="compare new reports with old reports",
-                    action="store_true")
-args = parser.parse_args()
 
 report_list = [
     ['6', 'rspo_aktywne.xls'],
@@ -35,6 +26,7 @@ report_list = [
     ['63', 'obwody.xls'],
     ['64', 'zawody.xls']
 ]
+
 fnull = open(os.devnull, 'w')
 uname = raw_input("Username: ")
 passwd = getpass.getpass()
