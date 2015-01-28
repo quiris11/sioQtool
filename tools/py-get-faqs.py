@@ -26,6 +26,8 @@ args = parser.parse_args()
 doc_dir = os.path.join(os.path.expanduser('~'), 'cie_faqs')
 dir_list = os.listdir(doc_dir)
 
+if not os.path.exists(os.path.join(os.path.expanduser('~'), 'cie_faqs')):
+    os.makedirs(os.path.join(os.path.expanduser('~'), 'cie_faqs'))
 if not os.path.exists(os.path.join(doc_dir, 'src')):
     os.makedirs(os.path.join(doc_dir, 'src'))
 
@@ -125,7 +127,7 @@ for faq in faq_list:
     bs = bs.replace('\n', '<br />\n')
     bs = bs.replace('><br />', '>')
     with open(os.path.join(doc_dir, faq[1] + '.html'), 'w') as f:
-        print('* Writing: %s...' % (faq[1] + '.html'))
+        print('* Writing to: %s...' % os.path.join(doc_dir, faq[1] + '.html'))
         f.write(
             '<p><strong>UWAGA! Niżej opublikowane pytania i odpowiedzi '
             'zostały skopiowane z oryginalnego źródła: '
