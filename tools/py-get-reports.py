@@ -38,7 +38,7 @@ data = urllib.urlencode({
     'param': 'Start_login'
 })
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
-response = opener.open(url, data)
+opener.open(url, data)
 
 for i in report_list:
     try:
