@@ -14,7 +14,6 @@ import urllib
 import urllib2
 from cookielib import CookieJar
 
-
 home = expanduser("~")
 
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
