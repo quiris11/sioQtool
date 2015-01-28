@@ -12,7 +12,6 @@ from os.path import expanduser
 from lxml import etree
 import urllib
 import urllib2
-from cookielib import CookieJar
 
 home = expanduser("~")
 
@@ -38,8 +37,7 @@ data = urllib.urlencode({
     'hasloUzytkownika': passwd,
     'param': 'Start_login'
 })
-cj = CookieJar()
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
 response = opener.open(url, data)
 
 for i in report_list:
