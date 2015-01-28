@@ -11,6 +11,11 @@ import getpass
 from os.path import expanduser
 from lxml import etree
 import subprocess
+import urllib
+import urllib2
+import sys
+import re
+
 
 home = expanduser("~")
 
@@ -30,6 +35,21 @@ report_list = [
 fnull = open(os.devnull, 'w')
 uname = raw_input("Username: ")
 passwd = getpass.getpass()
+
+url = 'https://sio.men.gov.pl/dodatki/strefa/index.php'
+data = urllib.urlencode({
+    'nazwaUzytkownika': uname,
+    'hasloUzytkownika': passwd,
+    'param': 'Start_login'
+})
+req = urllib2.Request(url, data)
+response = urllib2.urlopen(req)
+cookie = response.info()['Set-Cookie']
+
+if cookie:
+    print(cookie)
+
+# sys.exit()
 subprocess.check_call([
     'wget',
     '--delete-after',
@@ -48,6 +68,16 @@ for i in report_list:
     except:
         print('Error! Incorrect file: %s/NSIO/%s' % (home, i[1]))
         continue
+    url = 'https://sio.men.gov.pl/dodatki/strefa/index.php?param=Support_download_' + i[0]
+    print(url)
+    req = urllib2.Request(url)
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.14) Gecko/20080404 Firefox/2.0.0.14')
+    req.add_header('Cookie', cookie)
+    print(req)
+    response = urllib2.urlopen(req)
+    print(response.read())
+    sys.exit()
+
     subprocess.check_call([
         'wget',
         '--load-cookies=my_cookies.txt',
