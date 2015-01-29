@@ -67,7 +67,7 @@ for i in report_list:
     print('Local file title: ' + title_old)
     print('Remote file title: ' + title_new)
     if title_old == title_new:
-        print('NOT updated. Existing report downloaded...' % (home, i[1]))
+        print('NOT updated. Existing report downloaded...')
         os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
     else:
         print('Remote file: %s/NSIO/new_%s upadated. '
