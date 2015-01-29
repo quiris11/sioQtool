@@ -51,7 +51,6 @@ def get_reports():
             'https://sio.men.gov.pl/dodatki/strefa/index.php?'
             'param=Support_download_' + i[0]
         )
-        print(url)
         page = opener.open(url)
         with open(os.path.join(home, 'NSIO', 'new_' + i[1]), 'w') as f:
             f.write(page.read())
@@ -63,14 +62,14 @@ def get_reports():
             print('Error! Incorrect file: %s/NSIO/new_%s' % (home, i[1]))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
             continue
-        print('Local file title: ' + title_old)
+        print('Local file title:  ' + title_old)
         print('Remote file title: ' + title_new)
         if title_old == title_new:
-            print('NOT updated. Existing report downloaded...')
+            print('* NOT updated. Same report already downloaded...')
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
         else:
-            print('Remote file: %s/NSIO/new_%s upadated. '
-                  'Replacing the old one...' % (home, i[1]))
+            print('* Remote file: %s/NSIO/new_%s upadated. '
+                  '* Replacing the old one...' % (home, i[1]))
             shutil.copyfile(os.path.join('%s/NSIO/new_%s' % (home, i[1])),
                             os.path.join('%s/NSIO/%s' % (home, i[1])))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
