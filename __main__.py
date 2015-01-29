@@ -19,6 +19,7 @@ from dictionaries import specyfika_dict
 from dictionaries import zawod_dict
 from dictionaries import typ_organu_prow_dict
 from tools.getreports import get_reports
+from tools.getfaqs import get_faqs
 import argparse
 import os
 import csv
@@ -46,13 +47,16 @@ parser.add_argument('-t', '--ns-mail-tough-check',
                     help='NSIO: e-mails tough checking',
                     action="store_true")
 parser.add_argument("--move",
-                    help="move reports to 'src' directory",
+                    help="move reports/FAQs to 'src' directory",
                     action="store_true")
 parser.add_argument("-c", "--compare",
-                    help="compare new reports with old reports",
+                    help="compare new reports/FAQs with old reports/FAQs",
                     action="store_true")
 parser.add_argument('--get-reports',
                     help="get new NSIO reports from SIO portal",
+                    action="store_true")
+parser.add_argument('--get-faqs',
+                    help="get FAQs from SIO portal",
                     action="store_true")
 args = parser.parse_args()
 
@@ -529,6 +533,10 @@ def get_ns_data(path):
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska)
     return data
+
+if args.get_faqs:
+    get_faqs(args.move, args.compare)
+    sys.exit()
 
 if args.get_reports:
     get_reports()
