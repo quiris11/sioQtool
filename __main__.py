@@ -18,6 +18,7 @@ from dictionaries import type_dict
 from dictionaries import specyfika_dict
 from dictionaries import zawod_dict
 from dictionaries import typ_organu_prow_dict
+from tools.getreports import get_reports
 import argparse
 import os
 import csv
@@ -25,6 +26,7 @@ import difflib
 import shutil
 import sys
 
+home = os.path.expanduser("~")
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'x': 'urn:schemas-microsoft-com:office:excel',
@@ -34,16 +36,23 @@ BORDER_DATE = datetime.strptime('2014-09-30', '%Y-%m-%d')
 BORDER_DATEZ = datetime.strptime('2013-08-31', '%Y-%m-%d')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("oldpath", help="path to DIR with old SIO XML files")
-parser.add_argument('newpath', help='path to DIR with new SIO XLS files')
-parser.add_argument('-t', "--ns-mail-tough-check",
-                    help="NSIO: e-mails tough checking",
+parser.add_argument('oldpath', nargs='?', default=os.path.join(home, 'OSIO'),
+                    help='path to DIR with old SIO XML files '
+                         '(default: ~/OSIO)')
+parser.add_argument('newpath', nargs='?', default=os.path.join(home, 'NSIO'),
+                    help='path to DIR with new SIO XLS files '
+                         '(default: ~/NSIO)')
+parser.add_argument('-t', '--ns-mail-tough-check',
+                    help='NSIO: e-mails tough checking',
                     action="store_true")
 parser.add_argument("--move",
                     help="move reports to 'src' directory",
                     action="store_true")
 parser.add_argument("-c", "--compare",
                     help="compare new reports with old reports",
+                    action="store_true")
+parser.add_argument('--get-reports',
+                    help="get new NSIO reports from SIO portal",
                     action="store_true")
 args = parser.parse_args()
 
@@ -520,6 +529,10 @@ def get_ns_data(path):
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska)
     return data
+
+if args.get_reports:
+    get_reports()
+    sys.exit()
 
 if args.move:
     print('* Moving new reports to src directory...')

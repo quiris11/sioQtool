@@ -11,14 +11,13 @@ def get_reports():
     import os
     import shutil
     from lxml import etree
-    from os.path import expanduser
     import urllib
     import urllib2
 
     XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
              'x': 'urn:schemas-microsoft-com:office:excel',
              'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
-    home = expanduser("~")
+    home = os.path.expanduser("~")
     report_list = [
         ['6', 'rspo_aktywne.xls'],
         ['65', 'rspo_nieaktywne.xls'],
