@@ -20,6 +20,7 @@ from dictionaries import zawod_dict
 from dictionaries import typ_organu_prow_dict
 from tools.getreports import get_reports
 from tools.getfaqs import get_faqs
+from tools.transform import transform
 import argparse
 import os
 import csv
@@ -43,6 +44,10 @@ parser.add_argument('oldpath', nargs='?', default=os.path.join(home, 'OSIO'),
 parser.add_argument('newpath', nargs='?', default=os.path.join(home, 'NSIO'),
                     help='path to DIR with new SIO XLS files '
                          '(default: ~/NSIO)')
+parser.add_argument('-e', '--exp',
+                    help='OSIO: unpack EXP files in oldpath '
+                         '(required: Dkod tool)',
+                    action="store_true")
 parser.add_argument('-t', '--ns-mail-tough-check',
                     help='NSIO: e-mails tough checking',
                     action="store_true")
@@ -223,7 +228,10 @@ def duplicated_list(mylist):
 def xs(s):
     if s is None:
         return ''
-    return unicode(s).encode('utf8')
+    # s = s.strip
+    # if s.endswith(' '):
+    #     s = s[:-1]
+    return unicode(s.strip()).encode('utf8')
 
 
 def xi(s):
@@ -534,6 +542,15 @@ def get_ns_data(path):
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska)
     return data
 
+if args.oldpath.endswith('.krt'):
+    transform(args.oldpath, '.krt')
+    oldpath = 'OSIO'
+elif args.exp:
+    transform(args.oldpath, '.exp')
+    oldpath = 'OSIO'
+else:
+    oldpath = args.oldpath
+
 if args.get_faqs:
     get_faqs(args.move, args.compare)
     sys.exit()
@@ -560,9 +577,17 @@ if args.compare:
     print('* Comparing new reports with old reports...')
     compare_csvs(sio_report_list)
     sys.exit()
-ns_zawody_list = get_ns_zawody(args.newpath)
+
+if not os.path.exists(os.path.join('!normal!')):
+    os.makedirs(os.path.join('!normal!'))
+if not os.path.exists(os.path.join('!critical!')):
+    os.makedirs(os.path.join('!critical!'))
+if not os.path.exists(os.path.join('!ee!')):
+    os.makedirs(os.path.join('!ee!'))
+
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
+ns_zawody_list = get_ns_zawody(args.newpath)
 term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
 ns_term_list = zip(
     get_terminated_id(term_tree, '10'),  # REGON
@@ -570,11 +595,9 @@ ns_term_list = zip(
     get_terminated_id(term_tree, '1')    # Nr RSPO
 )
 print('* Loading old SIO data...')
-os_data_list, os_zawody_list = get_os_data(args.oldpath)
-if not os.path.exists(os.path.join('!ee!')):
-    os.makedirs(os.path.join('!ee!'))
+os_data_list, os_zawody_list = get_os_data(oldpath)
 print('* Loading education stages old SIO data...')
-os_ee_sp_p_list = get_os_ee_data(args.oldpath)
+os_ee_sp_p_list = get_os_ee_data(oldpath)
 print('* Loading education stages new SIO data...')
 ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
 ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
@@ -628,10 +651,6 @@ for item in ee_report_list:
                     if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
                         cfile.writerow(['Niewpisane w RSPO',
                                         ro[2]] + list(rn))
-if not os.path.exists(os.path.join('!normal!')):
-    os.makedirs(os.path.join('!normal!'))
-if not os.path.exists(os.path.join('!critical!')):
-    os.makedirs(os.path.join('!critical!'))
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
     with open(os.path.join(item[2], item[1]), 'wb') as f:
