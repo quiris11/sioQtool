@@ -92,6 +92,14 @@ def get_faqs(move, compare):
     for faq in faq_list:
         bs = get_faq(faq[0])
         bs = '\n'.join(bs.split('\r\n')[:-10])
+        bs = bs.replace(
+            '/www1',
+            '/sio'
+        )
+        bs = bs.replace(
+            '/SIO/',
+            '/_SIO/'
+        )
         bs = re.sub(
             r'<div class="question">(.+)</div>',
             r'<p><b>\1</b></p>',
@@ -102,6 +110,16 @@ def get_faqs(move, compare):
             r'<p>\1</p>',
             bs,
             flags=re.DOTALL
+        )
+        bs = re.sub(
+            r'(https?://[^\s<>)"]+)',
+            r'<a href="\1">\1</a>',
+            bs
+        )
+        bs = re.sub(
+            r'(www\.[^\s<>")]+)',
+            r'<a href="http://\1">\1</a>',
+            bs
         )
         bs = bs.replace('<div class="kit kit_bg1">',
                         '<div style="background:#eee; border:0px solid #ccc; '
