@@ -92,14 +92,6 @@ def get_faqs(move, compare):
     for faq in faq_list:
         bs = get_faq(faq[0])
         bs = '\n'.join(bs.split('\r\n')[:-10])
-        bs = bs.replace(
-            '/www1',
-            '/sio'
-        )
-        bs = bs.replace(
-            '/SIO/',
-            '/_SIO/'
-        )
         bs = re.sub(
             r'<div class="question">(.+)</div>',
             r'<p><b>\1</b></p>',
