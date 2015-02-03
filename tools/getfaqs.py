@@ -93,9 +93,10 @@ def get_faqs(move, compare):
         bs = get_faq(faq[0])
         bs = '\n'.join(bs.split('\r\n')[:-10])
         bs = re.sub(
-            r'<div class="question">(.+)</div>',
+            r'<div class="question">(.+?)</div>',
             r'<p><b>\1</b></p>',
-            bs
+            bs,
+            flags=re.DOTALL
         )
         bs = re.sub(
             r'<div class="answer">(.+?)</div>',
