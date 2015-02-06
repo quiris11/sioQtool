@@ -713,7 +713,7 @@ for item in ee_report_list:
                 for ro in os_ee_sp_12_list:
                     l_1etap = ro[1] + ro[2] + ro[3]
                     if rn[0] == ro[0] and rn[12] == '.' and l_1etap != 0:
-                        cfile.writerow(['Niewpisane w RSPO',
+                        cfile.writerow(['Niewpisany w RSPO',
                                         l_1etap] + list(rn))
         elif item[1] is 'etapy_eduk_szk_podst_drugi_etap.csv':
             cfile.writerow([
@@ -725,7 +725,7 @@ for item in ee_report_list:
                 for ro in os_ee_sp_12_list:
                     l_2etap = ro[4] + ro[5] + ro[6]
                     if rn[0] == ro[0] and rn[13] == '.' and l_2etap != 0:
-                        cfile.writerow(['Niewpisane w RSPO',
+                        cfile.writerow(['Niewpisany w RSPO',
                                         l_2etap] + list(rn))
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
