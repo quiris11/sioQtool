@@ -95,8 +95,8 @@ ee_report_list = ([
      'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv', '!critical!'],
     ['EE P: zero', 'etapy_eduk_przedszk_i_inne_formy_zero.csv', '!critical!'],
     ['EE SP: pierwszy etap', 'etapy_eduk_szk_podst_pierwszy_etap.csv',
-     '!ee!'],
-    ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!ee!']
+     '!critical!'],
+    ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!critical!']
 ])
 
 sio_report_list = ([
@@ -269,6 +269,59 @@ def os_row(i, a):
     return lista
 
 
+def get_os_ee_12_data(path):
+    def get_l_ucz(wiersz):
+        try:
+            l = int(wiersz.get('kol2'))
+        except:
+            l = 0
+        return l
+
+    def get_os_ee_row(tree):
+        file_rows = []
+        for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
+            ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
+            for i in ids:
+                l1 = l2 = l3 = l4 = l5 = l6 = 0
+                try:
+                    nrRspo = int(tree.xpath(
+                        '//' + typ + '/identyfikacja[@numerIdent="' +
+                        i.get('numerIdent') +
+                        '"]/i2c',
+                        namespaces=XSNS)[0].get('nrRspo'))
+                except:
+                    nrRspo = 0
+                u31s = tree.xpath(
+                    '//' + typ + '/uczniowieSzkolyPodst/'
+                    'oddzialy[@numerIdent="' +
+                    i.get('numerIdent') +
+                    '"]//wierszU3_1',
+                    namespaces=XSNS)
+                for u in u31s:
+                    if u.get('kol0') == '4':
+                        l1 += get_l_ucz(u)
+                    elif u.get('kol0') == '5':
+                        l2 += get_l_ucz(u)
+                    elif u.get('kol0') == '6':
+                        l3 += get_l_ucz(u)
+                    elif u.get('kol0') == '7':
+                        l4 += get_l_ucz(u)
+                    elif u.get('kol0') == '8':
+                        l5 += get_l_ucz(u)
+                    elif u.get('kol0') == '9':
+                        l6 += get_l_ucz(u)
+                file_rows.append([nrRspo, l1, l2, l3, l4, l5, l6])
+        return file_rows
+    data = []
+    for root, dirs, files in os.walk(path):
+        for single_file in files:
+            if single_file.endswith('.xml'):
+                single_file_path = os.path.join(root, single_file)
+                single_file_tree = etree.parse(single_file_path)
+                data = data + get_os_ee_row(single_file_tree)
+    return(data)
+
+
 def get_os_ee_data(path):
     def get_os_ee_row(tree):
         file_rows = []
@@ -295,8 +348,6 @@ def get_os_ee_data(path):
                     i.get('numerIdent')[:-1] + '1' +
                     '"]/dzieciWgOddzialow/u3_3/u3_3_2',
                     namespaces=XSNS)
-                # if len(u331s) > 1:
-                #     print(nrRspo, len(u331s))
                 for u in u331s:
                     try:
                         l_ucz_pon_zero = int(u.get('kol2'))
@@ -598,6 +649,7 @@ print('* Loading old SIO data...')
 os_data_list, os_zawody_list = get_os_data(oldpath)
 print('* Loading education stages old SIO data...')
 os_ee_sp_p_list = get_os_ee_data(oldpath)
+os_ee_sp_12_list = get_os_ee_12_data(oldpath)
 print('* Loading education stages new SIO data...')
 ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
 ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
@@ -651,6 +703,30 @@ for item in ee_report_list:
                     if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
                         cfile.writerow(['Niewpisane w RSPO',
                                         ro[2]] + list(rn))
+        elif item[1] is 'etapy_eduk_szk_podst_pierwszy_etap.csv':
+            cfile.writerow([
+                'I etap edukacyjny w RSPO',
+                'Liczba dzieci w klasach I-III '
+                'wykazanych w starym SIO'
+            ] + list(ns_ee_sp_list[0]))
+            for rn in ns_ee_sp_list:
+                for ro in os_ee_sp_12_list:
+                    l_1etap = ro[1] + ro[2] + ro[3]
+                    if rn[0] == ro[0] and rn[12] == '.' and l_1etap != 0:
+                        cfile.writerow(['Niewpisane w RSPO',
+                                        l_1etap] + list(rn))
+        elif item[1] is 'etapy_eduk_szk_podst_drugi_etap.csv':
+            cfile.writerow([
+                'II etap edukacyjny w RSPO',
+                'Liczba dzieci w klasach IV-VI '
+                'wykazanych w starym SIO'
+            ] + list(ns_ee_sp_list[0]))
+            for rn in ns_ee_sp_list:
+                for ro in os_ee_sp_12_list:
+                    l_2etap = ro[4] + ro[5] + ro[6]
+                    if rn[0] == ro[0] and rn[13] == '.' and l_2etap != 0:
+                        cfile.writerow(['Niewpisane w RSPO',
+                                        l_2etap] + list(rn))
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
     with open(os.path.join(item[2], item[1]), 'wb') as f:
