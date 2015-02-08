@@ -633,8 +633,6 @@ if not os.path.exists(os.path.join('!normal!')):
     os.makedirs(os.path.join('!normal!'))
 if not os.path.exists(os.path.join('!critical!')):
     os.makedirs(os.path.join('!critical!'))
-if not os.path.exists(os.path.join('!ee!')):
-    os.makedirs(os.path.join('!ee!'))
 
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
