@@ -136,7 +136,7 @@ sio_report_list = ([
         'osn_niezgodne_dane_o_obowodowosci.csv',
         '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
-    ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!normal!']
+    ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!']
 ])
 
 header_list = [
