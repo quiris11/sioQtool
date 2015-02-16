@@ -68,7 +68,7 @@ def get_reports():
             print('* NOT updated. Same report already downloaded...')
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
         else:
-            print('* Remote file: %s/NSIO/new_%s upadated. '
+            print('* Remote file: %s/NSIO/new_%s upadated.\n'
                   '* Replacing the old one...' % (home, i[1]))
             shutil.copyfile(os.path.join('%s/NSIO/new_%s' % (home, i[1])),
                             os.path.join('%s/NSIO/%s' % (home, i[1])))
