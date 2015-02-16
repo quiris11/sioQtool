@@ -21,6 +21,8 @@ def transform(path, extension):
 
     home = os.path.expanduser("~")
     dekod_path = os.path.join(home, 'github/Dekod')
+    if not os.path.exists(os.path.join('OSIO')):
+        os.makedirs(os.path.join('OSIO'))
 
     if extension == '.krt':
         exp = os.path.join('OSIO.exp')
