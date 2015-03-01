@@ -190,7 +190,7 @@ def get_ns_zawody(path):
     for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_rspos.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="4"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="5"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_zawody.append(xs(i))
     data = zip(ns_rspos, ns_zawody)
@@ -541,50 +541,50 @@ def get_ns_data(path):
             ns_rspos.append(xi(i))
         except:
             ns_rspos.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="10"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_regons.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="2"]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_typs.append(xs(i))
     for i in tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
                         namespaces=XLSNS):
+        ns_typs.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="4"]/ss:Data/text()',
+                        namespaces=XLSNS):
         ns_names.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_org_rej.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="34"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="35"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_datas_rozp_dzial.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="28"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="29"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_publicznosc.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="27"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="28"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_kat_uczn.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="21"]/ss:Data',
+    for i in tree.xpath('//ss:Cell[@ss:Index="22"]/ss:Data',
                         namespaces=XLSNS):
         if i.text is None:
             ns_emails.append('')
         else:
             ns_emails.append(i.text)
     # for Telefon col skipped first merged cell
-    for i in tree.xpath('//ss:Cell[@ss:Index="19"]/ss:Data',
+    for i in tree.xpath('//ss:Cell[@ss:Index="20"]/ss:Data',
                         namespaces=XLSNS)[1:]:
         if i.text is None:
             ns_tels.append('')
         else:
             ns_tels.append(i.text)
-    for i in tree.xpath('//ss:Cell[@ss:Index="26"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="27"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_specyfika.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_typ_org_prow.append(xs(i))
     for i in tree.xpath('//ss:Cell[@ss:Index="8"]/ss:Data/text()',
                         namespaces=XLSNS):
+        ns_typ_org_prow.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
+                        namespaces=XLSNS):
         ns_org_prow.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="23"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="24"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_czesc_miejska.append(xs(i))
 
@@ -639,8 +639,8 @@ ns_data_list = get_ns_data(args.newpath)
 ns_zawody_list = get_ns_zawody(args.newpath)
 term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
 ns_term_list = zip(
-    get_terminated_id(term_tree, '10'),  # REGON
-    get_terminated_id(term_tree, '5'),   # Termination date
+    get_terminated_id(term_tree, '11'),  # REGON
+    get_terminated_id(term_tree, '6'),   # Termination date
     get_terminated_id(term_tree, '1')    # Nr RSPO
 )
 print('* Loading old SIO data...')
