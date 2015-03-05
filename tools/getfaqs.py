@@ -19,7 +19,7 @@ def get_faqs(move, compare):
     dir_list = os.listdir(doc_dir)
 
     def get_faq(category):
-        url = 'http://sio.men.gov.pl/dodatki/sio2_support/index.php'
+        url = 'https://sio.men.gov.pl/dodatki/sio2_support/index.php'
         data = urllib.urlencode({
             'param': 'Support_htmlContent',
             'phrase': '',
