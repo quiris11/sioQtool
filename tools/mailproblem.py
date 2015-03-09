@@ -30,28 +30,26 @@ def mail_problem(csvf, params):
         for row in csv.reader(f, delimiter=';', quotechar='"'):
             # print(row)
             # print(row[0])
-            content = 'Szanowni Państwo,\n\n'
-            content += \
+            content = 'Szanowni Państwo,\n\n' \
                 'Analiza danych zgromadzonych w dwóch systemach informacji ' \
                 'oświatowej (starym SIO i nowym SIO) wykazała istnienie ' \
                 'poważnego ' \
                 'problemu w szkole/placówce o następujących danych ' \
                 'identyfikacyjnych:\n\n' \
-                'REGON: ' + row[4] + ' \n' \
-                'Nr RSPO: ' + row[3] + ' \n' \
-                'Nazwa: ' + row[10] + ' \n\n' \
+                'REGON: %s\n' \
+                'Nr RSPO: %s\n' \
+                'Nazwa: %s\n\n' \
                 'Problem polega na niezgodności danych pomiędzy dwoma ' \
                 'systemami SIO w następującym obszarze:\n\n' \
-                ' '
-            content += '\n\n-- \n' + data.SIGNED
-
+                '\n\n-- \n%s' % (row[4], row[3], row[10], data.SIGNED)
             msg = MIMEText(content, 'plain', 'utf-8')
             msg['To'] = data.TO_ADDRESS
             msg['From'] = data.FROM_ADDRESS
             msg['Subject'] = Header('Test - zażółć gęślą jaźń', 'utf-8')
-            # print content
+            print content
             # print msg.as_string()
 
             # mail(msg, data)
 if __name__ == '__main__':
-    mail_problem('!critical!/osn_niepoprawne_pole_publicznosc.csv', 'smtp.txt')
+    mail_problem('!critical!/osn_niepoprawne_pole_publicznosc.csv',
+                 'Dropbox/smtp.txt')
