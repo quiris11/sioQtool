@@ -166,6 +166,29 @@ header_list = [
 ]
 
 
+def get_os_internaty(tree):
+    rows = []
+    inter_tags = tree.xpath('//internat', namespaces=XSNS)
+    if inter_tags is None:
+        return None
+    for it in inter_tags:
+        itree = etree.ElementTree(it.getparent().getparent())
+        numerIdent = itree.xpath('//identyfikacja',
+                                 namespaces=XSNS)[0].get('numerIdent')
+        print(numerIdent)
+        if numerIdent is None:
+            continue
+        try:
+            nrRspo = int(tree.xpath(
+                '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
+                namespaces=XSNS
+            )[0].get('nrRspo'))
+        except:
+            nrRspo = 0
+        rows.append(nrRspo)
+    return rows
+
+
 def get_ns_obwody(path):
     tree = etree.parse(os.path.join(path, 'obwody.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
@@ -417,6 +440,7 @@ def get_os_data(path):
                 single_file_path = os.path.join(root, single_file)
                 single_file_tree = etree.parse(single_file_path)
                 data = data + get_os_row(single_file_tree)
+                # print(get_os_internaty(single_file_tree))
                 if get_os_zawody(single_file_tree) != []:
                     for r in get_os_zawody(single_file_tree):
                         os_zawody.append(r)
