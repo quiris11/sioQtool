@@ -117,7 +117,7 @@ sio_report_list = ([
     ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
     ['NS: Missing REGONs in old SIO existing in a new SIO\n  with birthdate '
         'earlier than %s' % BORDER_DATE,
-     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!normal!'],
+     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
     ['OS: Terminated items existing in old SIO (REGON checked)'
         '\n  with termination date older than %s' % BORDER_DATEZ,
      'os_nieistniejace_szkoly_wykazane_w_starym_sio.csv', '!critical!'],
@@ -1394,6 +1394,17 @@ for item in sio_report_list:
         elif (item[1] is
                 'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
             os_regons = []
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             for i in os_data_list:
                 os_regons.append(i[1])
             for row in ns_data_list:
@@ -1406,8 +1417,18 @@ for item in sio_report_list:
                 except:
                     roz_date = datetime.strptime('9999-01-01', '%Y-%m-%d')
                 if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
-                        and roz_date < BORDER_DATE) or row[0] == 'Nr RSPO':
-                    cfile.writerow(row)
+                        and roz_date < BORDER_DATE):
+                    cfile.writerow([
+                        '',
+                        row[2],
+                        'Jednostka brakująca w starym SIO (wg numeru REGON)',
+                        row[0],
+                        row[1],
+                        row[4],
+                        row[3],
+                        row[5],
+                        row[6]
+                    ])
         elif (item[1] is
                 'os_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
             ns_regons = []
