@@ -18,6 +18,7 @@ from dictionaries import type_dict
 from dictionaries import specyfika_dict
 from dictionaries import zawod_dict
 from dictionaries import typ_organu_prow_dict
+from dictionaries import jst_dict
 from tools.getreports import get_reports
 from tools.getfaqs import get_faqs
 from tools.transform import transform
@@ -430,6 +431,24 @@ def get_os_ee_data(path):
     return(data)
 
 
+def get_jst_row(tree):
+    jst_row = []
+    i2b = tree.xpath('//i2b', namespaces=XSNS)
+    for i in i2b:
+        if i.get('typJed') == '103':
+            jst_row.append([
+                i.getparent().get('numerIdent'),
+                jst_dict[
+                    int(
+                        xs(i.get('wojJST')) +
+                        xs(i.get('powJST')) +
+                        xs(i.get('gmJST'))
+                    )
+                ]
+            ])
+    return jst_row
+
+
 def get_os_row(tree, scalid):
     file_rows = []
     i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
@@ -442,6 +461,7 @@ def get_os_row(tree, scalid):
 
 def get_os_data(path):
     data = []
+    jsts = [['OSIO', 26]]
     os_zawody = []
     for root, dirs, files in os.walk(path):
         for single_file in files:
@@ -453,11 +473,13 @@ def get_os_data(path):
                 single_file_path = os.path.join(root, single_file)
                 single_file_tree = etree.parse(single_file_path)
                 data = data + get_os_row(single_file_tree, scalid)
+                jsts = jsts + get_jst_row(single_file_tree)
                 # print(get_os_internaty(single_file_tree))
                 if get_os_zawody(single_file_tree) != []:
                     for r in get_os_zawody(single_file_tree):
                         os_zawody.append(r)
-    return(data, os_zawody)
+    jsts_dict = dict(jsts)
+    return(data, os_zawody, jsts_dict)
 
 
 def get_terminated_id(tree, id):
@@ -681,7 +703,7 @@ ns_term_list = zip(
     get_terminated_id(term_tree, '1')    # Nr RSPO
 )
 print('* Loading old SIO data...')
-os_data_list, os_zawody_list = get_os_data(oldpath)
+os_data_list, os_zawody_list, jsts_dict = get_os_data(oldpath)
 print('* Loading education stages old SIO data...')
 os_ee_sp_p_list = get_os_ee_data(oldpath)
 # print(os_ee_sp_p_list)
@@ -698,6 +720,7 @@ for item in ee_report_list:
         if item[1] is 'etapy_eduk_szk_podst_ponizej_zero.csv':
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'Nauczanie poniżej oddziału "0" w RSPO',
                 'Liczba dzieci nauczanych poniżej oddziału "0" '
@@ -707,14 +730,14 @@ for item in ee_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon',
-                'Organ rejestrujący'
+                'Telefon'
             ])
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
                         cfile.writerow([
                             ro[3],
+                            jsts_dict[ro[3]],
                             'Niezgodność dotycząca etapu: "Poniżej 0"',
                             'Niewpisane w RSPO',
                             ro[1],
@@ -723,13 +746,13 @@ for item in ee_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6],
-                            rn[2]
+                            rn[6]
                         ])
         elif (item[1] is
                 'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv'):
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'Nauczanie poniżej oddziału "0" w RSPO',
                 'Liczba dzieci nauczanych poniżej oddziału "0" '
@@ -739,14 +762,14 @@ for item in ee_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon',
-                'Organ rejestrujący'
+                'Telefon'
             ])
             for rn in ns_ee_p_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[10] == '.' and ro[1] != 0:
                         cfile.writerow([
                             ro[3],
+                            jsts_dict[ro[3]],
                             'Niezgodność dotycząca etapu: "Poniżej 0"',
                             'Niewpisane w RSPO',
                             ro[1],
@@ -755,12 +778,12 @@ for item in ee_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6],
-                            rn[2]
+                            rn[6]
                         ])
         if item[1] is 'etapy_eduk_szk_podst_zero.csv':
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'Nauczanie w oddziale "0" w RSPO',
                 'Liczba dzieci nauczanych w oddziałach "0" '
@@ -770,14 +793,14 @@ for item in ee_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon',
-                'Organ rejestrujący'
+                'Telefon'
             ])
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
                         cfile.writerow([
                             ro[3],
+                            jsts_dict[ro[3]],
                             'Niezgodność dotycząca etapu: "0"',
                             'Niewpisane w RSPO',
                             ro[2],
@@ -786,12 +809,12 @@ for item in ee_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6],
-                            rn[2]
+                            rn[6]
                         ])
         elif item[1] is 'etapy_eduk_przedszk_i_inne_formy_zero.csv':
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'Nauczanie w oddziale "0" w RSPO',
                 'Liczba dzieci nauczanych w oddziałach "0" '
@@ -801,14 +824,14 @@ for item in ee_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon',
-                'Organ rejestrujący'
+                'Telefon'
             ])
             for rn in ns_ee_p_list:
                 for ro in os_ee_sp_p_list:
                     if rn[0] == ro[0] and rn[11] == '.' and ro[2] != 0:
                         cfile.writerow([
                             ro[3],
+                            jsts_dict[ro[3]],
                             'Niezgodność dotycząca etapu: "0"',
                             'Niewpisane w RSPO',
                             ro[2],
@@ -817,12 +840,12 @@ for item in ee_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6],
-                            rn[2]
+                            rn[6]
                         ])
         elif item[1] is 'etapy_eduk_szk_podst_pierwszy_etap.csv':
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'I etap edukacyjny w RSPO',
                 'Liczba dzieci w klasach I-III '
@@ -832,8 +855,7 @@ for item in ee_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon',
-                'Organ rejestrujący'
+                'Telefon'
             ])
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_12_list:
@@ -841,6 +863,7 @@ for item in ee_report_list:
                     if rn[0] == ro[0] and rn[12] == '.' and l_1etap != 0:
                         cfile.writerow([
                             ro[7],
+                            jsts_dict[ro[7]],
                             'Niezgodność dotycząca I etapu edukacyjnego',
                             'Niewpisany w RSPO',
                             l_1etap,
@@ -849,13 +872,13 @@ for item in ee_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6],
-                            rn[2]
+                            rn[6]
 
                         ])
         elif item[1] is 'etapy_eduk_szk_podst_drugi_etap.csv':
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'II etap edukacyjny w RSPO',
                 'Liczba dzieci w klasach IV-VI '
@@ -865,8 +888,7 @@ for item in ee_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon',
-                'Organ rejestrujący'
+                'Telefon'
             ])
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_12_list:
@@ -874,6 +896,7 @@ for item in ee_report_list:
                     if rn[0] == ro[0] and rn[13] == '.' and l_2etap != 0:
                         cfile.writerow([
                             ro[7],
+                            jsts_dict[ro[7]],
                             'Niezgodność dotycząca II etapu edukacyjnego',
                             'Niewpisany w RSPO',
                             l_2etap,
@@ -882,8 +905,7 @@ for item in ee_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6],
-                            rn[2]
+                            rn[6]
                         ])
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
@@ -893,6 +915,7 @@ for item in sio_report_list:
         if item[1].startswith('os_'):
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'Nr RSPO',
                 'REGON',
@@ -905,6 +928,7 @@ for item in sio_report_list:
             for row in os_data_list:
                 cfile.writerow([
                     row[23],
+                    jsts_dict[row[23]],
                     'brak problemu',
                     row[0],
                     row[1],
@@ -918,6 +942,7 @@ for item in sio_report_list:
                 if row[0] is 0 and row[4] not in (102, 103, 104):
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Brak numeru RSPO',
                         'brak' if row[0] == 0 else row[0],
                         row[1],
@@ -931,6 +956,7 @@ for item in sio_report_list:
                 if row[8] is '':
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Brak adresu e-mail',
                         row[0],
                         row[1],
@@ -946,6 +972,7 @@ for item in sio_report_list:
                 if row[1] in dup_regon_list:
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Zdublowany numer REGON',
                         row[0],
                         row[1],
@@ -961,6 +988,7 @@ for item in sio_report_list:
                 if row[0] in dup_rspo_list and row[0] is not 0:
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Zdublowany numer RSPO',
                         row[0],
                         row[1],
@@ -975,6 +1003,7 @@ for item in sio_report_list:
                         and row[8] is not '') or '@02.pl' in row[8]:
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Nieprawidłowy adres e-mail',
                         row[0],
                         row[1],
@@ -998,17 +1027,18 @@ for item in sio_report_list:
                         rofnd = True
                 if rofnd == False:
                     found.append([ro[0], zawod_dict[ro[1]]])
-            cfile.writerow(['ID organu scalającego',
-                            'Opis problemu',
-                            'Nieznalezione w nowym SIO zawody',
-                            'Nr RSPO',
-                            'REGON',
-                            'Typ jednostki',
-                            'Nazwa jednostki',
-                            'E-mail',
-                            'Telefon',
-                            'Organ rejestrujący'
-                            ])
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Nieznalezione w nowym SIO zawody',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             for rowo in os_data_list:
                 for rowf in found:
                     if str(rowf[0]) in ns_term_rspos:
@@ -1018,6 +1048,7 @@ for item in sio_report_list:
                             if rowo[0] == rown[0]:
                                 cfile.writerow([
                                     rowo[23],
+                                    jsts_dict[rowo[23]],
                                     'Nieznaleziony w RSPO zawód',
                                     rowf[1],
                                     rowo[0],
@@ -1025,8 +1056,7 @@ for item in sio_report_list:
                                     type_dict[rowo[4]],
                                     rowo[7],
                                     rowo[8],
-                                    rowo[9],
-                                    rown[2]
+                                    rowo[9]
                                 ])
         elif item[1] is 'os_niepoprawne_numery_regon.csv':
             ns_long_regons = []
@@ -1044,6 +1074,7 @@ for item in sio_report_list:
                 if row[1] not in ns_long_regons and row[0] is not 0:
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Niepoprawny numer REGON',
                         row[0],
                         row[1],
@@ -1062,6 +1093,7 @@ for item in sio_report_list:
                 if row[0] not in ns_rspos and row[0] is not 0:
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Niepoprawny numer RSPO',
                         row[0],
                         row[1],
@@ -1073,6 +1105,7 @@ for item in sio_report_list:
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
             cfile.writerow([
                 'ID organu scalającego',
+                'Organ scalający',
                 'Opis problemu',
                 'Stare SIO (prawdopodobnie błędnie)',
                 'Nowe SIO (prawdopodobnie poprawnie)',
@@ -1081,8 +1114,7 @@ for item in sio_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon',
-                'Organ rejestrujący'
+                'Telefon'
             ])
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1094,6 +1126,7 @@ for item in sio_report_list:
                         if not kfound:
                             cfile.writerow([
                                 rowo[23],
+                                jsts_dict[rowo[23]],
                                 'Niezgodność pola: "Kategoria uczniów"',
                                 kat_ucz_dict[rowo[6]][0],
                                 rown[9],
@@ -1102,27 +1135,28 @@ for item in sio_report_list:
                                 rown[4],
                                 rown[3],
                                 rown[5],
-                                rown[6],
-                                rown[2]
+                                rown[6]
                             ])
         elif item[1] is 'osn_niepoprawne_pole_typ.csv':
-            cfile.writerow(['ID organu scalającego',
-                            'Opis problemu',
-                            'Stare SIO (prawdopodobnie błędnie)',
-                            'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Nr RSPO',
-                            'REGON',
-                            'Typ jednostki',
-                            'Nazwa jednostki',
-                            'E-mail',
-                            'Telefon',
-                            'Organ rejestrujący'
-                            ])
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Stare SIO (prawdopodobnie błędnie)',
+                'Nowe SIO (prawdopodobnie poprawnie)',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and type_dict[rowo[4]] != rown[4]:
                         cfile.writerow([
                             rowo[23],
+                            jsts_dict[rowo[23]],
                             'Niezgodność pola: "Typ jednostki"',
                             type_dict[rowo[4]],
                             rown[4],
@@ -1131,27 +1165,28 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9],
-                            rown[2]
+                            rowo[9]
                             ])
         elif item[1] is 'osn_niepoprawne_pole_publicznosc.csv':
-            cfile.writerow(['ID organu scalającego',
-                            'Opis problemu',
-                            'Stare SIO (prawdopodobnie błędnie)',
-                            'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Nr RSPO',
-                            'REGON',
-                            'Typ jednostki',
-                            'Nazwa jednostki',
-                            'E-mail',
-                            'Telefon',
-                            'Organ rejestrujący'
-                            ])
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Stare SIO (prawdopodobnie błędnie)',
+                'Nowe SIO (prawdopodobnie poprawnie)',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and publ_dict[rowo[5]] != rown[8]:
                         cfile.writerow([
                             rowo[23],
+                            jsts_dict[rowo[23]],
                             'Niezgodność pola: "Publiczność"',
                             publ_dict[rowo[5]],
                             rown[8],
@@ -1160,9 +1195,8 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9],
-                            rown[2]
-                            ])
+                            rowo[9]
+                        ])
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
@@ -1172,18 +1206,19 @@ for item in sio_report_list:
                         and ('MINISTERSTWO' not in row[2])):
                     cfile.writerow(row)
         elif item[1] is 'osn_rozne_adresy_email.csv':
-            cfile.writerow(['ID organu scalającego',
-                            'Opis problemu',
-                            'Stare SIO (prawdopodobnie błędnie)',
-                            'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Nr RSPO',
-                            'REGON',
-                            'Typ jednostki',
-                            'Nazwa jednostki',
-                            'E-mail',
-                            'Telefon',
-                            'Organ rejestrujący'
-                            ])
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Stare SIO (prawdopodobnie błędnie)',
+                'Nowe SIO (prawdopodobnie poprawnie)',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             for rowo in os_data_list:
                 om = 'brak' if rowo[8] == '' else rowo[8]
                 for rown in ns_data_list:
@@ -1191,6 +1226,7 @@ for item in sio_report_list:
                             om not in rown[5].lower()):
                         cfile.writerow([
                             rowo[23],
+                            jsts_dict[rowo[23]],
                             'Niezgodność lub brak adresu e-mail',
                             'brak' if rowo[8] == '' else rowo[8],
                             'brak' if rown[5] == '' else rown[5],
@@ -1199,24 +1235,24 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9],
-                            rown[2]
-                            ])
+                            rowo[9]
+                        ])
         elif item[1] is 'osn_niezgodny_typ_organu_prow.csv':
-            cfile.writerow(['ID organu scalającego',
-                            'Opis problemu',
-                            'Stare SIO - typ organu prow.',
-                            'Stare SIO - nazwa organu prow.',
-                            'Nowe SIO - typ organu prow.',
-                            'Nowe SIO - nazwa organu prow.',
-                            'Nr RSPO',
-                            'REGON',
-                            'Typ jednostki',
-                            'Nazwa jednostki',
-                            'E-mail',
-                            'Telefon',
-                            'Organ rejestrujący'
-                            ])
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Stare SIO - typ organu prow.',
+                'Stare SIO - nazwa organu prow.',
+                'Nowe SIO - typ organu prow.',
+                'Nowe SIO - nazwa organu prow.',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if (
@@ -1224,78 +1260,83 @@ for item in sio_report_list:
                         typ_organu_prow_dict[rowo[21]] != rown[11] and
                         rown[13] == 'Nie dotyczy'
                     ):
-                        cfile.writerow([rowo[23],
-                                        'Niezgodność typu organu prowadzącego',
-                                        typ_organu_prow_dict[rowo[21]],
-                                        rowo[15],
-                                        rown[11],
-                                        rown[12],
-                                        rowo[0],
-                                        rowo[1],
-                                        type_dict[rowo[4]],
-                                        rowo[7],
-                                        rowo[8],
-                                        rowo[9],
-                                        rown[2]
-                                        ])
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność typu organu prowadzącego',
+                            typ_organu_prow_dict[rowo[21]],
+                            rowo[15],
+                            rown[11],
+                            rown[12],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
                     elif (
                         rowo[0] == rown[0] and
                         rown[13] == 'Część gminna' and
                         (typ_organu_prow_dict[rowo[21]] != rown[11] and
                          typ_organu_prow_dict[rowo[21]] != 'Gmina')
                     ):
-                        cfile.writerow([rowo[23],
-                                        'Niezgodność typu organu prowadzącego',
-                                        typ_organu_prow_dict[rowo[21]],
-                                        rowo[15],
-                                        rown[11],
-                                        rown[12],
-                                        rowo[0],
-                                        rowo[1],
-                                        type_dict[rowo[4]],
-                                        rowo[7],
-                                        rowo[8],
-                                        rowo[9],
-                                        rown[2]
-                                        ])
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność typu organu prowadzącego',
+                            typ_organu_prow_dict[rowo[21]],
+                            rowo[15],
+                            rown[11],
+                            rown[12],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
                     elif (
                         rowo[0] == rown[0] and
                         rown[13] == 'Część powiatowa' and
                         typ_organu_prow_dict[rowo[21]] != rown[11]
                     ):
-                        cfile.writerow([rowo[23],
-                                        'Niezgodność typu organu prowadzącego',
-                                        typ_organu_prow_dict[rowo[21]],
-                                        rowo[15],
-                                        rown[11],
-                                        rown[12],
-                                        rowo[0],
-                                        rowo[1],
-                                        type_dict[rowo[4]],
-                                        rowo[7],
-                                        rowo[8],
-                                        rowo[9],
-                                        rown[2]
-                                        ])
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność typu organu prowadzącego',
+                            typ_organu_prow_dict[rowo[21]],
+                            rowo[15],
+                            rown[11],
+                            rown[12],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
         elif item[1] is 'osn_niepoprawne_pole_specyfika.csv':
-            cfile.writerow(['ID organu scalającego',
-                            'Opis problemu',
-                            'Stare SIO (prawdopodobnie błędnie)',
-                            'Nowe SIO (prawdopodobnie poprawnie)',
-                            'Nr RSPO',
-                            'REGON',
-                            'Typ jednostki',
-                            'Nazwa jednostki',
-                            'E-mail',
-                            'Telefon',
-                            'Organ rejestrujący'
-                            ])
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Stare SIO (prawdopodobnie błędnie)',
+                'Nowe SIO (prawdopodobnie poprawnie)',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if (rowo[0] == rown[0] and
                             specyfika_dict[rowo[20]] != rown[10]):
                         cfile.writerow([
                             rowo[23],
+                            jsts_dict[rowo[23]],
                             'Niezgodność pola: "Specyfika"',
                             specyfika_dict[rowo[20]],
                             rown[10],
@@ -1304,26 +1345,28 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9],
-                            rown[2]
-                            ])
+                            rowo[9]
+                        ])
         elif item[1] is 'osn_niezgodne_dane_o_obwodowosci.csv':
-            cfile.writerow(['ID organu scalającego',
-                            'Opis problemu',
-                            'Stare SIO',
-                            'Nowe SIO',
-                            'Nr RSPO',
-                            'REGON',
-                            'Typ jednostki',
-                            'Nazwa jednostki',
-                            'E-mail',
-                            'Telefon'
-                            ])
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Stare SIO',
+                'Nowe SIO',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
             obw_rspo_list = get_ns_obwody(args.newpath)
             for rowo in os_data_list:
                     if (rowo[0] not in obw_rspo_list and rowo[22] == 'true'):
                         cfile.writerow([
                             rowo[23],
+                            jsts_dict[rowo[23]],
                             'Niezgodność danych o obwodowości',
                             'Szkoła obwodowa',
                             'Obwód niewpisany',
@@ -1337,6 +1380,7 @@ for item in sio_report_list:
                     elif (rowo[0] in obw_rspo_list and rowo[22] == 'false'):
                         cfile.writerow([
                             rowo[23],
+                            jsts_dict[rowo[23]],
                             'Niezgodność danych o obwodowości',
                             'Szkoła nieobwodowa',
                             'Obwód wpisany',
@@ -1382,6 +1426,7 @@ for item in sio_report_list:
                 if row[1] not in ns_regons and row[4] < 101:
                     cfile.writerow([
                         row[23],
+                        jsts_dict[row[23]],
                         'Nieistniejąca jednostka wykazana w starym SIO '
                         '(wg numeru REGON)',
                         row[0],
