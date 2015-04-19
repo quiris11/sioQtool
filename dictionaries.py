@@ -101,7 +101,10 @@ type_dict = {
     82: 'Poznańska szkoła chóralna',
     83: 'Niepubliczna placówka kształcenia ustawicznego i praktycznego ze '
         'szkołami',
-    100: 'Zespół szkół i placówek oświatowych'
+    100: 'Zespół szkół i placówek oświatowych',
+    102: 'Kuratorium oświaty (wraz z delegaturami)',
+    103: 'Jednostka Samorządu Terytorialnego',
+    104: 'ZEAS (zespół obsługi ekonomiczno-administracyjnej szkół)'
 }
 
 zawod_dict = {
