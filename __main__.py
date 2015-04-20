@@ -1223,7 +1223,7 @@ for item in sio_report_list:
                 om = 'brak' if rowo[8] == '' else rowo[8]
                 for rown in ns_data_list:
                     if (rowo[0] == rown[0] and
-                            om not in rown[5].lower()):
+                            om.lower() not in rown[5].lower()):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
@@ -1243,9 +1243,7 @@ for item in sio_report_list:
                 'Organ scalający',
                 'Opis problemu',
                 'Stare SIO - typ organu prow.',
-                'Stare SIO - nazwa organu prow.',
                 'Nowe SIO - typ organu prow.',
-                'Nowe SIO - nazwa organu prow.',
                 'Nr RSPO',
                 'REGON',
                 'Typ jednostki',
@@ -1265,9 +1263,7 @@ for item in sio_report_list:
                             jsts_dict[rowo[23]],
                             'Niezgodność typu organu prowadzącego',
                             typ_organu_prow_dict[rowo[21]],
-                            rowo[15],
                             rown[11],
-                            rown[12],
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
@@ -1286,9 +1282,7 @@ for item in sio_report_list:
                             jsts_dict[rowo[23]],
                             'Niezgodność typu organu prowadzącego',
                             typ_organu_prow_dict[rowo[21]],
-                            rowo[15],
                             rown[11],
-                            rown[12],
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
@@ -1306,9 +1300,7 @@ for item in sio_report_list:
                             jsts_dict[rowo[23]],
                             'Niezgodność typu organu prowadzącego',
                             typ_organu_prow_dict[rowo[21]],
-                            rowo[15],
                             rown[11],
-                            rown[12],
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
