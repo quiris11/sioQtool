@@ -1462,3 +1462,12 @@ for item in sio_report_list:
                         if (not validate_email(m)
                                 and m is not '') or '@02.pl' in m:
                             cfile.writerow(row)
+
+# merge !critical! csv files to all.csv
+print('* Generating "all.csv" file...')
+with open(os.path.join('!critical!', 'all.csv'), 'w') as outfile:
+    for item in sio_report_list:
+        if item[2] == '!critical!':
+            with open(os.path.join(item[2], item[1])) as infile:
+                for line in infile:
+                    outfile.write(line)
