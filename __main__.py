@@ -68,27 +68,26 @@ args = parser.parse_args()
 
 
 def compare_csvs(sio_report_list):
-    for i in (ee_report_list, sio_report_list):
-        for item in i:
-            print('*** ' + item[1] + ' ***')
-            try:
-                with open(os.path.join(item[2], 'src', item[1]), 'r') as f:
-                    lines1 = f.read().split('\n')
-                with open(os.path.join(item[2], item[1]), 'r') as f:
-                    lines2 = f.read().split('\n')
-                    for line in difflib.unified_diff(
-                        lines1, lines2,
-                        fromfile='stary: ' + item[2] + '/src/' + item[1],
-                        tofile='nowy: ' + item[2] + '/' + item[1],
-                        lineterm='', n=0
-                    ):
-                        print(line)
-            except IOError:
-                print('* Error')
-                continue
-            print('* OK')
+    for item in sio_report_list:
+        print('*** ' + item[1] + ' ***')
+        try:
+            with open(os.path.join(item[2], 'src', item[1]), 'r') as f:
+                lines1 = f.read().split('\n')
+            with open(os.path.join(item[2], item[1]), 'r') as f:
+                lines2 = f.read().split('\n')
+                for line in difflib.unified_diff(
+                    lines1, lines2,
+                    fromfile='stary: ' + item[2] + '/src/' + item[1],
+                    tofile='nowy: ' + item[2] + '/' + item[1],
+                    lineterm='', n=0
+                ):
+                    print(line)
+        except IOError:
+            print('* Error')
+            continue
+        print('* OK')
 
-ee_report_list = ([
+sio_report_list = ([
     ['EE SP: ponizej zero', 'etapy_eduk_szk_podst_ponizej_zero.csv',
      '!critical!'],
     ['EE SP: zero', 'etapy_eduk_szk_podst_zero.csv', '!critical!'],
@@ -97,10 +96,7 @@ ee_report_list = ([
     ['EE P: zero', 'etapy_eduk_przedszk_i_inne_formy_zero.csv', '!critical!'],
     ['EE SP: pierwszy etap', 'etapy_eduk_szk_podst_pierwszy_etap.csv',
      '!critical!'],
-    ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!critical!']
-])
-
-sio_report_list = ([
+    ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!critical!'],
     ['OS: all items', 'os_all_items.csv', '!normal!'],
     ['OS: duplicated REGONs', 'os_zdublowane_regony.csv', '!critical!'],
     ['OS: duplicated RSPOs', 'os_zdublowane_nr_rspo.csv', '!critical!'],
@@ -671,15 +667,14 @@ if args.get_reports:
 
 if args.move:
     print('* Moving new reports to src directory...')
-    for i in (ee_report_list, sio_report_list):
-        for item in i:
-            if not os.path.exists(os.path.join(item[2], 'src')):
-                os.makedirs(os.path.join(item[2], 'src'))
-            try:
-                shutil.copyfile(os.path.join(item[2], item[1]),
-                                os.path.join(item[2], 'src', item[1]))
-            except IOError:
-                continue
+    for item in sio_report_list:
+        if not os.path.exists(os.path.join(item[2], 'src')):
+            os.makedirs(os.path.join(item[2], 'src'))
+        try:
+            shutil.copyfile(os.path.join(item[2], item[1]),
+                            os.path.join(item[2], 'src', item[1]))
+        except IOError:
+            continue
     sys.exit()
 
 if args.compare:
@@ -712,11 +707,23 @@ os_ee_sp_12_list = get_os_ee_12_data(oldpath)
 print('* Loading education stages new SIO data...')
 ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
 ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
-for item in ee_report_list:
+for item in sio_report_list:
     print('* Generating %s...' % item[0])
     with open(os.path.join(item[2], item[1]), 'wb') as f:
         cfile = csv.writer(f, delimiter=";", quotechar='"',
                            quoting=csv.QUOTE_NONNUMERIC)
+        if item[1].startswith('os_'):
+            cfile.writerow([
+                'ID organu scalającego',
+                'Organ scalający',
+                'Opis problemu',
+                'Nr RSPO',
+                'REGON',
+                'Typ jednostki',
+                'Nazwa jednostki',
+                'E-mail',
+                'Telefon'
+            ])
         if item[1] is 'etapy_eduk_szk_podst_ponizej_zero.csv':
             cfile.writerow([
                 'ID organu scalającego',
@@ -780,7 +787,7 @@ for item in ee_report_list:
                             rn[5],
                             rn[6]
                         ])
-        if item[1] is 'etapy_eduk_szk_podst_zero.csv':
+        elif item[1] is 'etapy_eduk_szk_podst_zero.csv':
             cfile.writerow([
                 'ID organu scalającego',
                 'Organ scalający',
@@ -907,24 +914,7 @@ for item in ee_report_list:
                             rn[5],
                             rn[6]
                         ])
-for item in sio_report_list:
-    print('* Generating %s...' % item[0])
-    with open(os.path.join(item[2], item[1]), 'wb') as f:
-        cfile = csv.writer(f, delimiter=";", quotechar='"',
-                           quoting=csv.QUOTE_NONNUMERIC)
-        if item[1].startswith('os_'):
-            cfile.writerow([
-                'ID organu scalającego',
-                'Organ scalający',
-                'Opis problemu',
-                'Nr RSPO',
-                'REGON',
-                'Typ jednostki',
-                'Nazwa jednostki',
-                'E-mail',
-                'Telefon'
-            ])
-        if item[1] is 'os_all_items.csv':
+        elif item[1] is 'os_all_items.csv':
             for row in os_data_list:
                 cfile.writerow([
                     row[23],
