@@ -113,10 +113,10 @@ sio_report_list = ([
     ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
     ['NS: Missing REGONs in old SIO existing in a new SIO\n  with birthdate '
         'earlier than %s' % BORDER_DATE,
-     'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
+     'osn_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
     ['OS: Terminated items existing in old SIO (REGON checked)'
         '\n  with termination date older than %s' % BORDER_DATEZ,
-     'os_nieistniejace_szkoly_wykazane_w_starym_sio.csv', '!critical!'],
+     'osn_nieistniejace_szkoly_wykazane_w_starym_sio.csv', '!critical!'],
     ['OS: incorrect type', 'osn_niepoprawne_pole_typ.csv', '!critical!'],
     ['OS: incorrect specyfika', 'osn_niepoprawne_pole_specyfika.csv',
         '!critical!'],
@@ -1171,19 +1171,6 @@ for item in sio_report_list:
                             rowo[9]
                         ])
         elif item[1] is 'osn_niezgodne_dane_o_obwodowosci.csv':
-            cfile.writerow([
-                'ID organu scalającego',
-                'Organ scalający',
-                'Opis problemu',
-                'Stare SIO',
-                'Nowe SIO',
-                'Nr RSPO',
-                'REGON',
-                'Typ jednostki',
-                'Nazwa jednostki',
-                'E-mail',
-                'Telefon'
-            ])
             obw_rspo_list = get_ns_obwody(args.newpath)
             for rowo in os_data_list:
                     if (rowo[0] not in obw_rspo_list and rowo[22] == 'true'):
@@ -1215,21 +1202,8 @@ for item in sio_report_list:
                             rowo[9]
                         ])
         elif (item[1] is
-                'ns_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
+                'osn_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
             os_regons = []
-            cfile.writerow([
-                'ID organu scalającego',
-                'Organ scalający',
-                'Opis problemu',
-                'Stare SIO',
-                'Nowe SIO',
-                'Nr RSPO',
-                'REGON',
-                'Typ jednostki',
-                'Nazwa jednostki',
-                'E-mail',
-                'Telefon'
-            ])
             for i in os_data_list:
                 os_regons.append(i[1])
             for row in ns_data_list:
@@ -1247,8 +1221,8 @@ for item in sio_report_list:
                         '',
                         row[2],
                         'Jednostka brakująca w starym SIO (wg numeru REGON)',
-                        'brak nr REGON',
-                        'REGON istnieje',
+                        'brak jednostki',
+                        'jednostka istnieje',
                         row[0],
                         row[1],
                         row[4],
@@ -1257,7 +1231,7 @@ for item in sio_report_list:
                         row[6]
                     ])
         elif (item[1] is
-                'os_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
+                'osn_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
             ns_regons = []
             for row in ns_data_list:
                 if len(row[1]) == 9:
@@ -1277,8 +1251,8 @@ for item in sio_report_list:
                         jsts_dict[row[23]],
                         'Nieistniejąca jednostka wykazana w starym SIO '
                         '(wg numeru REGON)',
-                        'REGON istnieje',
-                        'brak nr REGON',
+                        'jednostka istnieje',
+                        'brak jednostki',
                         row[0],
                         row[1],
                         type_dict[row[4]],
