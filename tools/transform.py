@@ -37,7 +37,7 @@ def transform(path, extension):
                     single_file_path = os.path.join(root, single_file)
                     shutil.copy(single_file_path, 'OSIO')
                     try:
-                        print('* Unapacking EXP file: ' +
+                        print('* Removing old unpacked directory: ' +
                               os.path.basename(single_file_path[:-4]))
                         shutil.rmtree(os.path.join(
                             'OSIO',
@@ -45,6 +45,8 @@ def transform(path, extension):
                         ))
                     except:
                         pass
+                    print('* Unapacking EXP file: ' +
+                          os.path.basename(single_file_path[:-4]))
                     unpack_exp(os.path.join(
                         'OSIO',
                         os.path.basename(single_file_path)
