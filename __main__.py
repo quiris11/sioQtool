@@ -735,6 +735,9 @@ def generate_jst_reports():
             else:
                 os.makedirs(os.path.join('!critical!', 'JST'))
             for r in csvread:
+                for i, x in enumerate(r):
+                    if type(x) is float:
+                        r[i] = int(x)
                 if r[6] == 'REGON':
                     continue
                 else:
@@ -756,15 +759,15 @@ def generate_jst_reports():
                                        l[2] + str(r[2]),
                                        l[3] + str(r[3]),
                                        l[4] + str(r[4]),
-                                       l[5] + str(int(r[5])),
+                                       l[5] + str(r[5]),
                                        l[6] + str(r[6]),
                                        l[7] + str(r[7]),
                                        l[8] + str(r[8]),
                                        l[9] + str(r[9]),
                                        l[10] + str(r[10])
                                    ])
-generate_jst_reports()
-sys.exit()
+# generate_jst_reports()
+# sys.exit()
 
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
