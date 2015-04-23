@@ -5,8 +5,6 @@
 # Copyright © Robert Błaut. See NOTICE for more information.
 #
 
-# TODO optionally more extensive e-mail checking
-
 from __future__ import print_function
 from lxml import etree
 from collections import Counter
@@ -246,9 +244,6 @@ def duplicated_list(mylist):
 def xs(s):
     if s is None:
         return ''
-    # s = s.strip
-    # if s.endswith(' '):
-    #     s = s[:-1]
     return unicode(s.strip()).encode('utf8')
 
 
