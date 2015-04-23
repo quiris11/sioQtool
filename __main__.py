@@ -399,8 +399,6 @@ def get_os_ee_data(path):
                 u332p = ttree.xpath(
                     '//dzieciWgOddzialow/u3_3/u3_3_2',
                     namespaces=XSNS)
-                # if len(u331p) > 1:
-                #     print(nrRspo, len(u331p))
                 for u in u331p:
                     try:
                         l_ucz_pon_zero = int(u.get('kol2'))
@@ -421,7 +419,6 @@ def get_os_ee_data(path):
                     scalid = '/'.join(root.split('/')[-2:-1])
                 else:
                     scalid = '/'.join(root.split('/')[-1:])
-                # print(scalid)
                 single_file_path = os.path.join(root, single_file)
                 single_file_tree = etree.parse(single_file_path)
                 data = data + get_os_ee_row(single_file_tree, scalid)
@@ -766,8 +763,6 @@ def generate_jst_reports():
                                        l[9] + str(r[9]),
                                        l[10] + str(r[10])
                                    ])
-# generate_jst_reports()
-# sys.exit()
 
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
