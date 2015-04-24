@@ -98,7 +98,6 @@ sio_report_list = ([
     ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!critical!'],
     ['OS: all items', 'os_all_items.csv', '!normal!'],
     ['OS: duplicated REGONs', 'os_zdublowane_regony.csv', '!critical!'],
-    ['OS: duplicated RSPOs', 'os_zdublowane_nr_rspo.csv', '!critical!'],
     ['OS: no RSPOs', 'os_brak_nr_rspo.csv', '!critical!'],
     ['OS: no e-mails', 'os_brak_adresu_email.csv', '!critical!'],
     ['OS: incorrect e-mails', 'os_nieprawidlowe_adresy_email.csv', '!normal!'],
@@ -978,24 +977,6 @@ for item in sio_report_list:
                         jsts_dict[row[23]],
                         'Zdublowany numer REGON w starym SIO',
                         row[1],
-                        'nie badano',
-                        row[0],
-                        row[1],
-                        type_dict[row[4]],
-                        row[7],
-                        row[8],
-                        row[9]
-                    ])
-        elif item[1] is 'os_zdublowane_nr_rspo.csv':
-            rspo_list = [row[0] for row in os_data_list]
-            dup_rspo_list = duplicated_list(rspo_list)
-            for row in os_data_list:
-                if row[0] in dup_rspo_list and row[0] is not 0:
-                    cfile.writerow([
-                        row[23],
-                        jsts_dict[row[23]],
-                        'Zdublowany numer RSPO w starym SIO',
-                        row[0],
                         'nie badano',
                         row[0],
                         row[1],
