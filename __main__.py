@@ -784,6 +784,8 @@ ns_term_list = zip(
 )
 print('* Loading old SIO data...')
 os_data_list, os_zawody_list, jsts_dict = get_os_data(oldpath)
+with open(os.path.join('NSIO', 'jst_dict.txt'), 'w') as f:
+    f.write(str(jsts_dict))
 print('* Loading education stages old SIO data...')
 os_ee_sp_p_list = get_os_ee_data(oldpath)
 os_ee_sp_12_list = get_os_ee_12_data(oldpath)
