@@ -682,6 +682,19 @@ if not os.path.exists(os.path.join('!critical!')):
     os.makedirs(os.path.join('!critical!'))
 
 
+def load_exceptions():
+    l = []
+    try:
+        with open(os.path.join('NSIO', 'exceptions.csv')) as f:
+            csvread = csv.reader(f, delimiter=';', quotechar='"',
+                                 quoting=csv.QUOTE_NONNUMERIC)
+            for r in csvread:
+                if r[0] == 'missregon':
+                    l.append(r[1])
+    except:
+        pass
+    return l
+
 def generate_jst_reports():
     l = [
         'ID organu scalającego: ',
@@ -758,6 +771,7 @@ def generate_jst_reports():
                                        l[9] + str(r[9]),
                                        l[10] + str(r[10])
                                    ])
+missregons = load_exceptions()
 
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
@@ -1276,6 +1290,9 @@ for item in sio_report_list:
             for i in os_data_list:
                 os_regons.append(i[1])
             for row in ns_data_list:
+                if row[1] in missregons:
+                    print('! EXCEPTION! REGON skipped: '+ row[1])
+                    continue
                 if len(row[1]) == 9:
                     reg_long = row[1] + '00000'
                 else:
