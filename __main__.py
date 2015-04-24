@@ -754,8 +754,12 @@ def generate_jst_reports():
                     nfname = "".join(x for x in nfname if (
                         x.isalnum() or x.isspace() or x in ('_', '-', '.')
                     ))
-                    with open(os.path.join(
-                              '!critical!', 'JST', nfname + '.txt'), 'a') as j:
+                    with open(
+                        os.path.join(
+                            '!critical!',
+                            'JST',
+                            '%s (%s).txt' % (nfname, r[0])), 'a'
+                    ) as j:
                         csv.writer(j, delimiter='\n', quotechar="'",
                                    lineterminator='\n\n\n',
                                    quoting=csv.QUOTE_MINIMAL).writerow([
