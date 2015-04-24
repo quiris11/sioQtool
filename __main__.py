@@ -694,6 +694,7 @@ def load_exceptions():
         pass
     return l
 
+
 def generate_jst_reports():
     l = [
         'ID organu scalającego: ',
@@ -1065,26 +1066,46 @@ for item in sio_report_list:
                         row[9]
                     ])
         elif item[1] is 'os_niepoprawne_numery_rspo.csv':
-            ns_rspos = []
-            for i in ns_data_list:
-                ns_rspos.append(i[0])
-            for i in ns_term_list:
-                ns_rspos.append(int(i[2]))
+            ns_long_regons = []
             for row in os_data_list:
-                if row[0] not in ns_rspos and row[0] is not 0:
-                    cfile.writerow([
-                        row[23],
-                        jsts_dict[row[23]],
-                        'Niepoprawny numer RSPO w starym SIO',
-                        row[0],
-                        'nie badano',
-                        row[0],
-                        row[1],
-                        type_dict[row[4]],
-                        row[7],
-                        row[8],
-                        row[9]
-                    ])
+                for i in ns_data_list:
+                    if len(i[1]) == 9:
+                        ns_long_regon = i[1] + '00000'
+                    else:
+                        ns_long_regon = i[1]
+                    if row[1] == ns_long_regon and row[0] != i[0]:
+                        cfile.writerow([
+                            row[23],
+                            jsts_dict[row[23]],
+                            'Błędny nr RSPO w starym SIO',
+                            row[0],
+                            i[0],
+                            row[0],
+                            row[1],
+                            type_dict[row[4]],
+                            row[7],
+                            row[8],
+                            row[9]
+                        ])
+                for i in ns_term_list:
+                    if len(i[1]) == 9:
+                        ns_long_regon = i[1] + '00000'
+                    else:
+                        ns_long_regon = i[1]
+                    if row[1] == ns_long_regon and row[0] != i[0]:
+                        cfile.writerow([
+                            row[23],
+                            jsts_dict[row[23]],
+                            'Błędny nr RSPO w starym SIO',
+                            row[0],
+                            i[0],
+                            row[0],
+                            row[1],
+                            type_dict[row[4]],
+                            row[7],
+                            row[8],
+                            row[9]
+                        ])
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1274,7 +1295,7 @@ for item in sio_report_list:
                 os_regons.append(i[1])
             for row in ns_data_list:
                 if row[1] in missregons:
-                    print('! EXCEPTION! REGON skipped: '+ row[1])
+                    print('! EXCEPTION! REGON skipped: ' + row[1])
                     continue
                 if len(row[1]) == 9:
                     reg_long = row[1] + '00000'
