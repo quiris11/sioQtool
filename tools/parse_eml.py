@@ -11,7 +11,7 @@ from email.Parser import Parser
 from email.utils import parseaddr
 from email.Header import decode_header
 
-path = os.path.join(os.path.expanduser("~"),'eml')
+path = os.path.join(os.path.expanduser("~"), 'eml')
 p = Parser()
 idmails = []
 for root, dirs, files in os.walk(path):
@@ -29,7 +29,7 @@ for root, dirs, files in os.walk(path):
                         ):
                             for param in dispositions[1:]:
                                 if 'filename' in param:
-                                    name,value = param.split("=", 1)
+                                    name, value = param.split("=", 1)
                                     bytes, encoding = decode_header(
                                         value.replace('"', '')
                                     )[0]
@@ -51,8 +51,8 @@ for root, dirs, files in os.walk(path):
                                                 parseaddr(msgobj.get(
                                                     'From'
                                                 ))[1]
-                                        ])
-with open(os.path.join('NSIO', 'jst_dict.txt'),'r') as f:
+                                            ])
+with open(os.path.join('NSIO', 'jst_dict.txt'), 'r') as f:
     jst_dict = eval(f.read())
 with open(os.path.join('NSIO', 'idmails.csv'), 'w') as o:
     csvwrite = csv.writer(o, delimiter=';', quotechar='"',
