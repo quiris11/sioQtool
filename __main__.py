@@ -123,6 +123,9 @@ sio_report_list = ([
     ['OS: different jobs',
         'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv',
         '!critical!'],
+    ['OS: different REGONs',
+        'osn_niezgodne_numery_regon.csv',
+        '!critical!'],
     ['NS: incorrect szkolaObwodowa',
         'osn_niezgodne_dane_o_obwodowosci.csv',
         '!critical!'],
@@ -1070,7 +1073,6 @@ for item in sio_report_list:
                         row[9]
                     ])
         elif item[1] is 'os_niepoprawne_numery_rspo.csv':
-            ns_long_regons = []
             for row in os_data_list:
                 for i in ns_data_list:
                     if len(i[1]) == 9:
@@ -1103,6 +1105,46 @@ for item in sio_report_list:
                             'Błędny nr RSPO w starym SIO',
                             row[0],
                             i[0],
+                            row[0],
+                            row[1],
+                            type_dict[row[4]],
+                            row[7],
+                            row[8],
+                            row[9]
+                        ])
+        elif item[1] is 'osn_niezgodne_numery_regon.csv':
+            for row in os_data_list:
+                for i in ns_data_list:
+                    if len(i[1]) == 9:
+                        ns_long_regon = i[1] + '00000'
+                    else:
+                        ns_long_regon = i[1]
+                    if row[1] != ns_long_regon and row[0] == i[0]:
+                        cfile.writerow([
+                            row[23],
+                            jsts_dict[row[23]],
+                            'Niezgodny nr REGON (wg nr RSPO)',
+                            row[1],
+                            ns_long_regon,
+                            row[0],
+                            row[1],
+                            type_dict[row[4]],
+                            row[7],
+                            row[8],
+                            row[9]
+                        ])
+                for i in ns_term_list:
+                    if len(i[1]) == 9:
+                        ns_long_regon = i[1] + '00000'
+                    else:
+                        ns_long_regon = i[1]
+                    if row[1] != ns_long_regon and row[0] == i[0]:
+                        cfile.writerow([
+                            row[23],
+                            jsts_dict[row[23]],
+                            'Niezgodny nr REGON (wg nr RSPO)',
+                            row[1],
+                            ns_long_regon,
                             row[0],
                             row[1],
                             type_dict[row[4]],
