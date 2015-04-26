@@ -470,7 +470,8 @@ def get_os_data(path):
                     for r in get_os_zawody(single_file_tree):
                         os_zawody.append(r)
     jsts_dict = dict(jsts)
-    return(data, os_zawody, jsts_dict)
+    jst_dict_rew = dict((r[1], r[0]) for r in jsts)
+    return(data, os_zawody, jsts_dict, jst_dict_rew)
 
 
 def get_terminated_id(tree, id):
@@ -790,7 +791,7 @@ ns_term_list = zip(
     get_terminated_id(term_tree, '1')    # Nr RSPO
 )
 print('* Loading old SIO data...')
-os_data_list, os_zawody_list, jsts_dict = get_os_data(oldpath)
+os_data_list, os_zawody_list, jsts_dict, jst_dict_rew = get_os_data(oldpath)
 with open(os.path.join('NSIO', 'jst_dict.txt'), 'w') as f:
     f.write(str(jsts_dict))
 print('* Loading education stages old SIO data...')
@@ -1353,20 +1354,37 @@ for item in sio_report_list:
                     roz_date = datetime.strptime('9999-01-01', '%Y-%m-%d')
                 if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
                         and roz_date < BORDER_DATE):
-                    cfile.writerow([
-                        '',
-                        row[2],
-                        'Jednostka brakująca w starym SIO '
-                        '(wg nr REGON)',
-                        'brak jednostki',
-                        'jednostka istnieje',
-                        row[0],
-                        row[1],
-                        row[4],
-                        row[3],
-                        row[5],
-                        row[6]
-                    ])
+                    try:
+                        cfile.writerow([
+                            jst_dict_rew[row[2]],
+                            row[2],
+                            'Jednostka brakująca w starym SIO '
+                            '(wg nr REGON)',
+                            'brak jednostki',
+                            'jednostka istnieje',
+                            row[0],
+                            row[1],
+                            row[4],
+                            row[3],
+                            row[5],
+                            row[6]
+                        ])
+                    except KeyError:
+                        cfile.writerow([
+                            'niescalona jst',
+                            row[2],
+                            'Jednostka brakująca w starym SIO '
+                            '(wg nr REGON)',
+                            'brak jednostki',
+                            'jednostka istnieje',
+                            row[0],
+                            row[1],
+                            row[4],
+                            row[3],
+                            row[5],
+                            row[6]
+                        ])
+
         elif (item[1] is
                 'osn_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
             ns_regons = []
