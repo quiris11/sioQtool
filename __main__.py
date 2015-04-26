@@ -285,141 +285,114 @@ def os_row(i, a, scalid):
     return lista
 
 
-def get_os_ee_12_data(path):
+def get_os_12_row(tree, scalid):
     def get_l_ucz(wiersz):
         try:
             l = int(wiersz.get('kol2'))
         except:
             l = 0
         return l
-
-    def get_os_ee_row(tree, scalid):
-        file_rows = []
-        for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
-            ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
-            for i in ids:
-                l1 = l2 = l3 = l4 = l5 = l6 = 0
-                try:
-                    nrRspo = int(tree.xpath(
-                        '//' + typ + '/identyfikacja[@numerIdent="' +
-                        i.get('numerIdent') +
-                        '"]/i2c',
-                        namespaces=XSNS)[0].get('nrRspo'))
-                except:
-                    nrRspo = 0
-                u31s = tree.xpath(
-                    '//' + typ + '/uczniowieSzkolyPodst/'
-                    'oddzialy[@numerIdent="' +
+    file_rows = []
+    for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
+        ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
+        for i in ids:
+            l1 = l2 = l3 = l4 = l5 = l6 = 0
+            try:
+                nrRspo = int(tree.xpath(
+                    '//' + typ + '/identyfikacja[@numerIdent="' +
                     i.get('numerIdent') +
-                    '"]//wierszU3_1',
-                    namespaces=XSNS)
-                for u in u31s:
-                    if u.get('kol0') == '4':
-                        l1 += get_l_ucz(u)
-                    elif u.get('kol0') == '5':
-                        l2 += get_l_ucz(u)
-                    elif u.get('kol0') == '6':
-                        l3 += get_l_ucz(u)
-                    elif u.get('kol0') == '7':
-                        l4 += get_l_ucz(u)
-                    elif u.get('kol0') == '8':
-                        l5 += get_l_ucz(u)
-                    elif u.get('kol0') == '9':
-                        l6 += get_l_ucz(u)
-                file_rows.append([nrRspo, l1, l2, l3, l4, l5, l6, scalid])
-        return file_rows
-    data = []
-    for root, dirs, files in os.walk(path):
-        for single_file in files:
-            if single_file.endswith('.xml'):
-                if 'jednostkiScalone' in root:
-                    scalid = '/'.join(root.split('/')[-2:-1])
-                else:
-                    scalid = '/'.join(root.split('/')[-1:])
-                single_file_path = os.path.join(root, single_file)
-                single_file_tree = etree.parse(single_file_path)
-                data = data + get_os_ee_row(single_file_tree, scalid)
-    return(data)
+                    '"]/i2c',
+                    namespaces=XSNS)[0].get('nrRspo'))
+            except:
+                nrRspo = 0
+            u31s = tree.xpath(
+                '//' + typ + '/uczniowieSzkolyPodst/'
+                'oddzialy[@numerIdent="' +
+                i.get('numerIdent') +
+                '"]//wierszU3_1',
+                namespaces=XSNS)
+            for u in u31s:
+                if u.get('kol0') == '4':
+                    l1 += get_l_ucz(u)
+                elif u.get('kol0') == '5':
+                    l2 += get_l_ucz(u)
+                elif u.get('kol0') == '6':
+                    l3 += get_l_ucz(u)
+                elif u.get('kol0') == '7':
+                    l4 += get_l_ucz(u)
+                elif u.get('kol0') == '8':
+                    l5 += get_l_ucz(u)
+                elif u.get('kol0') == '9':
+                    l6 += get_l_ucz(u)
+            file_rows.append([nrRspo, l1, l2, l3, l4, l5, l6, scalid])
+    return file_rows
 
 
-def get_os_ee_data(path):
-    def get_os_ee_row(tree, scalid):
-        file_rows = []
-        for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
-            ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
-            for i in ids:
+def get_os_ee_row(tree, scalid):
+    file_rows = []
+    for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
+        ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
+        for i in ids:
+            try:
+                nrRspo = int(tree.xpath(
+                    '//' + typ + '/identyfikacja[@numerIdent="' +
+                    i.get('numerIdent') +
+                    '"]/i2c',
+                    namespaces=XSNS)[0].get('nrRspo'))
+            except:
+                nrRspo = 0
+            u331s = tree.xpath(
+                '//' + typ + '/uczniowieSzkolyPodst/'
+                'oddzialyPrzedszkolne[@numerIdent="' +
+                i.get('numerIdent')[:-1] + '1' +
+                '"]/dzieciWgOddzialow/u3_3/u3_3_1',
+                namespaces=XSNS)
+            u332s = tree.xpath(
+                '//' + typ + '/uczniowieSzkolyPodst/'
+                'oddzialyPrzedszkolne[@numerIdent="' +
+                i.get('numerIdent')[:-1] + '1' +
+                '"]/dzieciWgOddzialow/u3_3/u3_3_2',
+                namespaces=XSNS)
+            for u in u331s:
                 try:
-                    nrRspo = int(tree.xpath(
-                        '//' + typ + '/identyfikacja[@numerIdent="' +
-                        i.get('numerIdent') +
-                        '"]/i2c',
-                        namespaces=XSNS)[0].get('nrRspo'))
+                    l_ucz_pon_zero = int(u.get('kol2'))
                 except:
-                    nrRspo = 0
-                u331s = tree.xpath(
-                    '//' + typ + '/uczniowieSzkolyPodst/'
-                    'oddzialyPrzedszkolne[@numerIdent="' +
-                    i.get('numerIdent')[:-1] + '1' +
-                    '"]/dzieciWgOddzialow/u3_3/u3_3_1',
-                    namespaces=XSNS)
-                u332s = tree.xpath(
-                    '//' + typ + '/uczniowieSzkolyPodst/'
-                    'oddzialyPrzedszkolne[@numerIdent="' +
-                    i.get('numerIdent')[:-1] + '1' +
-                    '"]/dzieciWgOddzialow/u3_3/u3_3_2',
-                    namespaces=XSNS)
-                for u in u331s:
-                    try:
-                        l_ucz_pon_zero = int(u.get('kol2'))
-                    except:
-                        l_ucz_pon_zero = 0
-                    try:
-                        l_ucz_zero = int(u332s[u331s.index(u)].get('kol2'))
-                    except:
-                        l_ucz_zero = 0
-                    file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero,
-                                     scalid])
-        for typ in ('punktPrzedszkolny',
-                    'zespolWychowaniaPrzedszkolnego',
-                    'przedszkole'):
-            typels = tree.xpath('//' + typ, namespaces=XSNS)
-            for t in typels:
-                ttree = etree.ElementTree(t)
+                    l_ucz_pon_zero = 0
                 try:
-                    nrRspo = int(ttree.xpath('//identyfikacja/i2c',
-                                 namespaces=XSNS)[0].get('nrRspo'))
+                    l_ucz_zero = int(u332s[u331s.index(u)].get('kol2'))
                 except:
-                    nrRspo = 0
-                u331p = ttree.xpath(
-                    '//dzieciWgOddzialow/u3_3/u3_3_1',
-                    namespaces=XSNS)
-                u332p = ttree.xpath(
-                    '//dzieciWgOddzialow/u3_3/u3_3_2',
-                    namespaces=XSNS)
-                for u in u331p:
-                    try:
-                        l_ucz_pon_zero = int(u.get('kol2'))
-                    except:
-                        l_ucz_pon_zero = 0
-                    try:
-                        l_ucz_zero = int(u332p[u331p.index(u)].get('kol2'))
-                    except:
-                        l_ucz_zero = 0
-                    file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero,
-                                     scalid])
-        return file_rows
-    data = []
-    for root, dirs, files in os.walk(path):
-        for single_file in files:
-            if single_file.endswith('.xml'):
-                if 'jednostkiScalone' in root:
-                    scalid = '/'.join(root.split('/')[-2:-1])
-                else:
-                    scalid = '/'.join(root.split('/')[-1:])
-                single_file_path = os.path.join(root, single_file)
-                single_file_tree = etree.parse(single_file_path)
-                data = data + get_os_ee_row(single_file_tree, scalid)
-    return(data)
+                    l_ucz_zero = 0
+                file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero,
+                                 scalid])
+    for typ in ('punktPrzedszkolny',
+                'zespolWychowaniaPrzedszkolnego',
+                'przedszkole'):
+        typels = tree.xpath('//' + typ, namespaces=XSNS)
+        for t in typels:
+            ttree = etree.ElementTree(t)
+            try:
+                nrRspo = int(ttree.xpath('//identyfikacja/i2c',
+                             namespaces=XSNS)[0].get('nrRspo'))
+            except:
+                nrRspo = 0
+            u331p = ttree.xpath(
+                '//dzieciWgOddzialow/u3_3/u3_3_1',
+                namespaces=XSNS)
+            u332p = ttree.xpath(
+                '//dzieciWgOddzialow/u3_3/u3_3_2',
+                namespaces=XSNS)
+            for u in u331p:
+                try:
+                    l_ucz_pon_zero = int(u.get('kol2'))
+                except:
+                    l_ucz_pon_zero = 0
+                try:
+                    l_ucz_zero = int(u332p[u331p.index(u)].get('kol2'))
+                except:
+                    l_ucz_zero = 0
+                file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero,
+                                 scalid])
+    return file_rows
 
 
 def get_jst_row(tree):
@@ -454,6 +427,8 @@ def get_os_data(path):
     data = []
     jsts = [['OSIO', 26]]
     os_zawody = []
+    os_ee_data = []
+    os_12_data = []
     for root, dirs, files in os.walk(path):
         for single_file in files:
             if single_file.endswith('.xml'):
@@ -465,13 +440,17 @@ def get_os_data(path):
                 single_file_tree = etree.parse(single_file_path)
                 data = data + get_os_row(single_file_tree, scalid)
                 jsts = jsts + get_jst_row(single_file_tree)
+                os_ee_data = os_ee_data + get_os_ee_row(single_file_tree,
+                                                        scalid)
+                os_12_data = os_12_data + get_os_12_row(single_file_tree,
+                                                        scalid)
                 # print(get_os_internaty(single_file_tree))
                 if get_os_zawody(single_file_tree) != []:
                     for r in get_os_zawody(single_file_tree):
                         os_zawody.append(r)
     jsts_dict = dict(jsts)
     jst_dict_rew = dict((r[1], r[0]) for r in jsts)
-    return(data, os_zawody, jsts_dict, jst_dict_rew)
+    return(data, os_zawody, jsts_dict, jst_dict_rew, os_ee_data, os_12_data)
 
 
 def get_terminated_id(tree, id):
@@ -791,12 +770,16 @@ ns_term_list = zip(
     get_terminated_id(term_tree, '1')    # Nr RSPO
 )
 print('* Loading old SIO data...')
-os_data_list, os_zawody_list, jsts_dict, jst_dict_rew = get_os_data(oldpath)
+(
+    os_data_list,
+    os_zawody_list,
+    jsts_dict,
+    jst_dict_rew,
+    os_ee_sp_p_list,
+    os_ee_sp_12_list
+) = get_os_data(oldpath)
 with open(os.path.join('NSIO', 'jst_dict.txt'), 'w') as f:
     f.write(str(jsts_dict))
-print('* Loading education stages old SIO data...')
-os_ee_sp_p_list = get_os_ee_data(oldpath)
-os_ee_sp_12_list = get_os_ee_12_data(oldpath)
 print('* Loading education stages new SIO data...')
 ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
 ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
