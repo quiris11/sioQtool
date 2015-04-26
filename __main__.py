@@ -455,8 +455,6 @@ def get_os_data(path):
 
 def get_terminated_id(tree, id):
     lista = []
-    print('* ' + tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                            namespaces=XLSNS)[0])
     lista = lista + tree.xpath(
         '//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
         namespaces=XLSNS
@@ -762,8 +760,13 @@ missregons = load_exceptions()
 
 print('* Loading new SIO data...')
 ns_data_list = get_ns_data(args.newpath)
+ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
+ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
 ns_zawody_list = get_ns_zawody(args.newpath)
+obw_rspo_list = get_ns_obwody(args.newpath)
 term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
+print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                             namespaces=XLSNS)[0])
 ns_term_list = zip(
     get_terminated_id(term_tree, '11'),  # REGON
     get_terminated_id(term_tree, '6'),   # Termination date
@@ -780,9 +783,6 @@ print('* Loading old SIO data...')
 ) = get_os_data(oldpath)
 with open(os.path.join('NSIO', 'jst_dict.txt'), 'w') as f:
     f.write(str(jsts_dict))
-print('* Loading education stages new SIO data...')
-ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
-ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
     with open(os.path.join(item[2], item[1]), 'wb') as f:
@@ -1288,7 +1288,6 @@ for item in sio_report_list:
                             rowo[9]
                         ])
         elif item[1] is 'osn_niezgodne_dane_o_obwodowosci.csv':
-            obw_rspo_list = get_ns_obwody(args.newpath)
             for rowo in os_data_list:
                     if (rowo[0] not in obw_rspo_list and rowo[22] == 'true'):
                         cfile.writerow([
