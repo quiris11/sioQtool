@@ -1079,7 +1079,7 @@ for item in sio_report_list:
                                     rowo[23],
                                     jsts_dict[rowo[23]],
                                     'Nieznaleziony w RSPO zawód',
-                                    'nie badano',
+                                    'istnieje',
                                     rowf[1],
                                     rowo[0],
                                     rowo[1],
