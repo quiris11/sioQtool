@@ -52,7 +52,7 @@ for root, dirs, files in os.walk(path):
                                                     'From'
                                                 ))[1]
                                             ])
-with open(os.path.join('NSIO', 'jst_dict.txt'), 'r') as f:
+with open(os.path.join('NSIO', 'jsts_dict.txt'), 'r') as f:
     jst_dict = eval(f.read())
 with open(os.path.join('NSIO', 'idmails.csv'), 'w') as o:
     csvwrite = csv.writer(o, delimiter=';', quotechar='"',
