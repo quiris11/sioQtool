@@ -27,6 +27,7 @@ import csv
 import difflib
 import shutil
 import sys
+import time
 
 home = os.path.expanduser("~")
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
@@ -762,6 +763,7 @@ def generate_jst_reports():
                                        l[9] + str(r[9]),
                                        l[10] + str(r[10])
                                    ])
+start = time.clock()
 missregons = load_exceptions()
 if args.new_overwrite:
     print('! Preparing new SIO data from source files...')
@@ -1485,3 +1487,4 @@ with open(os.path.join('!critical!', 'all.csv'), 'w') as outfile:
                 for line in infile:
                     outfile.write(line)
 generate_jst_reports()
+print('* Excution time: ' + str(time.clock()-start))
