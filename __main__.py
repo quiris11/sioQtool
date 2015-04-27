@@ -63,6 +63,12 @@ parser.add_argument('--get-reports',
 parser.add_argument('--get-faqs',
                     help="get FAQs from SIO portal",
                     action="store_true")
+parser.add_argument('-o', '--new-overwrite',
+                    help="overwrite new SIO temporary lists",
+                    action="store_true")
+parser.add_argument('-s', '--skip-old-overwrite',
+                    help="skip overwriting old SIO temporary lists",
+                    action="store_true")
 args = parser.parse_args()
 
 
@@ -665,7 +671,7 @@ if not os.path.exists(os.path.join('!critical!')):
 def load_exceptions():
     l = []
     try:
-        with open(os.path.join('NSIO', 'exceptions.csv')) as f:
+        with open(os.path.join(args.newpath, 'exceptions.csv')) as f:
             csvread = csv.reader(f, delimiter=';', quotechar='"',
                                  quoting=csv.QUOTE_NONNUMERIC)
             for r in csvread:
@@ -757,32 +763,83 @@ def generate_jst_reports():
                                        l[10] + str(r[10])
                                    ])
 missregons = load_exceptions()
-
-print('* Loading new SIO data...')
-ns_data_list = get_ns_data(args.newpath)
-ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
-ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
-ns_zawody_list = get_ns_zawody(args.newpath)
-obw_rspo_list = get_ns_obwody(args.newpath)
-term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
-print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                             namespaces=XLSNS)[0])
-ns_term_list = zip(
-    get_terminated_id(term_tree, '11'),  # REGON
-    get_terminated_id(term_tree, '6'),   # Termination date
-    get_terminated_id(term_tree, '1')    # Nr RSPO
-)
-print('* Loading old SIO data...')
-(
-    os_data_list,
-    os_zawody_list,
-    jsts_dict,
-    jst_dict_rew,
-    os_ee_sp_p_list,
-    os_ee_sp_12_list
-) = get_os_data(oldpath)
-with open(os.path.join('NSIO', 'jst_dict.txt'), 'w') as f:
-    f.write(str(jsts_dict))
+if args.new_overwrite:
+    print('! Preparing new SIO data from source files...')
+    ns_data_list = get_ns_data(args.newpath)
+    ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
+    ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
+    ns_zawody_list = get_ns_zawody(args.newpath)
+    obw_rspo_list = get_ns_obwody(args.newpath)
+    term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
+    print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                                 namespaces=XLSNS)[0])
+    ns_term_list = zip(
+        get_terminated_id(term_tree, '11'),  # REGON
+        get_terminated_id(term_tree, '6'),   # Termination date
+        get_terminated_id(term_tree, '1')    # Nr RSPO
+    )
+    with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'w') as f:
+        f.write(str(ns_data_list))
+    with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'w') as f:
+        f.write(str(ns_ee_sp_list))
+    with open(os.path.join(args.newpath, 'ns_ee_p_list.txt'), 'w') as f:
+        f.write(str(ns_ee_p_list))
+    with open(os.path.join(args.newpath, 'ns_zawody_list.txt'), 'w') as f:
+        f.write(str(ns_zawody_list))
+    with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'w') as f:
+        f.write(str(obw_rspo_list))
+    with open(os.path.join(args.newpath, 'ns_term_list.txt'), 'w') as f:
+        f.write(str(ns_term_list))
+else:
+    print('* Loading prepared new SIO data from txt files...')
+    with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'r') as f:
+        ns_data_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'r') as f:
+        ns_ee_sp_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'ns_ee_p_list.txt'), 'r') as f:
+        ns_ee_p_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'ns_zawody_list.txt'), 'r') as f:
+        ns_zawody_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'r') as f:
+        obw_rspo_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'ns_term_list.txt'), 'r') as f:
+        ns_term_list = eval(f.read())
+if not args.skip_old_overwrite:
+    print('! Preparing old SIO data from source files...')
+    (
+        os_data_list,
+        os_zawody_list,
+        jsts_dict,
+        jst_dict_rew,
+        os_ee_sp_p_list,
+        os_ee_sp_12_list
+    ) = get_os_data(oldpath)
+    with open(os.path.join(args.newpath, 'os_data_list.txt'), 'w') as f:
+        f.write(str(os_data_list))
+    with open(os.path.join(args.newpath, 'os_zawody_list.txt'), 'w') as f:
+        f.write(str(os_zawody_list))
+    with open(os.path.join(args.newpath, 'jsts_dict.txt'), 'w') as f:
+        f.write(str(jsts_dict))
+    with open(os.path.join(args.newpath, 'jst_dict_rew.txt'), 'w') as f:
+        f.write(str(jst_dict_rew))
+    with open(os.path.join(args.newpath, 'os_ee_sp_p_list.txt'), 'w') as f:
+        f.write(str(os_ee_sp_p_list))
+    with open(os.path.join(args.newpath, 'os_ee_sp_12_list.txt'), 'w') as f:
+        f.write(str(os_ee_sp_12_list))
+else:
+    print('* Loading prepared old SIO data from txt files...')
+    with open(os.path.join(args.newpath, 'os_data_list.txt'), 'r') as f:
+        os_data_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'os_zawody_list.txt'), 'r') as f:
+        os_zawody_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'jsts_dict.txt'), 'r') as f:
+        jsts_dict = eval(f.read())
+    with open(os.path.join(args.newpath, 'jst_dict_rew.txt'), 'r') as f:
+        jst_dict_rew = eval(f.read())
+    with open(os.path.join(args.newpath, 'os_ee_sp_p_list.txt'), 'r') as f:
+        os_ee_sp_p_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'os_ee_sp_12_list.txt'), 'r') as f:
+        os_ee_sp_12_list = eval(f.read())
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
     with open(os.path.join(item[2], item[1]), 'wb') as f:
