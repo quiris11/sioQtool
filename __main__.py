@@ -628,46 +628,6 @@ def get_ns_data(path):
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska)
     return data
 
-if args.oldpath.endswith('.krt'):
-    transform(args.oldpath, '.krt')
-    oldpath = 'OSIO'
-elif args.exp:
-    transform(args.oldpath, '.exp')
-    oldpath = 'OSIO'
-else:
-    oldpath = args.oldpath
-
-if args.get_faqs:
-    get_faqs(args.move, args.compare)
-    sys.exit()
-
-if args.get_reports:
-    get_reports()
-    sys.exit()
-
-if args.move:
-    print('* Moving new reports to src directory...')
-    for item in sio_report_list:
-        if not os.path.exists(os.path.join(item[2], 'src')):
-            os.makedirs(os.path.join(item[2], 'src'))
-        try:
-            shutil.copyfile(os.path.join(item[2], item[1]),
-                            os.path.join(item[2], 'src', item[1]))
-        except IOError:
-            continue
-    sys.exit()
-
-if args.compare:
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print('* Comparing new reports with old reports...')
-    compare_csvs(sio_report_list)
-    sys.exit()
-
-if not os.path.exists(os.path.join('!normal!')):
-    os.makedirs(os.path.join('!normal!'))
-if not os.path.exists(os.path.join('!critical!')):
-    os.makedirs(os.path.join('!critical!'))
-
 
 def load_exceptions():
     l = []
@@ -763,7 +723,49 @@ def generate_jst_reports():
                                        l[9] + str(r[9]),
                                        l[10] + str(r[10])
                                    ])
+
 start = time.clock()
+if args.oldpath.endswith('.krt'):
+    transform(args.oldpath, '.krt')
+    oldpath = 'OSIO'
+elif args.exp:
+    print('aaaa')
+    transform(args.oldpath, '.exp')
+    oldpath = 'OSIO'
+else:
+    oldpath = args.oldpath
+
+if args.get_faqs:
+    get_faqs(args.move, args.compare)
+    sys.exit()
+
+if args.get_reports:
+    get_reports()
+    sys.exit()
+
+if args.move:
+    print('* Moving new reports to src directory...')
+    for item in sio_report_list:
+        if not os.path.exists(os.path.join(item[2], 'src')):
+            os.makedirs(os.path.join(item[2], 'src'))
+        try:
+            shutil.copyfile(os.path.join(item[2], item[1]),
+                            os.path.join(item[2], 'src', item[1]))
+        except IOError:
+            continue
+    sys.exit()
+
+if args.compare:
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print('* Comparing new reports with old reports...')
+    compare_csvs(sio_report_list)
+    sys.exit()
+
+if not os.path.exists(os.path.join('!normal!')):
+    os.makedirs(os.path.join('!normal!'))
+if not os.path.exists(os.path.join('!critical!')):
+    os.makedirs(os.path.join('!critical!'))
+
 missregons = load_exceptions()
 if args.new_overwrite:
     print('! Preparing new SIO data from source files...')
