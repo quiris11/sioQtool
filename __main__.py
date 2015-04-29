@@ -644,6 +644,13 @@ def load_exceptions():
 
 
 def generate_jst_reports():
+    print('* Generating JST report files...')
+    with open(os.path.join('!critical!', 'temp.csv'), 'w') as outfile:
+        for item in sio_report_list:
+            if item[2] == '!critical!':
+                with open(os.path.join(item[2], item[1])) as infile:
+                    for line in infile:
+                        outfile.write(line)
     l = [
         'ID organu scalającego: ',
         'Organ scalający: ',
@@ -663,10 +670,10 @@ def generate_jst_reports():
             'NFKD', text
         ) if unicodedata.category(c) != 'Mn')
 
-    with open(os.path.join('!critical!', 'all.csv')) as f:
+    with open(os.path.join('!critical!', 'temp.csv')) as f:
         csvread = csv.reader(f, delimiter=';', quotechar='"',
                              quoting=csv.QUOTE_NONNUMERIC)
-        with open(os.path.join('!critical!', 'alls.csv'), 'w') as o:
+        with open(os.path.join('!critical!', 'all.csv'), 'w') as o:
             csvwrite = csv.writer(o, delimiter=';', quotechar='"',
                                   quoting=csv.QUOTE_NONNUMERIC)
             csvwrite.writerow([
@@ -723,6 +730,7 @@ def generate_jst_reports():
                                        l[9] + str(r[9]),
                                        l[10] + str(r[10])
                                    ])
+    os.remove(os.path.join('!critical!', 'temp.csv'))
 
 start = time.clock()
 if args.oldpath.endswith('.krt'):
@@ -1480,13 +1488,5 @@ for item in sio_report_list:
                         and ('MINISTERSTWO' not in row[2])):
                     cfile.writerow(row)
 
-# merge !critical! csv files to all.csv
-print('* Generating all.csv file...')
-with open(os.path.join('!critical!', 'all.csv'), 'w') as outfile:
-    for item in sio_report_list:
-        if item[2] == '!critical!':
-            with open(os.path.join(item[2], item[1])) as infile:
-                for line in infile:
-                    outfile.write(line)
 generate_jst_reports()
 print('* Excution time: ' + str(time.clock()-start))
