@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Get SIO reports module."""
 # -*- coding: utf-8 -*-
 #
 # This file is part of sioQtool, licensed under GNU Affero GPLv3 or later.
@@ -7,12 +8,14 @@
 
 
 def get_reports():
+    """Get reports from SIO 'Strefa dla zalogowanych' server."""
     import getpass
     import os
     import shutil
     from lxml import etree
     import urllib
     import urllib2
+    import re
 
     XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
              'x': 'urn:schemas-microsoft-com:office:excel',
@@ -38,7 +41,28 @@ def get_reports():
     })
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
     opener.open(url, data)
-
+    print('* Downloading experts lists...')
+    w = 1
+    while w <= 16:
+        url = (
+            'https://sio.men.gov.pl/dodatki/strefa/index.php?'
+            'param=Support_eksperciNewWindow_' + str(w)
+        )
+        page = opener.open(url)
+        bs = page.read()
+        m = re.search('<title>(.+?)</title>', bs)
+        if m:
+            found = m.group(1)
+        bs = bs.replace('<meta http-equiv="Content-Type" '
+                        'content="text/html; charset=iso-8859-2">',
+                        '<meta http-equiv="Content-Type" '
+                        'content="text/html; charset=utf-8">')
+        with open(os.path.join(home, 'NSIO',
+                               'eksp_' + str(w) + '_' + found + '.html'),
+                  'w') as f:
+            f.write(bs)
+        w += 1
+    print('* Downloading reports...')
     for i in report_list:
         try:
             tree = etree.parse(os.path.join('%s/NSIO/%s' % (home, i[1])))
