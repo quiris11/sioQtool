@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-"""Get SIO reports module."""
 # -*- coding: utf-8 -*-
 #
 # This file is part of sioQtool, licensed under GNU Affero GPLv3 or later.
@@ -8,7 +7,6 @@
 
 
 def get_reports():
-    """Get reports from SIO 'Strefa dla zalogowanych' server."""
     import getpass
     import os
     import shutil
