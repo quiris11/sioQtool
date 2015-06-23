@@ -7,7 +7,7 @@
 
 specyfika_dict = {
     0: 'brak specyfiki',
-    1:	'specjalna',
+    1: 'specjalna',
     100: 'brak specyfiki'
 }
 

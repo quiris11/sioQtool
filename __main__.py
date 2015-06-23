@@ -1076,7 +1076,7 @@ for item in sio_report_list:
                 for rn in ns_zawody_list:
                     if str(ro[0]) + zawod_dict[ro[1]] == str(rn[0]) + rn[1]:
                         rofnd = True
-                if rofnd == False:
+                if rofnd is False:
                     found.append([ro[0], zawod_dict[ro[1]]])
             for rowo in os_data_list:
                 for rowf in found:
@@ -1489,4 +1489,4 @@ for item in sio_report_list:
                     cfile.writerow(row)
 
 generate_jst_reports()
-print('* Excution time: ' + str(time.clock()-start))
+print('* Excution time: ' + str(time.clock() - start))

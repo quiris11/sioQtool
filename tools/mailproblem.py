@@ -10,7 +10,6 @@ def mail_problem(csvf, params):
     import smtplib
     import csv
     import imp
-    import sys
     from email.mime.text import MIMEText
     from email.header import Header
 
