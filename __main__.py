@@ -137,7 +137,8 @@ sio_report_list = ([
         'osn_niezgodne_dane_o_obwodowosci.csv',
         '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
-    ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!']
+    ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
+    ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!']
 ])
 
 header_list = [
@@ -174,20 +175,20 @@ def get_os_internaty(tree):
     if inter_tags is None:
         return None
     for it in inter_tags:
-        itree = etree.ElementTree(it.getparent().getparent())
-        numerIdent = itree.xpath('//identyfikacja',
-                                 namespaces=XSNS)[0].get('numerIdent')
-        print(numerIdent)
-        if numerIdent is None:
-            continue
-        try:
-            nrRspo = int(tree.xpath(
-                '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
-                namespaces=XSNS
-            )[0].get('nrRspo'))
-        except:
-            nrRspo = 0
-        rows.append(nrRspo)
+        if it.get('numerIdent') is not None:
+            itree = etree.ElementTree(it.getparent())
+            numerIdent = itree.xpath('//identyfikacja',
+                                     namespaces=XSNS)[0].get('numerIdent')
+            if numerIdent is None:
+                continue
+            try:
+                nrRspo = int(tree.xpath(
+                    '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
+                    namespaces=XSNS
+                )[0].get('nrRspo'))
+            except:
+                nrRspo = 0
+            rows.append(nrRspo)
     return rows
 
 
@@ -436,6 +437,7 @@ def get_os_data(path):
     os_zawody = []
     os_ee_data = []
     os_12_data = []
+    os_internaty = []
     for root, dirs, files in os.walk(path):
         for single_file in files:
             if single_file.endswith('.xml'):
@@ -451,13 +453,16 @@ def get_os_data(path):
                                                         scalid)
                 os_12_data = os_12_data + get_os_12_row(single_file_tree,
                                                         scalid)
-                # print(get_os_internaty(single_file_tree))
+                os_internaty = os_internaty + get_os_internaty(
+                    single_file_tree
+                )
                 if get_os_zawody(single_file_tree) != []:
                     for r in get_os_zawody(single_file_tree):
                         os_zawody.append(r)
     jsts_dict = dict(jsts)
     jst_dict_rew = dict((r[1], r[0]) for r in jsts)
-    return(data, os_zawody, jsts_dict, jst_dict_rew, os_ee_data, os_12_data)
+    return(data, os_zawody, jsts_dict, jst_dict_rew, os_ee_data, os_12_data,
+           os_internaty)
 
 
 def get_terminated_id(tree, id):
@@ -570,6 +575,7 @@ def get_ns_data(path):
     ns_typ_org_prow = []
     ns_org_prow = []
     ns_czesc_miejska = []
+    ns_internaty = []
     for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         try:
@@ -622,10 +628,17 @@ def get_ns_data(path):
     for i in tree.xpath('//ss:Cell[@ss:Index="24"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_czesc_miejska.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="43"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        try:
+            ns_internaty.append(xi(i))
+        except:
+            ns_internaty.append(xs(i))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
-               ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska)
+               ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska,
+               ns_internaty)
     return data
 
 
@@ -824,7 +837,8 @@ if not args.skip_old_overwrite:
         jsts_dict,
         jst_dict_rew,
         os_ee_sp_p_list,
-        os_ee_sp_12_list
+        os_ee_sp_12_list,
+        os_internaty_list
     ) = get_os_data(oldpath)
     with open(os.path.join(args.newpath, 'os_data_list.txt'), 'w') as f:
         f.write(str(os_data_list))
@@ -838,6 +852,8 @@ if not args.skip_old_overwrite:
         f.write(str(os_ee_sp_p_list))
     with open(os.path.join(args.newpath, 'os_ee_sp_12_list.txt'), 'w') as f:
         f.write(str(os_ee_sp_12_list))
+    with open(os.path.join(args.newpath, 'os_internaty_list.txt'), 'w') as f:
+        f.write(str(os_internaty_list))
 else:
     print('* Loading prepared old SIO data from txt files...')
     with open(os.path.join(args.newpath, 'os_data_list.txt'), 'r') as f:
@@ -852,6 +868,8 @@ else:
         os_ee_sp_p_list = eval(f.read())
     with open(os.path.join(args.newpath, 'os_ee_sp_12_list.txt'), 'r') as f:
         os_ee_sp_12_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'os_internaty_list.txt'), 'r') as f:
+        os_internaty_list = eval(f.read())
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
     with open(os.path.join(item[2], item[1]), 'wb') as f:
@@ -1280,6 +1298,48 @@ for item in sio_report_list:
                             rowo[8],
                             rowo[9]
                         ])
+        elif item[1] is 'osn_rozne_internaty.csv':
+            for rowo in os_data_list:
+                if rowo[0] == 0:
+                    continue
+                if rowo[0] in os_internaty_list:
+                    for rown in ns_data_list:
+                        if (
+                            rowo[0] == rown[0] and
+                            rown[14] == 0
+                        ):
+                            cfile.writerow([
+                                rowo[23],
+                                jsts_dict[rowo[23]],
+                                'Niezgodność danych o internacie',
+                                'Internat wpisany',
+                                'Internat niewpisany',
+                                rowo[0],
+                                rowo[1],
+                                type_dict[rowo[4]],
+                                rowo[7],
+                                rowo[8],
+                                rowo[9]
+                            ])
+                else:
+                    for rown in ns_data_list:
+                        if (
+                            rowo[0] == rown[0] and
+                            rown[14] == 1
+                        ):
+                            cfile.writerow([
+                                rowo[23],
+                                jsts_dict[rowo[23]],
+                                'Niezgodność danych o internacie',
+                                'Internat niewpisany',
+                                'Internat wpisany',
+                                rowo[0],
+                                rowo[1],
+                                type_dict[rowo[4]],
+                                rowo[7],
+                                rowo[8],
+                                rowo[9]
+                            ])
         elif item[1] is 'osn_niezgodny_typ_organu_prow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
