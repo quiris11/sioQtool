@@ -37,7 +37,7 @@ def get_reports():
                                    namespaces=XLSNS)[0]
         except:
             print('Error! Incorrect file: %s/NSIO/%s' % (home, i[1]))
-            continue
+            title_old = ''
         url = (
             'https://bezpieczenstwo-formularz.men.gov.pl/frame/sdz/raporty/'
             'raport/idPodmiot/38/idRaport/' + i[0]
