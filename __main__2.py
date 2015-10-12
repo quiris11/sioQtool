@@ -682,11 +682,11 @@ def generate_jst_reports():
                 'E-mail',
                 'Telefon'
             ])
-            if os.path.exists(os.path.join('!critical!', 'JST')):
-                shutil.rmtree(os.path.join('!critical!', 'JST'))
-                os.makedirs(os.path.join('!critical!', 'JST'))
+            if os.path.exists(os.path.join('!critical!', 'JST2')):
+                shutil.rmtree(os.path.join('!critical!', 'JST2'))
+                os.makedirs(os.path.join('!critical!', 'JST2'))
             else:
-                os.makedirs(os.path.join('!critical!', 'JST'))
+                os.makedirs(os.path.join('!critical!', 'JST2'))
             for r in csvread:
                 for i, x in enumerate(r):
                     if type(x) is float:
@@ -705,7 +705,7 @@ def generate_jst_reports():
                     with open(
                         os.path.join(
                             '!critical!',
-                            'JST',
+                            'JST2',
                             '%s (%s).txt' % (nfname, r[0])), 'a'
                     ) as j:
                         csv.writer(j, delimiter='\n', quotechar="'",
