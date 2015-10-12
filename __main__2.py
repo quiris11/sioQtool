@@ -511,60 +511,49 @@ def get_ns_ee_data(path, typ):
     ns_ee_first = []
     ns_ee_second = []
     ns_ee_irrelevant = []
-    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
-                        namespaces=XLSNS)[2:]:
+
+    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
+        rtree = etree.ElementTree(i)
+        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
         try:
-            ns_rspos.append(xi(i))
+            ns_rspos.append(xi(cd[0].text))
         except:
-            ns_rspos.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[3]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_typs.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[4]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_names.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[5]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_pzero.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[6]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_zero.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[7]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_first.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[8]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_second.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[9]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_irrelevant.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[14]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_regons.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[11]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_org_rej.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[35]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_datas_rozp_dzial.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[32]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_publicznosc.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[31]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_kat_uczn.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[26]/ss:Data',
-                        namespaces=XLSNS):
-        if i.text is None:
+            ns_rspos.append(xs(cd[0].text))
+        ns_typs.append(xs(cd[2].text))
+        ns_names.append(xs(cd[3].text))
+        if cd[4].text is None:
+            ns_ee_pzero.append('.')
+        else:
+            ns_ee_pzero.append(xs(cd[4].text))
+        if cd[5].text is None:
+            ns_ee_zero.append('.')
+        else:
+            ns_ee_zero.append(xs(cd[5].text))
+        if cd[6].text is None:
+            ns_ee_first.append('.')
+        else:
+            ns_ee_first.append(xs(cd[6].text))
+        if cd[7].text is None:
+            ns_ee_second.append('.')
+        else:
+            ns_ee_second.append(xs(cd[7].text))
+        if cd[8].text is None:
+            ns_ee_irrelevant.append('.')
+        else:
+            ns_ee_irrelevant.append(xs(cd[8].text))
+        ns_regons.append(xs(cd[13].text))
+        ns_org_rej.append(xs(cd[10].text))
+        ns_datas_rozp_dzial.append(xs(cd[34].text))
+        ns_publicznosc.append(xs(cd[31].text))
+        ns_kat_uczn.append(xs(cd[30].text))
+        if cd[25].text is None:
             ns_emails.append('')
         else:
-            ns_emails.append(i.text)
-    for i in tree.xpath('//ss:Row/ss:Cell[25]/ss:Data',
-                        namespaces=XLSNS):
-        if i.text is None:
+            ns_emails.append(cd[25].text)
+        if cd[24].text is None:
             ns_tels.append('')
         else:
-            ns_tels.append(i.text)
+            ns_tels.append(cd[24].text)
     dataee = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                  ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                  ns_ee_pzero, ns_ee_zero, ns_ee_first, ns_ee_second,
