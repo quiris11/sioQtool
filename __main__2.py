@@ -194,7 +194,7 @@ def get_os_internaty(tree):
 
 
 def get_ns_obwody(path):
-    tree = etree.parse(os.path.join(path, 'obwody_sp.xls'))
+    tree = etree.parse(os.path.join(path, 'obwody_sp2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
@@ -204,7 +204,7 @@ def get_ns_obwody(path):
             data.append(xi(i))
         except:
             continue
-    tree = etree.parse(os.path.join(path, 'obwody_gm.xls'))
+    tree = etree.parse(os.path.join(path, 'obwody_gm2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
@@ -217,7 +217,7 @@ def get_ns_obwody(path):
 
 
 def get_ns_zawody(path):
-    tree = etree.parse(os.path.join(path, 'zawody.xls'))
+    tree = etree.parse(os.path.join(path, 'zawody2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
@@ -492,7 +492,7 @@ def get_terminated_id(tree, id):
 
 
 def get_ns_ee_data(path, typ):
-    tree = etree.parse(os.path.join(path, 'ee_' + typ + '.xls'))
+    tree = etree.parse(os.path.join(path, 'ee_' + typ + '2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     dataee = []
@@ -511,56 +511,55 @@ def get_ns_ee_data(path, typ):
     ns_ee_first = []
     ns_ee_second = []
     ns_ee_irrelevant = []
-    # for 'ponizej zero' col skipped first merged cell
-    for i in tree.xpath('//ss:Cell[@ss:Index="4"]/ss:Data/text()',
-                        namespaces=XLSNS)[1:]:
-        ns_ee_pzero.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="5"]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_zero.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_first.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_second.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="8"]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_ee_irrelevant.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
-                        namespaces=XLSNS):
+    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
+                        namespaces=XLSNS)[2:]:
         try:
             ns_rspos.append(xi(i))
         except:
             ns_rspos.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="13"]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_regons.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="2"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Row/ss:Cell[3]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_typs.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Row/ss:Cell[4]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_names.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="10"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Row/ss:Cell[5]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_pzero.append(xs(i))
+    for i in tree.xpath('//ss:Row/ss:Cell[6]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_zero.append(xs(i))
+    for i in tree.xpath('//ss:Row/ss:Cell[7]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_first.append(xs(i))
+    for i in tree.xpath('//ss:Row/ss:Cell[8]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_second.append(xs(i))
+    for i in tree.xpath('//ss:Row/ss:Cell[9]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_irrelevant.append(xs(i))
+    for i in tree.xpath('//ss:Row/ss:Cell[14]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_regons.append(xs(i))
+    for i in tree.xpath('//ss:Row/ss:Cell[11]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_org_rej.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="36"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Row/ss:Cell[35]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_datas_rozp_dzial.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="33"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Row/ss:Cell[32]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_publicznosc.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="32"]/ss:Data/text()',
+    for i in tree.xpath('//ss:Row/ss:Cell[31]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_kat_uczn.append(xs(i))
-    for i in tree.xpath('//ss:Cell[@ss:Index="26"]/ss:Data',
+    for i in tree.xpath('//ss:Row/ss:Cell[26]/ss:Data',
                         namespaces=XLSNS):
         if i.text is None:
             ns_emails.append('')
         else:
             ns_emails.append(i.text)
-    for i in tree.xpath('//ss:Cell[@ss:Index="24"]/ss:Data',
+    for i in tree.xpath('//ss:Row/ss:Cell[25]/ss:Data',
                         namespaces=XLSNS):
         if i.text is None:
             ns_tels.append('')
@@ -574,7 +573,7 @@ def get_ns_ee_data(path, typ):
 
 
 def get_ns_data(path):
-    tree = etree.parse(os.path.join(path, 'rspo_aktywne.xls'))
+    tree = etree.parse(os.path.join(path, 'rspo_aktywne2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
@@ -593,73 +592,39 @@ def get_ns_data(path):
     ns_org_prow = []
     ns_czesc_miejska = []
     ns_internaty = []
-    # for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
-    #                     namespaces=XLSNS)[2:]:
-    #     try:
-    #         ns_rspos.append(xi(i))
-    #     except:
-    #         ns_rspos.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data',
-                        namespaces=XLSNS)[2:]:
-        if i.text is None:
-            ns_rspos.append(0)
+    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
+        rtree = etree.ElementTree(i)
+        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
+        if cd[0].text is None:
+                continue
         else:
             try:
-                ns_rspos.append(xi(i.text))
+                ns_rspos.append(xi(cd[0].text))
             except:
-                ns_rspos.append(xs(i.text))
-    print(ns_rspos)
-    for i in tree.xpath('//ss:Row/ss:Cell[9]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_regons.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[3]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_typs.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[4]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_names.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[6]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_org_rej.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[33]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_datas_rozp_dzial.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[27]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_publicznosc.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[26]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_kat_uczn.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[21]/ss:Data',
-                        namespaces=XLSNS):
-        if i.text is None:
-            ns_emails.append('')
-        else:
-            ns_emails.append(i.text)
-    for i in tree.xpath('//ss:Row/ss:Cell[20]/ss:Data',
-                        namespaces=XLSNS):
-        if i.text is None:
-            ns_tels.append('')
-        else:
-            ns_tels.append(i.text)
-    for i in tree.xpath('//ss:Row/ss:Cell[25]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_specyfika.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[7]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_typ_org_prow.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[8]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_org_prow.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[23]/ss:Data/text()',
-                        namespaces=XLSNS):
-        ns_czesc_miejska.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[39]/ss:Data/text()',
-                        namespaces=XLSNS):
-        try:
-            ns_internaty.append(xi(i))
-        except:
-            ns_internaty.append(xs(i))
+                ns_rspos.append(xs(cd[0].text))
+            ns_regons.append(xs(cd[8].text))
+            ns_typs.append(xs(cd[2].text))
+            ns_names.append(xs(cd[3].text))
+            ns_org_rej.append(xs(cd[5].text))
+            ns_datas_rozp_dzial.append(xs(cd[32].text))
+            ns_publicznosc.append(xs(cd[26].text))
+            ns_kat_uczn.append(xs(cd[25].text))
+            if cd[20].text is None:
+                ns_emails.append('')
+            else:
+                ns_emails.append(cd[20].text)
+            if cd[19].text is None:
+                ns_tels.append('')
+            else:
+                ns_tels.append(cd[19].text)
+            ns_specyfika.append(xs(cd[24].text))
+            ns_typ_org_prow.append(xs(cd[6].text))
+            ns_org_prow.append(xs(cd[7].text))
+            ns_czesc_miejska.append(xs(cd[22].text))
+            try:
+                ns_internaty.append(xi(cd[38].text))
+            except:
+                ns_internaty.append(xs(cd[38].text))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
@@ -821,7 +786,7 @@ if args.new_overwrite:
     ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
     ns_zawody_list = get_ns_zawody(args.newpath)
     obw_rspo_list = get_ns_obwody(args.newpath)
-    term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
+    term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne2.xls'))
     print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                  namespaces=XLSNS)[0])
     ns_term_list = zip(
