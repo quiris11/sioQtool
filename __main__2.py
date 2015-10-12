@@ -476,19 +476,20 @@ def get_os_data(path):
            os_internaty)
 
 
-def get_terminated_id(tree, id):
-    lista = []
-    if id == '1':
-        lista = lista + tree.xpath(
-            '//ss:Row/ss:Cell[' + id + ']/ss:Data/text()',
-            namespaces=XLSNS
-        )[3:]
-    else:
-        lista = lista + tree.xpath(
-            '//ss:Row/ss:Cell[' + id + ']/ss:Data/text()',
-            namespaces=XLSNS
-        )[1:]
-    return lista
+def get_terminated(tree):
+    regons = []
+    term_d = []
+    rspos = []
+    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[3:]:
+        rtree = etree.ElementTree(i)
+        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
+        if cd[0].text is None:
+            continue
+        else:
+            regons.append(xs(cd[9].text))
+            term_d.append(xs(cd[4].text))
+            rspos.append(xs(cd[0].text))
+    return zip(regons, term_d, rspos)
 
 
 def get_ns_ee_data(path, typ):
@@ -778,11 +779,7 @@ if args.new_overwrite:
     term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne2.xls'))
     print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                  namespaces=XLSNS)[0])
-    ns_term_list = zip(
-        get_terminated_id(term_tree, '10'),  # REGON
-        get_terminated_id(term_tree, '5'),   # Termination date
-        get_terminated_id(term_tree, '1')    # Nr RSPO
-    )
+    ns_term_list = get_terminated(term_tree)
     with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'w') as f:
         f.write(str(ns_data_list))
     with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'w') as f:
