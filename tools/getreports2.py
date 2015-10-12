@@ -18,13 +18,13 @@ def get_reports():
     home = os.path.expanduser("~")
 
     report_list = [
-        ['1', 'rspo_aktywne.xls'],
-        ['2', 'ee_przedszk.xls'],
-        ['3', 'ee_sp.xls'],
-        ['4', 'obwody_sp.xls'],
-        ['5', 'obwody_gm.xls'],
-        ['6', 'zawody.xls'],
-        ['7', 'rspo_nieaktywne.xls']
+        ['1', 'rspo_aktywne2.xls'],
+        ['2', 'ee_przedszk2.xls'],
+        ['3', 'ee_sp2.xls'],
+        ['4', 'obwody_sp2.xls'],
+        ['5', 'obwody_gm2.xls'],
+        ['6', 'zawody2.xls'],
+        ['7', 'rspo_nieaktywne2.xls']
     ]
 
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
