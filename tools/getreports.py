@@ -20,12 +20,12 @@ def get_reports():
              'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
     home = os.path.expanduser("~")
     report_list = [
-        ['6', 'rspo_aktywne.xls'],
-        ['65', 'rspo_nieaktywne.xls'],
-        ['61', 'ee_przedszk.xls'],
-        ['62', 'ee_sp.xls'],
-        ['63', 'obwody.xls'],
-        ['64', 'zawody.xls']
+        ['6', '1rspo_aktywne.xls'],
+        ['65', '1rspo_nieaktywne.xls'],
+        ['61', '1ee_przedszk.xls'],
+        ['62', '1ee_sp.xls'],
+        ['63', '1obwody.xls'],
+        ['64', '1zawody.xls']
     ]
 
     uname = raw_input("Username: ")
@@ -68,7 +68,7 @@ def get_reports():
                                    namespaces=XLSNS)[0]
         except:
             print('Error! Incorrect file: %s/NSIO/%s' % (home, i[1]))
-            continue
+            title_old = ''
         url = (
             'https://sio.men.gov.pl/dodatki/strefa/index.php?'
             'param=Support_download_' + i[0]
