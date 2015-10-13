@@ -138,7 +138,9 @@ sio_report_list = ([
         '!critical!'],
     ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
-    ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!']
+    ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
+    ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
+        '!critical!']
 ])
 
 header_list = [
@@ -561,6 +563,37 @@ def get_ns_ee_data(path, typ):
     return dataee
 
 
+def get_jst_data(path):
+    tree = etree.parse(os.path.join(path, 'rspo_aktywne2.xls'))
+    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                              namespaces=XLSNS)[0])
+    data = []
+    ns_regons = []
+    ns_type_ids = []
+    ns_typs = []
+    ns_names = []
+    ns_emails = []
+    ns_tels = []
+    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
+        rtree = etree.ElementTree(i)
+        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
+        if cd[1].text == '103' or cd[1].text == '104':
+            ns_type_ids.append(xi(cd[1].text))
+            ns_typs.append(xs(cd[2].text))
+            ns_names.append(xs(cd[3].text))
+            ns_regons.append(xs(cd[8].text))
+            if cd[20].text is None:
+                ns_emails.append('')
+            else:
+                ns_emails.append(xs(cd[20].text))
+            if cd[19].text is None:
+                ns_tels.append('')
+            else:
+                ns_tels.append(xs(cd[19].text))
+    data = zip(ns_type_ids, ns_typs, ns_names, ns_regons, ns_emails, ns_tels)
+    return data
+
+
 def get_ns_data(path):
     tree = etree.parse(os.path.join(path, 'rspo_aktywne2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
@@ -771,6 +804,7 @@ missregons = load_exceptions()
 if args.new_overwrite:
     print('! Preparing new SIO data from source files...')
     ns_data_list = get_ns_data(args.newpath)
+    ns_jst_list = get_jst_data(args.newpath)
     ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
     ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
     ns_zawody_list = get_ns_zawody(args.newpath)
@@ -781,6 +815,8 @@ if args.new_overwrite:
     ns_term_list = get_terminated(term_tree)
     with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'w') as f:
         f.write(str(ns_data_list))
+    with open(os.path.join(args.newpath, 'ns_jst_list.txt'), 'w') as f:
+        f.write(str(ns_jst_list))
     with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'w') as f:
         f.write(str(ns_ee_sp_list))
     with open(os.path.join(args.newpath, 'ns_ee_p_list.txt'), 'w') as f:
@@ -795,6 +831,8 @@ else:
     print('* Loading prepared new SIO data from txt files...')
     with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'r') as f:
         ns_data_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'ns_jst_list.txt'), 'r') as f:
+        ns_jst_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'r') as f:
         ns_ee_sp_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_ee_p_list.txt'), 'r') as f:
@@ -1199,6 +1237,33 @@ for item in sio_report_list:
                             row[8],
                             row[9]
                         ])
+        elif item[1] is 'osn_jst_problematyczne_numery_regon.csv':
+            for row in os_data_list:
+                if row[4] not in (103, 104):
+                    continue
+                regon_found = False
+                nregon = ''
+                for i in ns_jst_list:
+                    if row[1] == i[3] + '00000':
+                        regon_found = True
+                        continue
+                if regon_found is False:
+                    for i in ns_jst_list:
+                        if i[2] == jsts_dict[row[23]]:
+                            nregon = i[3]
+                    cfile.writerow([
+                        row[23],
+                        jsts_dict[row[23]],
+                        'Niezgodny nr REGON JST lub ZEAS',
+                        row[1],
+                        nregon,
+                        row[0],
+                        row[1],
+                        type_dict[row[4]],
+                        row[7],
+                        row[8],
+                        row[9]
+                    ])
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
