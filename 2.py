@@ -17,8 +17,7 @@ from dictionaries import specyfika_dict
 from dictionaries import zawod_dict
 from dictionaries import typ_organu_prow_dict
 from dictionaries import jst_dict
-# from tools.getreports import get_reports
-from tools.getreports2 import get_reports  # get new daily reports
+from tools.getreports2 import get_reports
 from tools.getfaqs import get_faqs
 from tools.transform import transform
 import unicodedata
