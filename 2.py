@@ -140,6 +140,9 @@ sio_report_list = ([
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
+        '!critical!'],
+    ['NS: different or missing parent',
+        'osn_brak_lub_niezgodny_org_nadrzedny.csv',
         '!critical!']
 ])
 
@@ -275,7 +278,7 @@ def xi(s):
     return int(s)
 
 
-def os_row(i, a, scalid):
+def os_row(i, a, scalid, rspo_nad, regon_nad, name_nad, parent_tag):
     lista = [
         xi(i.get('nrRspo')),
         xs(i.get('regon')),
@@ -300,7 +303,11 @@ def os_row(i, a, scalid):
         xi(i.get('specyfikaSzkoly')),
         xi(i.get('typOrganuProw')),
         xs(i.get('szkolaObwodowa')),
-        xs(scalid)
+        xs(scalid),
+        xi(rspo_nad),
+        xs(regon_nad),
+        xs(name_nad),
+        xs(parent_tag)
     ]
     return lista
 
@@ -435,11 +442,28 @@ def get_jst_row(tree):
 
 def get_os_row(tree, scalid):
     file_rows = []
+    i2as = tree.xpath('//i2a', namespaces=XSNS)
+    if len(i2as) > 0:
+        rspo_nad = 0 if i2as[0].get(
+            'nrRspo'
+        ) is None else i2as[0].get('nrRspo')
+        regon_nad = i2as[0].get('regon')
+        nazwa_nad = i2as[0].get('nazwa')
+    else:
+        rspo_nad = '0'
+        regon_nad = ''
+        nazwa_nad = ''
     i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
     for i in i2s:
         itree = etree.ElementTree(i)
         a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-        file_rows.append(os_row(i, a, scalid))
+        file_rows.append(os_row(
+            i, a, scalid,
+            '0' if i.get('nrRspo') == rspo_nad else rspo_nad,
+            '' if i.get('nrRspo') == rspo_nad else regon_nad,
+            '' if i.get('nrRspo') == rspo_nad else nazwa_nad,
+            i.getparent().getparent().tag
+        ))
     return file_rows
 
 
@@ -614,6 +638,8 @@ def get_ns_data(path):
     ns_org_prow = []
     ns_czesc_miejska = []
     ns_internaty = []
+    ns_rspos_nad = []
+    ns_names_nad = []
     for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
         rtree = etree.ElementTree(i)
         cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
@@ -647,11 +673,22 @@ def get_ns_data(path):
                 ns_internaty.append(xi(cd[38].text))
             except:
                 ns_internaty.append(xs(cd[38].text))
+            if cd[36].text is None:
+                ns_rspos_nad.append(0)
+            else:
+                try:
+                    ns_rspos_nad.append(xi(cd[36].text))
+                except:
+                    ns_rspos_nad.append(xs(cd[36].text))
+            if cd[37].text is None:
+                ns_names_nad.append('')
+            else:
+                ns_names_nad.append(xs(cd[37].text))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska,
-               ns_internaty)
+               ns_internaty, ns_rspos_nad, ns_names_nad)
     return data
 
 
@@ -1332,6 +1369,30 @@ for item in sio_report_list:
                             'Niezgodność lub brak adresu e-mail',
                             'brak' if rowo[8] == '' else rowo[8],
                             'brak' if rown[5] == '' else rown[5],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
+        elif item[1] is 'osn_brak_lub_niezgodny_org_nadrzedny.csv':
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    if (rowo[0] == rown[0] and
+                            rowo[24] != rown[15] and
+                            rowo[4] != 81 and
+                            rowo[27] != 'filiaSzkolyPodst'):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność lub brak podmiotu nadrzędnego',
+                            'Nr RSPO nadrzędnego: ' + (
+                                'brak' if rowo[24] == 0 else str(rowo[24])
+                            ),
+                            'Nr RSPO nadrzędnego: ' + (
+                                'brak' if rown[15] == 0 else str(rown[15])
+                            ),
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
