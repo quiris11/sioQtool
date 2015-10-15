@@ -438,7 +438,13 @@ zawod_dict = {
     347: 'Technik procesów introligatorskich',
     348: 'Wiertacz',
     349: 'Murarz-tynkarz',
-    350: 'Wędliniarz'
+    350: 'Wędliniarz',
+    351: 'Technik chłodnictwa i klimatyzacji',
+    352: 'Technik urządzeń dźwigowych',
+    353: 'Mechanik motocyklowy',
+    354: 'Technik przemysłu mody',
+    355: 'Technik lotniskowych służb operacyjnych',
+    356: 'Przetwórca ryb'
 }
 
 typ_organu_prow_dict = {
