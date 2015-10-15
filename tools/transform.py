@@ -8,6 +8,7 @@
 
 def transform(path, extension):
     import os
+    import sys
     import shutil
     import subprocess
 
@@ -27,7 +28,10 @@ def transform(path, extension):
     if extension == '.krt':
         exp = os.path.join('OSIO.exp')
         shutil.rmtree(os.path.join('OSIO'))
-        shutil.copyfile(os.path.join(path), exp)
+        try:
+            shutil.copyfile(os.path.join(path), exp)
+        except:
+            sys.exit('Error! File does not exist...')
         unpack_exp(exp)
         os.remove(exp)
     elif extension == '.exp':
