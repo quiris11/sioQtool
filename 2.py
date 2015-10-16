@@ -1382,6 +1382,9 @@ for item in sio_report_list:
                     if (rowo[0] == rown[0] and
                             rowo[24] != rown[15] and
                             rowo[4] != 81 and
+                            rowo[4] != 51 and
+                            rowo[4] != 53 and
+                            rowo[4] != 54 and
                             rowo[27] != 'filiaSzkolyPodst'):
                         cfile.writerow([
                             rowo[23],
