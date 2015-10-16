@@ -670,9 +670,9 @@ def get_ns_data(path):
             ns_org_prow.append(xs(cd[7].text))
             ns_czesc_miejska.append(xs(cd[22].text))
             try:
-                ns_internaty.append(xi(cd[38].text))
+                ns_internaty.append(xi(cd[40].text))
             except:
-                ns_internaty.append(xs(cd[38].text))
+                ns_internaty.append(xs(cd[40].text))
             if cd[36].text is None:
                 ns_rspos_nad.append(0)
             else:
