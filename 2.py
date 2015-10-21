@@ -64,8 +64,8 @@ parser.add_argument('--get-reports',
 parser.add_argument('--get-faqs',
                     help="get FAQs from SIO portal",
                     action="store_true")
-parser.add_argument('-o', '--new-overwrite',
-                    help="overwrite new SIO temporary lists",
+parser.add_argument('-n', '--skip-new-overwrite',
+                    help="skip overwriting new SIO temporary lists",
                     action="store_true")
 parser.add_argument('-s', '--skip-old-overwrite',
                     help="skip overwriting old SIO temporary lists",
@@ -838,7 +838,7 @@ if not os.path.exists(os.path.join('!critical!')):
     os.makedirs(os.path.join('!critical!'))
 
 missregons = load_exceptions()
-if args.new_overwrite:
+if not args.skip_new_overwrite:
     print('! Preparing new SIO data from source files...')
     ns_data_list = get_ns_data(args.newpath)
     ns_jst_list = get_jst_data(args.newpath)
