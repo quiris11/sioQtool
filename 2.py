@@ -25,6 +25,7 @@ import argparse
 import os
 import csv
 import difflib
+import glob
 import shutil
 import sys
 import time
@@ -1668,5 +1669,14 @@ for i in sio_report_list:
         worksheet.autofilter(0, 0, r, c)
         worksheet.set_column(0, c, 30)
     workbook.close()
+
+# move CSV files to CSV directory
+if os.path.exists(os.path.join('!critical!', 'CSV')):
+    shutil.rmtree(os.path.join('!critical!', 'CSV'))
+    os.makedirs(os.path.join('!critical!', 'CSV'))
+else:
+    os.makedirs(os.path.join('!critical!', 'CSV'))
+for filename in glob.glob(os.path.join('!critical!', '*.csv')):
+    shutil.move(filename, os.path.join('!critical!', 'CSV'))
 
 print('* Excution time: ' + str(time.clock() - start))
