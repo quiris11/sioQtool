@@ -20,6 +20,7 @@ from dictionaries import jst_dict
 from tools.getreports2 import get_reports
 from tools.getfaqs import get_faqs
 from tools.transform import transform
+from xlsxwriter.workbook import Workbook
 import unicodedata
 import argparse
 import os
@@ -144,7 +145,8 @@ sio_report_list = ([
         '!critical!'],
     ['NS: different or missing parent',
         'osn_brak_lub_niezgodny_org_nadrzedny.csv',
-        '!critical!']
+        '!critical!'],
+    ['ALL: all problems', 'all.csv', '!critical!']
 ])
 
 header_list = [
@@ -1673,4 +1675,37 @@ for item in sio_report_list:
                     cfile.writerow(row)
 
 generate_jst_reports()
+
+# convert CSV into XLSX
+if os.path.exists(os.path.join('!critical!', 'XLSX')):
+    shutil.rmtree(os.path.join('!critical!', 'XLSX'))
+    os.makedirs(os.path.join('!critical!', 'XLSX'))
+else:
+    os.makedirs(os.path.join('!critical!', 'XLSX'))
+
+for i in sio_report_list:
+    print('* XLSX: Generating %s.xlsx' % os.path.splitext(i[1])[0])
+    workbook = Workbook(os.path.join('!critical!', 'XLSX',
+                        os.path.splitext(i[1])[0] + '.xlsx'))
+    worksheet = workbook.add_worksheet()
+    bold = workbook.add_format({'bold': True})
+    with open(os.path.join(i[2], i[1]), 'rb') as f:
+        reader = csv.reader(f, delimiter=';', quotechar='"',
+                            quoting=csv.QUOTE_NONNUMERIC)
+        for r, row in enumerate(reader):
+            for c, col in enumerate(row):
+                if r == 0:
+                    try:
+                        worksheet.write(r, c, col.decode('utf-8'), bold)
+                    except AttributeError:
+                        worksheet.write(r, c, col, bold)
+                else:
+                    try:
+                        worksheet.write(r, c, col.decode('utf-8'))
+                    except AttributeError:
+                        worksheet.write(r, c, col)
+        worksheet.autofilter(0, 0, r, c)
+        worksheet.set_column(0, c, 30)
+    workbook.close()
+
 print('* Excution time: ' + str(time.clock() - start))
