@@ -9,7 +9,6 @@ from __future__ import print_function
 from lxml import etree
 from collections import Counter
 from datetime import datetime
-from validate_email import validate_email
 from dictionaries import kat_ucz_dict
 from dictionaries import publ_dict
 from dictionaries import type_dict
@@ -109,7 +108,6 @@ sio_report_list = ([
     ['OS: duplicated RSPOs', 'os_zdublowane_rspo.csv', '!critical!'],
     ['OS: no RSPOs', 'os_brak_nr_rspo.csv', '!critical!'],
     ['OS: no e-mails', 'os_brak_adresu_email.csv', '!critical!'],
-    ['OS: incorrect e-mails', 'os_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['OS: incorrect RSPOs', 'os_niepoprawne_numery_rspo.csv', '!critical!'],
     ['OS: incorrect REGONSs', 'os_niepoprawne_numery_regon.csv', '!critical!'],
     ['OS: incorrect publicznosc', 'osn_niepoprawne_pole_publicznosc.csv',
@@ -117,7 +115,6 @@ sio_report_list = ([
     ['OS: incorrect kategoria uczniow',
         'osn_niepoprawne_pole_kategoria_uczniow.csv', '!critical!'],
     ['NS: all items', 'ns_all_items.csv', '!normal!'],
-    ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
     ['NS: Missing REGONs in old SIO existing in a new SIO\n  with birthdate '
         'earlier than %s' % BORDER_DATE,
      'osn_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
@@ -138,7 +135,6 @@ sio_report_list = ([
     ['NS: incorrect szkolaObwodowa',
         'osn_niezgodne_dane_o_obwodowosci.csv',
         '!critical!'],
-    ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
@@ -1136,23 +1132,6 @@ for item in sio_report_list:
                         row[8],
                         row[9]
                     ])
-        elif item[1] is 'os_nieprawidlowe_adresy_email.csv':
-            for row in os_data_list:
-                if (not validate_email(row[8])
-                        and row[8] is not '') or '@02.pl' in row[8]:
-                    cfile.writerow([
-                        row[23],
-                        jsts_dict[row[23]],
-                        'Nieprawidłowy adres e-mail w starym SIO',
-                        row[8],
-                        'nie badano',
-                        row[0],
-                        row[1],
-                        type_dict[row[4]],
-                        row[7],
-                        row[8],
-                        row[9]
-                    ])
         elif (
             item[1] is
             'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv'
@@ -1652,27 +1631,9 @@ for item in sio_report_list:
                         row[8],
                         row[9]
                     ])
-        elif item[1] is 'ns_nieprawidlowe_adresy_email.csv':
-            for row in ns_data_list:
-                ms = row[5].split(' , ')
-                for m in ms:
-                    if args.ns_mail_tough_check:
-                        print('* Checking: ' + m)
-                        if (not validate_email(m, check_mx=True)
-                                and m is not '') or '@02.pl' in m:
-                            cfile.writerow(row)
-                    else:
-                        if (not validate_email(m)
-                                and m is not '') or '@02.pl' in m:
-                            cfile.writerow(row)
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
-        elif item[1] is 'ns_brak_adresu_email.csv':
-            for row in ns_data_list:
-                if ((row[5] is '' or 'E-mail' in row[5])
-                        and ('MINISTERSTWO' not in row[2])):
-                    cfile.writerow(row)
 
 generate_jst_reports()
 
