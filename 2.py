@@ -147,7 +147,7 @@ sio_report_list = ([
         'osn_brak_lub_niezgodny_org_nadrzedny.csv',
         '!critical!'],
     ['NS: problematic characters in names',
-     'ns_problematic_chars_in_names.csv',
+     'osn_problematic_chars_in_names.csv',
      '!critical!'],
     ['ALL: all problems', 'all.csv', '!critical!']
 ])
@@ -1433,26 +1433,6 @@ for item in sio_report_list:
                                 rowo[8],
                                 rowo[9]
                             ])
-        elif item[1] is 'ns_problematic_chars_in_names.csv':
-            for rowo in os_data_list:
-                if rowo[0] == 0:
-                    continue
-                for rown in ns_data_list:
-                    if (rowo[0] == rown[0] and
-                            '\n' in rown[3].decode('utf-8')):
-                        cfile.writerow([
-                            rowo[23],
-                            jsts_dict[rowo[23]],
-                            'Problematyczne znaki w nazwie w RSPO',
-                            'nie badano',
-                            rown[3],
-                            rowo[0],
-                            rowo[1],
-                            type_dict[rowo[4]],
-                            rowo[7],
-                            rowo[8],
-                            rowo[9]
-                        ])
                 else:
                     for rown in ns_data_list:
                         if (
@@ -1472,6 +1452,26 @@ for item in sio_report_list:
                                 rowo[8],
                                 rowo[9]
                             ])
+        elif item[1] is 'osn_problematic_chars_in_names.csv':
+            for rowo in os_data_list:
+                if rowo[0] == 0:
+                    continue
+                for rown in ns_data_list:
+                    if (rowo[0] == rown[0] and
+                            '\n' in rown[3].decode('utf-8')):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Problematyczne znaki w nazwie w RSPO',
+                            'nie badano',
+                            rown[3],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
         elif item[1] is 'osn_niezgodny_typ_organu_prow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
