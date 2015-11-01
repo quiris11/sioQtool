@@ -71,6 +71,9 @@ parser.add_argument('-n', '--skip-new-overwrite',
 parser.add_argument('-s', '--skip-old-overwrite',
                     help="skip overwriting old SIO temporary lists",
                     action="store_true")
+parser.add_argument('-f', '--force',
+                    help="force downloading new reports",
+                    action="store_true")
 args = parser.parse_args()
 
 
@@ -814,7 +817,7 @@ if args.get_faqs:
     sys.exit()
 
 if args.get_reports:
-    get_reports()
+    get_reports(args.force)
     sys.exit()
 
 if args.move:

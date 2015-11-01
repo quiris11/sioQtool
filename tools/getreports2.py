@@ -6,7 +6,7 @@
 #
 
 
-def get_reports():
+def get_reports(force):
     import os
     import shutil
     from lxml import etree
@@ -55,7 +55,7 @@ def get_reports():
             continue
         print('Local file title:  ' + title_old)
         print('Remote file title: ' + title_new)
-        if title_old == title_new:
+        if title_old == title_new and not force:
             print('* NOT updated. Same report already downloaded...')
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
         else:
