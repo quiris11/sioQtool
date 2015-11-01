@@ -1440,7 +1440,6 @@ for item in sio_report_list:
                 for rown in ns_data_list:
                     if (rowo[0] == rown[0] and
                             '\n' in rown[3].decode('utf-8')):
-                        print(rown[3])
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
