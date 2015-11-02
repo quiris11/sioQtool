@@ -1462,7 +1462,7 @@ for item in sio_report_list:
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
-                            'Problematyczne znaki w nazwie w RSPO',
+                            'Niedozwolone znaki w nazwie w RSPO',
                             'nie badano',
                             rown[3],
                             rowo[0],
