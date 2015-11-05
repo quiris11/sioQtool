@@ -1627,6 +1627,11 @@ for item in sio_report_list:
                             row[5],
                             row[6]
                         ])
+            for row in ns_jst_list:
+                if row[0] == 104:
+                    reg_long = row[3] + '00000'
+                    if (reg_long not in os_regons):
+                        print('@ Missing ZEAS:', row[2], reg_long)
 
         elif (item[1] is
                 'osn_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
