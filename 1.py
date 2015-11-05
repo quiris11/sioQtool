@@ -9,6 +9,7 @@ from __future__ import print_function
 from lxml import etree
 from collections import Counter
 from datetime import datetime
+from validate_email import validate_email
 from dictionaries import kat_ucz_dict
 from dictionaries import publ_dict
 from dictionaries import type_dict
@@ -16,16 +17,15 @@ from dictionaries import specyfika_dict
 from dictionaries import zawod_dict
 from dictionaries import typ_organu_prow_dict
 from dictionaries import jst_dict
-from tools.getreports2 import get_reports
+from tools.getreports import get_reports
+# from tools.getreports2 import get_reports  # get new daily reports
 from tools.getfaqs import get_faqs
 from tools.transform import transform
-from xlsxwriter.workbook import Workbook
 import unicodedata
 import argparse
 import os
 import csv
 import difflib
-import glob
 import shutil
 import sys
 import time
@@ -65,14 +65,11 @@ parser.add_argument('--get-reports',
 parser.add_argument('--get-faqs',
                     help="get FAQs from SIO portal",
                     action="store_true")
-parser.add_argument('-n', '--skip-new-overwrite',
-                    help="skip overwriting new SIO temporary lists",
+parser.add_argument('-o', '--new-overwrite',
+                    help="overwrite new SIO temporary lists",
                     action="store_true")
 parser.add_argument('-s', '--skip-old-overwrite',
                     help="skip overwriting old SIO temporary lists",
-                    action="store_true")
-parser.add_argument('-f', '--force',
-                    help="force downloading new reports",
                     action="store_true")
 args = parser.parse_args()
 
@@ -109,9 +106,9 @@ sio_report_list = ([
     ['EE SP: drugi etap', 'etapy_eduk_szk_podst_drugi_etap.csv', '!critical!'],
     ['OS: all items', 'os_all_items.csv', '!normal!'],
     ['OS: duplicated REGONs', 'os_zdublowane_regony.csv', '!critical!'],
-    ['OS: duplicated RSPOs', 'os_zdublowane_rspo.csv', '!critical!'],
     ['OS: no RSPOs', 'os_brak_nr_rspo.csv', '!critical!'],
     ['OS: no e-mails', 'os_brak_adresu_email.csv', '!critical!'],
+    ['OS: incorrect e-mails', 'os_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['OS: incorrect RSPOs', 'os_niepoprawne_numery_rspo.csv', '!critical!'],
     ['OS: incorrect REGONSs', 'os_niepoprawne_numery_regon.csv', '!critical!'],
     ['OS: incorrect publicznosc', 'osn_niepoprawne_pole_publicznosc.csv',
@@ -119,6 +116,7 @@ sio_report_list = ([
     ['OS: incorrect kategoria uczniow',
         'osn_niepoprawne_pole_kategoria_uczniow.csv', '!critical!'],
     ['NS: all items', 'ns_all_items.csv', '!normal!'],
+    ['NS: no e-mails', 'ns_brak_adresu_email.csv', '!normal!'],
     ['NS: Missing REGONs in old SIO existing in a new SIO\n  with birthdate '
         'earlier than %s' % BORDER_DATE,
      'osn_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv', '!critical!'],
@@ -139,17 +137,9 @@ sio_report_list = ([
     ['NS: incorrect szkolaObwodowa',
         'osn_niezgodne_dane_o_obwodowosci.csv',
         '!critical!'],
+    ['NS: incorrect e-mails', 'ns_nieprawidlowe_adresy_email.csv', '!normal!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
-    ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
-    ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
-        '!critical!'],
-    ['NS: different or missing parent',
-        'osn_brak_lub_niezgodny_org_nadrzedny.csv',
-        '!critical!'],
-    ['NS: problematic characters in names',
-     'osn_problematic_chars_in_names.csv',
-     '!critical!'],
-    ['ALL: all problems', 'all.csv', '!critical!']
+    ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!']
 ])
 
 header_list = [
@@ -204,20 +194,11 @@ def get_os_internaty(tree):
 
 
 def get_ns_obwody(path):
-    tree = etree.parse(os.path.join(path, 'obwody_sp2.xls'))
+    tree = etree.parse(os.path.join(path, 'obwody.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
-    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
-                        namespaces=XLSNS):
-        try:
-            data.append(xi(i))
-        except:
-            continue
-    tree = etree.parse(os.path.join(path, 'obwody_gm2.xls'))
-    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                              namespaces=XLSNS)[0])
-    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
                         namespaces=XLSNS):
         try:
             data.append(xi(i))
@@ -227,17 +208,16 @@ def get_ns_obwody(path):
 
 
 def get_ns_zawody(path):
-    tree = etree.parse(os.path.join(path, 'zawody2.xls'))
+    tree = etree.parse(os.path.join(path, 'zawody.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
     ns_rspos = []
     ns_zawody = []
-    # skipped first two title cells
-    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
-                        namespaces=XLSNS)[2:]:
+    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
+                        namespaces=XLSNS):
         ns_rspos.append(xs(i))
-    for i in tree.xpath('//ss:Row/ss:Cell[5]/ss:Data/text()',
+    for i in tree.xpath('//ss:Cell[@ss:Index="5"]/ss:Data/text()',
                         namespaces=XLSNS):
         ns_zawody.append(xs(i))
     data = zip(ns_rspos, ns_zawody)
@@ -284,7 +264,7 @@ def xi(s):
     return int(s)
 
 
-def os_row(i, a, scalid, rspo_nad, regon_nad, name_nad, parent_tag):
+def os_row(i, a, scalid):
     lista = [
         xi(i.get('nrRspo')),
         xs(i.get('regon')),
@@ -309,11 +289,7 @@ def os_row(i, a, scalid, rspo_nad, regon_nad, name_nad, parent_tag):
         xi(i.get('specyfikaSzkoly')),
         xi(i.get('typOrganuProw')),
         xs(i.get('szkolaObwodowa')),
-        xs(scalid),
-        xi(rspo_nad),
-        xs(regon_nad),
-        xs(name_nad),
-        xs(parent_tag)
+        xs(scalid)
     ]
     return lista
 
@@ -448,28 +424,11 @@ def get_jst_row(tree):
 
 def get_os_row(tree, scalid):
     file_rows = []
-    i2as = tree.xpath('//i2a', namespaces=XSNS)
-    if len(i2as) > 0:
-        rspo_nad = 0 if i2as[0].get(
-            'nrRspo'
-        ) is None else i2as[0].get('nrRspo')
-        regon_nad = i2as[0].get('regon')
-        nazwa_nad = i2as[0].get('nazwa')
-    else:
-        rspo_nad = '0'
-        regon_nad = ''
-        nazwa_nad = ''
     i2s = tree.xpath('//i2a | //i2b | //i2c', namespaces=XSNS)
     for i in i2s:
         itree = etree.ElementTree(i)
         a = itree.xpath('//daneAdresowe', namespaces=XSNS)[0]
-        file_rows.append(os_row(
-            i, a, scalid,
-            '0' if i.get('nrRspo') == rspo_nad else rspo_nad,
-            '' if i.get('nrRspo') == rspo_nad else regon_nad,
-            '' if i.get('nrRspo') == rspo_nad else nazwa_nad,
-            i.getparent().getparent().tag
-        ))
+        file_rows.append(os_row(i, a, scalid))
     return file_rows
 
 
@@ -507,24 +466,17 @@ def get_os_data(path):
            os_internaty)
 
 
-def get_terminated(tree):
-    regons = []
-    term_d = []
-    rspos = []
-    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[3:]:
-        rtree = etree.ElementTree(i)
-        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
-        if cd[0].text is None:
-            continue
-        else:
-            regons.append(xs(cd[9].text))
-            term_d.append(xs(cd[4].text))
-            rspos.append(xs(cd[0].text))
-    return zip(regons, term_d, rspos)
+def get_terminated_id(tree, id):
+    lista = []
+    lista = lista + tree.xpath(
+        '//ss:Cell[@ss:Index="' + id + '"]/ss:Data/text()',
+        namespaces=XLSNS
+    )[1:]
+    return lista
 
 
 def get_ns_ee_data(path, typ):
-    tree = etree.parse(os.path.join(path, 'ee_' + typ + '2.xls'))
+    tree = etree.parse(os.path.join(path, 'ee_' + typ + '.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     dataee = []
@@ -543,49 +495,61 @@ def get_ns_ee_data(path, typ):
     ns_ee_first = []
     ns_ee_second = []
     ns_ee_irrelevant = []
-
-    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
-        rtree = etree.ElementTree(i)
-        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
+    # for 'ponizej zero' col skipped first merged cell
+    for i in tree.xpath('//ss:Cell[@ss:Index="4"]/ss:Data/text()',
+                        namespaces=XLSNS)[1:]:
+        ns_ee_pzero.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="5"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_zero.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="6"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_first.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_second.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="8"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_ee_irrelevant.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
+                        namespaces=XLSNS):
         try:
-            ns_rspos.append(xi(cd[0].text))
+            ns_rspos.append(xi(i))
         except:
-            ns_rspos.append(xs(cd[0].text))
-        ns_typs.append(xs(cd[2].text))
-        ns_names.append(xs(cd[3].text))
-        if cd[4].text is None:
-            ns_ee_pzero.append('.')
-        else:
-            ns_ee_pzero.append(xs(cd[4].text))
-        if cd[5].text is None:
-            ns_ee_zero.append('.')
-        else:
-            ns_ee_zero.append(xs(cd[5].text))
-        if cd[6].text is None:
-            ns_ee_first.append('.')
-        else:
-            ns_ee_first.append(xs(cd[6].text))
-        if cd[7].text is None:
-            ns_ee_second.append('.')
-        else:
-            ns_ee_second.append(xs(cd[7].text))
-        if cd[8].text is None:
-            ns_ee_irrelevant.append('.')
-        else:
-            ns_ee_irrelevant.append(xs(cd[8].text))
-        ns_regons.append(xs(cd[13].text))
-        ns_org_rej.append(xs(cd[10].text))
-        ns_datas_rozp_dzial.append(xs(cd[34].text))
-        ns_publicznosc.append(xs(cd[31].text))
-        ns_kat_uczn.append(xs(cd[30].text))
-        if cd[25].text is None:
+            ns_rspos.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="13"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_regons.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="2"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_typs.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_names.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="10"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_org_rej.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="36"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_datas_rozp_dzial.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="33"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_publicznosc.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="32"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_kat_uczn.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="26"]/ss:Data',
+                        namespaces=XLSNS):
+        if i.text is None:
             ns_emails.append('')
         else:
-            ns_emails.append(cd[25].text)
-        if cd[24].text is None:
+            ns_emails.append(i.text)
+    for i in tree.xpath('//ss:Cell[@ss:Index="24"]/ss:Data',
+                        namespaces=XLSNS):
+        if i.text is None:
             ns_tels.append('')
         else:
-            ns_tels.append(cd[24].text)
+            ns_tels.append(i.text)
     dataee = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                  ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                  ns_ee_pzero, ns_ee_zero, ns_ee_first, ns_ee_second,
@@ -593,39 +557,8 @@ def get_ns_ee_data(path, typ):
     return dataee
 
 
-def get_jst_data(path):
-    tree = etree.parse(os.path.join(path, 'rspo_aktywne2.xls'))
-    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                              namespaces=XLSNS)[0])
-    data = []
-    ns_regons = []
-    ns_type_ids = []
-    ns_typs = []
-    ns_names = []
-    ns_emails = []
-    ns_tels = []
-    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
-        rtree = etree.ElementTree(i)
-        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
-        if cd[1].text == '103' or cd[1].text == '104':
-            ns_type_ids.append(xi(cd[1].text))
-            ns_typs.append(xs(cd[2].text))
-            ns_names.append(xs(cd[3].text))
-            ns_regons.append(xs(cd[8].text))
-            if cd[20].text is None:
-                ns_emails.append('')
-            else:
-                ns_emails.append(xs(cd[20].text))
-            if cd[19].text is None:
-                ns_tels.append('')
-            else:
-                ns_tels.append(xs(cd[19].text))
-    data = zip(ns_type_ids, ns_typs, ns_names, ns_regons, ns_emails, ns_tels)
-    return data
-
-
 def get_ns_data(path):
-    tree = etree.parse(os.path.join(path, 'rspo_aktywne2.xls'))
+    tree = etree.parse(os.path.join(path, 'rspo_aktywne.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                               namespaces=XLSNS)[0])
     data = []
@@ -644,57 +577,69 @@ def get_ns_data(path):
     ns_org_prow = []
     ns_czesc_miejska = []
     ns_internaty = []
-    ns_rspos_nad = []
-    ns_names_nad = []
-    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
-        rtree = etree.ElementTree(i)
-        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
-        if cd[0].text is None:
-                continue
+    for i in tree.xpath('//ss:Cell[@ss:Index="1"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        try:
+            ns_rspos.append(xi(i))
+        except:
+            ns_rspos.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="10"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_regons.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="3"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_typs.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="4"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_names.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="7"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_org_rej.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="35"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_datas_rozp_dzial.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="29"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_publicznosc.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="28"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_kat_uczn.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="22"]/ss:Data',
+                        namespaces=XLSNS):
+        if i.text is None:
+            ns_emails.append('')
         else:
-            try:
-                ns_rspos.append(xi(cd[0].text))
-            except:
-                ns_rspos.append(xs(cd[0].text))
-            ns_regons.append(xs(cd[8].text))
-            ns_typs.append(xs(cd[2].text))
-            ns_names.append(xs(cd[3].text))
-            ns_org_rej.append(xs(cd[5].text))
-            ns_datas_rozp_dzial.append(xs(cd[32].text))
-            ns_publicznosc.append(xs(cd[26].text))
-            ns_kat_uczn.append(xs(cd[25].text))
-            if cd[20].text is None:
-                ns_emails.append('')
-            else:
-                ns_emails.append(cd[20].text)
-            if cd[19].text is None:
-                ns_tels.append('')
-            else:
-                ns_tels.append(cd[19].text)
-            ns_specyfika.append(xs(cd[24].text))
-            ns_typ_org_prow.append(xs(cd[6].text))
-            ns_org_prow.append(xs(cd[7].text))
-            ns_czesc_miejska.append(xs(cd[22].text))
-            try:
-                ns_internaty.append(xi(cd[40].text))
-            except:
-                ns_internaty.append(xs(cd[40].text))
-            if cd[36].text is None:
-                ns_rspos_nad.append(0)
-            else:
-                try:
-                    ns_rspos_nad.append(xi(cd[36].text))
-                except:
-                    ns_rspos_nad.append(xs(cd[36].text))
-            if cd[37].text is None:
-                ns_names_nad.append('')
-            else:
-                ns_names_nad.append(xs(cd[37].text))
+            ns_emails.append(i.text)
+    # for Telefon col skipped first merged cell
+    for i in tree.xpath('//ss:Cell[@ss:Index="20"]/ss:Data',
+                        namespaces=XLSNS)[1:]:
+        if i.text is None:
+            ns_tels.append('')
+        else:
+            ns_tels.append(i.text)
+    for i in tree.xpath('//ss:Cell[@ss:Index="27"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_specyfika.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="8"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_typ_org_prow.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="9"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_org_prow.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="24"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        ns_czesc_miejska.append(xs(i))
+    for i in tree.xpath('//ss:Cell[@ss:Index="43"]/ss:Data/text()',
+                        namespaces=XLSNS):
+        try:
+            ns_internaty.append(xi(i))
+        except:
+            ns_internaty.append(xs(i))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska,
-               ns_internaty, ns_rspos_nad, ns_names_nad)
+               ns_internaty)
     return data
 
 
@@ -758,11 +703,11 @@ def generate_jst_reports():
                 'E-mail',
                 'Telefon'
             ])
-            if os.path.exists(os.path.join('!critical!', 'JST2')):
-                shutil.rmtree(os.path.join('!critical!', 'JST2'))
-                os.makedirs(os.path.join('!critical!', 'JST2'))
+            if os.path.exists(os.path.join('!critical!', 'JST')):
+                shutil.rmtree(os.path.join('!critical!', 'JST'))
+                os.makedirs(os.path.join('!critical!', 'JST'))
             else:
-                os.makedirs(os.path.join('!critical!', 'JST2'))
+                os.makedirs(os.path.join('!critical!', 'JST'))
             for r in csvread:
                 for i, x in enumerate(r):
                     if type(x) is float:
@@ -781,7 +726,7 @@ def generate_jst_reports():
                     with open(
                         os.path.join(
                             '!critical!',
-                            'JST2',
+                            'JST',
                             '%s (%s).txt' % (nfname, r[0])), 'a'
                     ) as j:
                         csv.writer(j, delimiter='\n', quotechar="'",
@@ -817,7 +762,7 @@ if args.get_faqs:
     sys.exit()
 
 if args.get_reports:
-    get_reports(args.force)
+    get_reports()
     sys.exit()
 
 if args.move:
@@ -844,22 +789,23 @@ if not os.path.exists(os.path.join('!critical!')):
     os.makedirs(os.path.join('!critical!'))
 
 missregons = load_exceptions()
-if not args.skip_new_overwrite:
+if args.new_overwrite:
     print('! Preparing new SIO data from source files...')
     ns_data_list = get_ns_data(args.newpath)
-    ns_jst_list = get_jst_data(args.newpath)
     ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
     ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
     ns_zawody_list = get_ns_zawody(args.newpath)
     obw_rspo_list = get_ns_obwody(args.newpath)
-    term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne2.xls'))
+    term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne.xls'))
     print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                  namespaces=XLSNS)[0])
-    ns_term_list = get_terminated(term_tree)
+    ns_term_list = zip(
+        get_terminated_id(term_tree, '11'),  # REGON
+        get_terminated_id(term_tree, '6'),   # Termination date
+        get_terminated_id(term_tree, '1')    # Nr RSPO
+    )
     with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'w') as f:
         f.write(str(ns_data_list))
-    with open(os.path.join(args.newpath, 'ns_jst_list.txt'), 'w') as f:
-        f.write(str(ns_jst_list))
     with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'w') as f:
         f.write(str(ns_ee_sp_list))
     with open(os.path.join(args.newpath, 'ns_ee_p_list.txt'), 'w') as f:
@@ -874,8 +820,6 @@ else:
     print('* Loading prepared new SIO data from txt files...')
     with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'r') as f:
         ns_data_list = eval(f.read())
-    with open(os.path.join(args.newpath, 'ns_jst_list.txt'), 'r') as f:
-        ns_jst_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'r') as f:
         ns_ee_sp_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_ee_p_list.txt'), 'r') as f:
@@ -1121,16 +1065,15 @@ for item in sio_report_list:
                         row[8],
                         row[9]
                     ])
-        elif item[1] is 'os_zdublowane_rspo.csv':
-            rspo_list = [row[0] for row in os_data_list]
-            dup_rspo_list = duplicated_list(rspo_list)
+        elif item[1] is 'os_nieprawidlowe_adresy_email.csv':
             for row in os_data_list:
-                if row[0] in dup_regon_list:
+                if (not validate_email(row[8])
+                        and row[8] is not '') or '@02.pl' in row[8]:
                     cfile.writerow([
                         row[23],
                         jsts_dict[row[23]],
-                        'Zdublowany numer RSPO w starym SIO',
-                        row[0],
+                        'Nieprawidłowy adres e-mail w starym SIO',
+                        row[8],
                         'nie badano',
                         row[0],
                         row[1],
@@ -1281,33 +1224,6 @@ for item in sio_report_list:
                             row[8],
                             row[9]
                         ])
-        elif item[1] is 'osn_jst_problematyczne_numery_regon.csv':
-            for row in os_data_list:
-                if row[4] not in (103, 104):
-                    continue
-                regon_found = False
-                nregon = ''
-                for i in ns_jst_list:
-                    if row[1] == i[3] + '00000':
-                        regon_found = True
-                        continue
-                if regon_found is False:
-                    for i in ns_jst_list:
-                        if i[2] == jsts_dict[row[23]]:
-                            nregon = i[3]
-                    cfile.writerow([
-                        row[23],
-                        jsts_dict[row[23]],
-                        'Niezgodny nr REGON JST lub ZEAS',
-                        row[1],
-                        nregon,
-                        row[0],
-                        row[1],
-                        type_dict[row[4]],
-                        row[7],
-                        row[8],
-                        row[9]
-                    ])
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1383,33 +1299,6 @@ for item in sio_report_list:
                             rowo[8],
                             rowo[9]
                         ])
-        elif item[1] is 'osn_brak_lub_niezgodny_org_nadrzedny.csv':
-            for rowo in os_data_list:
-                for rown in ns_data_list:
-                    if (rowo[0] == rown[0] and
-                            rowo[24] != rown[15] and
-                            rowo[4] != 81 and
-                            rowo[4] != 51 and
-                            rowo[4] != 53 and
-                            rowo[4] != 54 and
-                            rowo[27] != 'filiaSzkolyPodst'):
-                        cfile.writerow([
-                            rowo[23],
-                            jsts_dict[rowo[23]],
-                            'Niezgodność lub brak podmiotu nadrzędnego',
-                            'Nr RSPO nadrzędnego: ' + (
-                                'brak' if rowo[24] == 0 else str(rowo[24])
-                            ),
-                            'Nr RSPO nadrzędnego: ' + (
-                                'brak' if rown[15] == 0 else str(rown[15])
-                            ),
-                            rowo[0],
-                            rowo[1],
-                            type_dict[rowo[4]],
-                            rowo[7],
-                            rowo[8],
-                            rowo[9]
-                        ])
         elif item[1] is 'osn_rozne_internaty.csv':
             for rowo in os_data_list:
                 if rowo[0] == 0:
@@ -1425,7 +1314,7 @@ for item in sio_report_list:
                                 jsts_dict[rowo[23]],
                                 'Niezgodność danych o internacie',
                                 'Internat wpisany',
-                                'Internat niewpisany w RSPO',
+                                'Internat niewpisany',
                                 rowo[0],
                                 rowo[1],
                                 type_dict[rowo[4]],
@@ -1444,7 +1333,7 @@ for item in sio_report_list:
                                 jsts_dict[rowo[23]],
                                 'Niezgodność danych o internacie',
                                 'Internat niewpisany',
-                                'Internat wpisany w RSPO',
+                                'Internat wpisany',
                                 rowo[0],
                                 rowo[1],
                                 type_dict[rowo[4]],
@@ -1452,26 +1341,6 @@ for item in sio_report_list:
                                 rowo[8],
                                 rowo[9]
                             ])
-        elif item[1] is 'osn_problematic_chars_in_names.csv':
-            for rowo in os_data_list:
-                if rowo[0] == 0:
-                    continue
-                for rown in ns_data_list:
-                    if (rowo[0] == rown[0] and
-                            '\n' in rown[3].decode('utf-8')):
-                        cfile.writerow([
-                            rowo[23],
-                            jsts_dict[rowo[23]],
-                            'Niedozwolone znaki w nazwie w RSPO',
-                            'nie badano',
-                            rown[3],
-                            rowo[0],
-                            rowo[1],
-                            type_dict[rowo[4]],
-                            rowo[7],
-                            rowo[8],
-                            rowo[9]
-                        ])
         elif item[1] is 'osn_niezgodny_typ_organu_prow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1658,51 +1527,27 @@ for item in sio_report_list:
                         row[8],
                         row[9]
                     ])
+        elif item[1] is 'ns_nieprawidlowe_adresy_email.csv':
+            for row in ns_data_list:
+                ms = row[5].split(' , ')
+                for m in ms:
+                    if args.ns_mail_tough_check:
+                        print('* Checking: ' + m)
+                        if (not validate_email(m, check_mx=True)
+                                and m is not '') or '@02.pl' in m:
+                            cfile.writerow(row)
+                    else:
+                        if (not validate_email(m)
+                                and m is not '') or '@02.pl' in m:
+                            cfile.writerow(row)
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
+        elif item[1] is 'ns_brak_adresu_email.csv':
+            for row in ns_data_list:
+                if ((row[5] is '' or 'E-mail' in row[5])
+                        and ('MINISTERSTWO' not in row[2])):
+                    cfile.writerow(row)
 
 generate_jst_reports()
-
-# convert CSV into XLSX
-if os.path.exists(os.path.join('!critical!', 'XLSX')):
-    shutil.rmtree(os.path.join('!critical!', 'XLSX'))
-    os.makedirs(os.path.join('!critical!', 'XLSX'))
-else:
-    os.makedirs(os.path.join('!critical!', 'XLSX'))
-
-for i in sio_report_list:
-    print('* XLSX: Generating %s.xlsx' % os.path.splitext(i[1])[0])
-    workbook = Workbook(os.path.join('!critical!', 'XLSX',
-                        os.path.splitext(i[1])[0] + '.xlsx'))
-    worksheet = workbook.add_worksheet()
-    bold = workbook.add_format({'bold': True})
-    with open(os.path.join(i[2], i[1]), 'rb') as f:
-        reader = csv.reader(f, delimiter=';', quotechar='"',
-                            quoting=csv.QUOTE_NONNUMERIC)
-        for r, row in enumerate(reader):
-            for c, col in enumerate(row):
-                if r == 0:
-                    try:
-                        worksheet.write(r, c, col.decode('utf-8'), bold)
-                    except AttributeError:
-                        worksheet.write(r, c, col, bold)
-                else:
-                    try:
-                        worksheet.write(r, c, col.decode('utf-8'))
-                    except AttributeError:
-                        worksheet.write(r, c, col)
-        worksheet.autofilter(0, 0, r, c)
-        worksheet.set_column(0, c, 30)
-    workbook.close()
-
-# move CSV files to CSV directory
-if os.path.exists(os.path.join('!critical!', 'CSV')):
-    shutil.rmtree(os.path.join('!critical!', 'CSV'))
-    os.makedirs(os.path.join('!critical!', 'CSV'))
-else:
-    os.makedirs(os.path.join('!critical!', 'CSV'))
-for filename in glob.glob(os.path.join('!critical!', '*.csv')):
-    shutil.move(filename, os.path.join('!critical!', 'CSV'))
-
 print('* Excution time: ' + str(time.clock() - start))
