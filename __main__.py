@@ -140,6 +140,7 @@ sio_report_list = ([
         'osn_niezgodne_dane_o_obwodowosci.csv',
         '!critical!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
+    ['NS: different phones', 'osn_rozne_nr_telefonu.csv', '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
         '!critical!'],
@@ -1376,6 +1377,26 @@ for item in sio_report_list:
                             'Niezgodność lub brak adresu e-mail',
                             'brak' if rowo[8] == '' else rowo[8],
                             'brak' if rown[5] == '' else rown[5],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
+        elif item[1] is 'osn_rozne_nr_telefonu.csv':
+            for rowo in os_data_list:
+                om = 'brak' if rowo[9] == '' else rowo[9]
+                for rown in ns_data_list:
+                    if (rowo[0] == rown[0] and
+                            om.translate(None, '- ').lstrip('0') not in
+                            rown[6].translate(None, '- ').lstrip('0')):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność lub brak numeru telefonu',
+                            'brak' if rowo[9] == '' else rowo[9],
+                            'brak' if rown[6] == '' else rown[6],
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
