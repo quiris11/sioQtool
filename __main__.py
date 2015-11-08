@@ -141,6 +141,8 @@ sio_report_list = ([
         '!critical!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
     ['NS: different phones', 'osn_rozne_nr_telefonu.csv', '!critical!'],
+    ['NS: different jst e-mails', 'osn_rozne_jst_email.csv', '!critical!'],
+    ['NS: different jst phones', 'osn_rozne_jst_telefon.csv', '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
         '!critical!'],
@@ -1359,6 +1361,65 @@ for item in sio_report_list:
                             publ_dict[rowo[5]],
                             rown[8],
                             rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
+        elif item[1] is 'osn_rozne_jst_telefon.csv':
+            for rowo in os_data_list:
+                om = 'brak' if rowo[9] == '' else rowo[9]
+                for rown in ns_jst_list:
+                    ns_regon = rown[3] + '00000'
+                    if (rowo[1] == ns_regon and
+                            om.translate(None, '- ').lstrip('0') not in
+                            rown[5].translate(None, '- ').lstrip('0')):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność lub brak numeru telefonu '
+                            'JST lub ZEAS-u',
+                            'brak' if rowo[9] == '' else rowo[9],
+                            'brak' if rown[5] == '' else rown[5],
+                            'jednostka pozarejestrowa',
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
+        elif item[1] is 'osn_rozne_jst_email.csv':
+            for rowo in os_data_list:
+                om = 'brak' if rowo[8] == '' else rowo[8]
+                for rown in ns_jst_list:
+                    ns_regon = rown[3] + '00000'
+                    if (rowo[1] == ns_regon and
+                            om.lower() not in rown[4].lower()):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność lub brak e-mail JST lub ZEAS-u',
+                            'brak' if rowo[8] == '' else rowo[8],
+                            'brak' if rown[4] == '' else rown[4],
+                            'jednostak pozarejestrowa',
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]
+                        ])
+                    omed = 'brak' if rowo[19] == '' else rowo[19]
+                    if (rowo[1] == ns_regon and
+                            omed.lower() not in rown[4].lower() and
+                            rown[0] == 103):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niezgodność lub brak e-mail komórki ds. edukacji',
+                            'brak' if rowo[19] == '' else rowo[19],
+                            'brak' if rown[4] == '' else rown[4],
+                            'jednostka pozarejestrowa',
                             rowo[1],
                             type_dict[rowo[4]],
                             rowo[7],
