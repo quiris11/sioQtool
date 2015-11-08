@@ -143,6 +143,10 @@ sio_report_list = ([
     ['NS: different phones', 'osn_rozne_nr_telefonu.csv', '!critical!'],
     ['NS: different jst e-mails', 'osn_rozne_jst_email.csv', '!critical!'],
     ['NS: different jst phones', 'osn_rozne_jst_telefon.csv', '!critical!'],
+    ['NS: missing ZEAS in old SIO', 'osn_brakujace_zeasy_stare_sio.csv',
+        '!critical!'],
+    ['NS: missing ZEAS in new SIO', 'osn_brakujace_zeasy_nowe_sio.csv',
+        '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
         '!critical!'],
@@ -1367,6 +1371,54 @@ for item in sio_report_list:
                             rowo[8],
                             rowo[9]
                         ])
+        elif item[1] is 'osn_brakujace_zeasy_nowe_sio.csv':
+            for rowo in os_data_list:
+                if rowo[4] != 104:
+                    continue
+                zeas_found = False
+                for rown in ns_jst_list:
+                    ns_regon = rown[3] + '00000'
+                    if (rowo[1] == ns_regon):
+                        zeas_found = True
+                        break
+                if (zeas_found is False):
+                    cfile.writerow([
+                        rowo[23],
+                        jsts_dict[rowo[23]],
+                        'ZEAS nieznaleziony w nowym SIO',
+                        'REGON ZEAS-u: ' + rowo[1],
+                        'brak',
+                        'jednostka pozarejestrowa',
+                        rowo[1],
+                        type_dict[rowo[4]],
+                        rowo[7],
+                        rowo[8],
+                        rowo[9]
+                    ])
+        elif item[1] is 'osn_brakujace_zeasy_stare_sio.csv':
+            for rown in ns_jst_list:
+                if rown[0] != 104:
+                    continue
+                zeas_found = False
+                for rowo in os_data_list:
+                    ns_regon = rown[3] + '00000'
+                    if (rowo[1] == ns_regon):
+                        zeas_found = True
+                        break
+                if (zeas_found is False):
+                    cfile.writerow([
+                        'brak',
+                        'brak',
+                        'ZEAS nieznaleziony w starym SIO',
+                        'brak',
+                        'REGON ZEAS-u: ' + rown[3],
+                        'jednostka pozarejestrowa',
+                        rown[3],
+                        rown[1],
+                        rown[2],
+                        rown[4],
+                        rown[5]
+                    ])
         elif item[1] is 'osn_rozne_jst_telefon.csv':
             for rowo in os_data_list:
                 om = 'brak' if rowo[9] == '' else rowo[9]
@@ -1709,12 +1761,6 @@ for item in sio_report_list:
                             row[5],
                             row[6]
                         ])
-            for row in ns_jst_list:
-                if row[0] == 104:
-                    reg_long = row[3] + '00000'
-                    if (reg_long not in os_regons):
-                        print('@ Missing ZEAS:', row[2], reg_long)
-
         elif (item[1] is
                 'osn_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
             ns_regons = []
