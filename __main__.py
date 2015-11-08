@@ -1402,7 +1402,7 @@ for item in sio_report_list:
                             'Niezgodność lub brak e-mail JST lub ZEAS-u',
                             'brak' if rowo[8] == '' else rowo[8],
                             'brak' if rown[4] == '' else rown[4],
-                            'jednostak pozarejestrowa',
+                            'jednostka pozarejestrowa',
                             rowo[1],
                             type_dict[rowo[4]],
                             rowo[7],
