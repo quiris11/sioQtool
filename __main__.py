@@ -1409,8 +1409,12 @@ for item in sio_report_list:
                         zeas_found = True
                         break
                 if (zeas_found is False):
+                    for r in os_data_list:
+                        if rown[6] == jsts_dict[r[23]]:
+                            scalid = r[23]
+                            break
                     cfile.writerow([
-                        'brak',
+                        scalid,
                         rown[6],
                         'ZEAS nieznaleziony w starym SIO',
                         'brak',
