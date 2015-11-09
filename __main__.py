@@ -611,6 +611,7 @@ def get_jst_data(path):
     ns_names = []
     ns_emails = []
     ns_tels = []
+    ns_org_rej = []
     for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
         rtree = etree.ElementTree(i)
         cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
@@ -627,7 +628,9 @@ def get_jst_data(path):
                 ns_tels.append('')
             else:
                 ns_tels.append(xs(cd[19].text))
-    data = zip(ns_type_ids, ns_typs, ns_names, ns_regons, ns_emails, ns_tels)
+            ns_org_rej.append(xs(cd[5].text))
+    data = zip(ns_type_ids, ns_typs, ns_names, ns_regons, ns_emails, ns_tels,
+               ns_org_rej)
     return data
 
 
@@ -1408,7 +1411,7 @@ for item in sio_report_list:
                 if (zeas_found is False):
                     cfile.writerow([
                         'brak',
-                        'brak',
+                        rown[6],
                         'ZEAS nieznaleziony w starym SIO',
                         'brak',
                         'REGON ZEAS-u: ' + rown[3],
