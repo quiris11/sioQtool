@@ -95,3 +95,5 @@ def get_reports():
             shutil.copyfile(os.path.join('%s/NSIO/new_%s' % (home, i[1])),
                             os.path.join('%s/NSIO/%s' % (home, i[1])))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
+if __name__ == '__main__':
+    get_reports()
