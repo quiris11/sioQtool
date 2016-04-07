@@ -1409,23 +1409,25 @@ for item in sio_report_list:
                         zeas_found = True
                         break
                 if (zeas_found is False):
+                    scalid = None
                     for r in os_data_list:
                         if rown[6] == jsts_dict[r[23]]:
                             scalid = r[23]
                             break
-                    cfile.writerow([
-                        scalid,
-                        rown[6],
-                        'ZEAS nieznaleziony w starym SIO',
-                        'brak',
-                        'REGON ZEAS-u: ' + rown[3],
-                        'jednostka pozarejestrowa',
-                        rown[3],
-                        rown[1],
-                        rown[2],
-                        rown[4],
-                        rown[5]
-                    ])
+                    if scalid is not None:
+                        cfile.writerow([
+                            scalid,
+                            rown[6],
+                            'ZEAS nieznaleziony w starym SIO',
+                            'brak',
+                            'REGON ZEAS-u: ' + rown[3],
+                            'jednostka pozarejestrowa',
+                            rown[3],
+                            rown[1],
+                            rown[2],
+                            rown[4],
+                            rown[5]
+                        ])
         elif item[1] is 'osn_rozne_jst_telefon.csv':
             for rowo in os_data_list:
                 om = 'brak' if rowo[9] == '' else rowo[9]
