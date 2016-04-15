@@ -1432,6 +1432,8 @@ for item in sio_report_list:
             for rowo in os_data_list:
                 om = 'brak' if rowo[9] == '' else rowo[9]
                 for rown in ns_jst_list:
+                    if rown[0] != 103:  # do not check ZEAS 104 (temporary)
+                        continue
                     ns_regon = rown[3] + '00000'
                     if (rowo[1] == ns_regon and
                             om.translate(None, '- ').lstrip('0') not in
@@ -1440,7 +1442,7 @@ for item in sio_report_list:
                             rowo[23],
                             jsts_dict[rowo[23]],
                             'Niezgodność lub brak numeru telefonu '
-                            'JST lub ZEAS-u',
+                            'JST',
                             'brak' if rowo[9] == '' else rowo[9],
                             'brak' if rown[5] == '' else rown[5],
                             'jednostka pozarejestrowa',
@@ -1454,13 +1456,15 @@ for item in sio_report_list:
             for rowo in os_data_list:
                 om = 'brak' if rowo[8] == '' else rowo[8]
                 for rown in ns_jst_list:
+                    if rown[0] != 103:  # do not check ZEAS 104 (temporary)
+                        continue
                     ns_regon = rown[3] + '00000'
                     if (rowo[1] == ns_regon and
                             om.lower() not in rown[4].lower()):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
-                            'Niezgodność lub brak e-mail JST lub ZEAS-u',
+                            'Niezgodność lub brak e-mail JST',
                             'brak' if rowo[8] == '' else rowo[8],
                             'brak' if rown[4] == '' else rown[4],
                             'jednostka pozarejestrowa',
