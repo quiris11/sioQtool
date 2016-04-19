@@ -1851,4 +1851,4 @@ else:
 for filename in glob.glob(os.path.join('!critical!', '*.csv')):
     shutil.move(filename, os.path.join('!critical!', 'CSV'))
 
-print('* Excution time: ' + str(time.clock() - start))
+print('* Execution time: ' + str(time.clock() - start))
