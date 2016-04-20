@@ -1481,7 +1481,9 @@ for item in sio_report_list:
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
-                            'Niezgodność lub brak e-mail komórki ds. edukacji',
+                            'Niezgodność lub brak e-mail komórki ds. edukacji '
+                            '(adres ten w RSPO dodaje się jako *kolejny* adres'
+                            ' e-mail w jednostce samorządu terytorialnego)',
                             'brak' if rowo[19] == '' else rowo[19],
                             'brak' if rown[4] == '' else rown[4],
                             'jednostka pozarejestrowa',
