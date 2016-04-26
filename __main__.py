@@ -1083,7 +1083,7 @@ for item in sio_report_list:
                 ])
         elif item[1] is 'os_brak_nr_rspo.csv':
             for row in os_data_list:
-                if row[0] is 0 and row[4] not in (102, 103, 104):
+                if row[0] is 0 and row[4] not in (102, 103, 104, 109):
                     cfile.writerow([
                         row[23],
                         jsts_dict[row[23]],
