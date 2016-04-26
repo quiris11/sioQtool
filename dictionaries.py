@@ -104,7 +104,8 @@ type_dict = {
     100: 'Zespół szkół i placówek oświatowych',
     102: 'Kuratorium oświaty (wraz z delegaturami)',
     103: 'Jednostka Samorządu Terytorialnego',
-    104: 'ZEAS (zespół obsługi ekonomiczno-administracyjnej szkół)'
+    104: 'ZEAS (zespół obsługi ekonomiczno-administracyjnej szkół)',
+    109: 'CUW (centrum usług wspólnych)'
 }
 
 zawod_dict = {
