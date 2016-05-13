@@ -1745,7 +1745,7 @@ for item in sio_report_list:
                 except:
                     roz_date = datetime.strptime('9999-01-01', '%Y-%m-%d')
                 if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
-                        and roz_date < BORDER_DATE:
+                        and roz_date < BORDER_DATE):
                     try:
                         cfile.writerow([
                             jst_dict_rew[row[2]],
