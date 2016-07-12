@@ -27,6 +27,7 @@ def get_reports(force):
         ['7', 'rspo_nieaktywne2.xls']
     ]
 
+
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
 
     print('* Downloading reports...')
@@ -39,8 +40,8 @@ def get_reports(force):
             print('Error! Incorrect file: %s/NSIO/%s' % (home, i[1]))
             title_old = ''
         url = (
-            'https://bezpieczenstwo-formularz.men.gov.pl/frame/sdz/raporty/'
-            'raport/idPodmiot/38/idRaport/' + i[0]
+            'https://raporty-sio2.men.gov.pl/raports/getraport?'
+            'idPodmiot=38&idRaport=' + i[0]
         )
         page = opener.open(url)
         with open(os.path.join(home, 'NSIO', 'new_' + i[1]), 'w') as f:
