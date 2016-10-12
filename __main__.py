@@ -141,8 +141,9 @@ sio_report_list = ([
         '!critical!'],
     ['NS: different e-mails', 'osn_rozne_adresy_email.csv', '!critical!'],
     ['NS: different phones', 'osn_rozne_nr_telefonu.csv', '!critical!'],
-    ['NS: different jst e-mails', 'osn_rozne_jst_email.csv', '!critical!'],
-    ['NS: different jst phones', 'osn_rozne_jst_telefon.csv', '!critical!'],
+    # turned off - impossible to correct such differences
+    # ['NS: different jst e-mails', 'osn_rozne_jst_email.csv', '!critical!'],
+    # ['NS: different jst phones', 'osn_rozne_jst_telefon.csv', '!critical!'],
     ['NS: missing ZEAS in old SIO', 'osn_brakujace_zeasy_stare_sio.csv',
         '!critical!'],
     ['NS: missing ZEAS in new SIO', 'osn_brakujace_zeasy_nowe_sio.csv',
