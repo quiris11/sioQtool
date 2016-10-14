@@ -445,7 +445,14 @@ zawod_dict = {
     353: 'Mechanik motocyklowy',
     354: 'Technik przemysłu mody',
     355: 'Technik lotniskowych służb operacyjnych',
-    356: 'Przetwórca ryb'
+    356: 'Przetwórca ryb',
+    357: 'Technik mechanizacji rolnictwa i agrotroniki',
+    358: 'Jeździec',
+    359: 'Kierowca mechanik',
+    360: 'Technik szerokopasmowej komunikacji elektronicznej',
+    361: 'Technik automatyk',
+    362: 'Szkutnik',
+    363: 'Mechanik operator maszyn do produkcji drzewnej'
 }
 
 typ_organu_prow_dict = {
