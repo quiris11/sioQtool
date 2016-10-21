@@ -1327,6 +1327,12 @@ for item in sio_report_list:
                         for k in kat_ucz_dict[rowo[6]]:
                             if k in rown[9]:
                                 kfound = True
+                        if (
+                            rown[4] == 'Szkoła policealna'
+                            ' (ponadgimnazjalna)' and
+                            kat_ucz_dict[rowo[6]][0] == 'Bez kategorii'
+                        ):
+                            kfound = True
                         if not kfound:
                             cfile.writerow([
                                 rowo[23],
