@@ -814,10 +814,11 @@ def generate_jst_reports():
 
 start = time.clock()
 if args.oldpath.endswith('.krt'):
+    print('Extracting KRT file...')
     transform(args.oldpath, '.krt')
     oldpath = 'OSIO'
 elif args.exp:
-    print('aaaa')
+    print('Extracting EXP files...')
     transform(args.oldpath, '.exp')
     oldpath = 'OSIO'
 else:
