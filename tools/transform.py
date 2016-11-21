@@ -49,7 +49,7 @@ def transform(path, extension):
                         ))
                     except:
                         pass
-                    print('* Unapacking EXP file: ' +
+                    print('* Unpacking EXP file: ' +
                           os.path.basename(single_file_path[:-4]))
                     unpack_exp(os.path.join(
                         'OSIO',
