@@ -671,36 +671,36 @@ def get_ns_data(path):
             ns_typs.append(xs(cd[2].text))
             ns_names.append(xs(cd[3].text))
             ns_org_rej.append(xs(cd[5].text))
-            ns_datas_rozp_dzial.append(xs(cd[32].text))
-            ns_publicznosc.append(xs(cd[26].text))
-            ns_kat_uczn.append(xs(cd[25].text))
-            if cd[20].text is None:
+            ns_datas_rozp_dzial.append(xs(cd[33].text))
+            ns_publicznosc.append(xs(cd[27].text))
+            ns_kat_uczn.append(xs(cd[26].text))
+            if cd[21].text is None:
                 ns_emails.append('')
             else:
-                ns_emails.append(cd[20].text)
-            if cd[19].text is None:
+                ns_emails.append(cd[21].text)
+            if cd[20].text is None:
                 ns_tels.append('')
             else:
-                ns_tels.append(cd[19].text)
-            ns_specyfika.append(xs(cd[24].text))
+                ns_tels.append(cd[20].text)
+            ns_specyfika.append(xs(cd[25].text))
             ns_typ_org_prow.append(xs(cd[6].text))
             ns_org_prow.append(xs(cd[7].text))
-            ns_czesc_miejska.append(xs(cd[22].text))
+            ns_czesc_miejska.append(xs(cd[23].text))
             try:
-                ns_internaty.append(xi(cd[40].text))
+                ns_internaty.append(xi(cd[41].text))
             except:
-                ns_internaty.append(xs(cd[40].text))
-            if cd[36].text is None:
+                ns_internaty.append(xs(cd[41].text))
+            if cd[37].text is None:
                 ns_rspos_nad.append(0)
             else:
                 try:
-                    ns_rspos_nad.append(xi(cd[36].text))
+                    ns_rspos_nad.append(xi(cd[37].text))
                 except:
-                    ns_rspos_nad.append(xs(cd[36].text))
-            if cd[37].text is None:
+                    ns_rspos_nad.append(xs(cd[37].text))
+            if cd[38].text is None:
                 ns_names_nad.append('')
             else:
-                ns_names_nad.append(xs(cd[37].text))
+                ns_names_nad.append(xs(cd[38].text))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
