@@ -5,6 +5,47 @@
 # Copyright © Robert Błaut. See NOTICE for more information.
 #
 
+def get_regions_reports():
+    import os
+    import shutil
+    from lxml import etree
+    import urllib2
+
+    home = os.path.expanduser("~")
+
+    report_list = [
+        ['26', 'dolnoslaskie'],
+        ['27', 'kujawsko-pomorskie'],
+        ['28', 'lubelskie'],
+        ['29', 'lubuskie'],
+        ['30', 'lodzkie'],
+        ['31', 'malopolskie'],
+        ['32', 'mazowieckie'],
+        ['33', 'opolskie'],
+        ['34', 'podkarpackie'],
+        ['35', 'podlaskie'],
+        ['36', 'pomorskie'],
+        ['37', 'slaskie'],
+        ['38', 'swietokrzyskie'],
+        ['39', 'warminsko-mazurskie'],
+        ['40', 'wielkopolskie'],
+        ['41', 'zachodniopomorskie'],
+    ]
+
+
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+
+
+    for i in report_list:
+        print('* Downloading: ' + i[1])
+        url = (
+            'https://raporty-sio2.men.gov.pl/raports/getraport?'
+            'idPodmiot=' + i[0] + '&idRaport=1'
+        )
+        page = opener.open(url)
+        with open(os.path.join(home, 'NSIO', 'woj_' + i[1] + '.xls'), 'w') as f:
+            f.write(page.read())
+
 
 def get_reports(force):
     import os
@@ -65,3 +106,6 @@ def get_reports(force):
             shutil.copyfile(os.path.join('%s/NSIO/new_%s' % (home, i[1])),
                             os.path.join('%s/NSIO/%s' % (home, i[1])))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
+
+if __name__ == "__main__":
+    get_regions_reports()
