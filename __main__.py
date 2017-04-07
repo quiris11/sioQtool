@@ -36,8 +36,8 @@ XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'x': 'urn:schemas-microsoft-com:office:excel',
          'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
 
-BORDER_DATE = datetime.strptime('2016-09-30', '%Y-%m-%d')
-BORDER_DATEZ = datetime.strptime('2015-08-31', '%Y-%m-%d')
+BORDER_DATE = datetime.strptime('2017-03-31', '%Y-%m-%d')
+BORDER_DATEZ = datetime.strptime('2016-09-01', '%Y-%m-%d')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('oldpath', nargs='?', default=os.path.join(home, 'OSIO'),
@@ -144,10 +144,10 @@ sio_report_list = ([
     # turned off - impossible to correct such differences
     # ['NS: different jst e-mails', 'osn_rozne_jst_email.csv', '!critical!'],
     # ['NS: different jst phones', 'osn_rozne_jst_telefon.csv', '!critical!'],
-    ['NS: missing ZEAS in old SIO', 'osn_brakujace_zeasy_stare_sio.csv',
-        '!critical!'],
-    ['NS: missing ZEAS in new SIO', 'osn_brakujace_zeasy_nowe_sio.csv',
-        '!critical!'],
+    # ['NS: missing ZEAS in old SIO', 'osn_brakujace_zeasy_stare_sio.csv',
+    #     '!critical!'],
+    # ['NS: missing ZEAS in new SIO', 'osn_brakujace_zeasy_nowe_sio.csv',
+    #     '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
         '!critical!'],
