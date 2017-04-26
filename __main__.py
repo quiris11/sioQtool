@@ -144,10 +144,10 @@ sio_report_list = ([
     # turned off - impossible to correct such differences
     # ['NS: different jst e-mails', 'osn_rozne_jst_email.csv', '!critical!'],
     # ['NS: different jst phones', 'osn_rozne_jst_telefon.csv', '!critical!'],
-    # ['NS: missing ZEAS in old SIO', 'osn_brakujace_zeasy_stare_sio.csv',
-    #     '!critical!'],
-    # ['NS: missing ZEAS in new SIO', 'osn_brakujace_zeasy_nowe_sio.csv',
-    #     '!critical!'],
+    ['NS: missing ZEAS in old SIO', 'osn_brakujace_zeasy_stare_sio.csv',
+         '!critical!'],
+    ['NS: missing ZEAS in new SIO', 'osn_brakujace_zeasy_nowe_sio.csv',
+         '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
         '!critical!'],
@@ -616,7 +616,7 @@ def get_jst_data(path):
     for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
         rtree = etree.ElementTree(i)
         cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
-        if cd[1].text == '103' or cd[1].text == '104':
+        if cd[1].text == '103' or cd[1].text == '160':
             ns_type_ids.append(xi(cd[1].text))
             ns_typs.append(xs(cd[2].text))
             ns_names.append(xs(cd[3].text))
@@ -1295,7 +1295,7 @@ for item in sio_report_list:
                         ])
         elif item[1] is 'osn_jst_problematyczne_numery_regon.csv':
             for row in os_data_list:
-                if row[4] not in (103, 104):
+                if row[4] not in (103, 104, 109):
                     continue
                 regon_found = False
                 nregon = ''
@@ -1310,7 +1310,7 @@ for item in sio_report_list:
                     cfile.writerow([
                         row[23],
                         jsts_dict[row[23]],
-                        'Niezgodny nr REGON JST lub ZEAS',
+                        'Niezgodny nr REGON JST lub CUW. Ewentualnie błędny typ CUW.',
                         row[1],
                         nregon,
                         row[0],
@@ -1384,7 +1384,7 @@ for item in sio_report_list:
                         ])
         elif item[1] is 'osn_brakujace_zeasy_nowe_sio.csv':
             for rowo in os_data_list:
-                if rowo[4] != 104:
+                if rowo[4] != 109:
                     continue
                 zeas_found = False
                 for rown in ns_jst_list:
@@ -1396,8 +1396,8 @@ for item in sio_report_list:
                     cfile.writerow([
                         rowo[23],
                         jsts_dict[rowo[23]],
-                        'ZEAS nieznaleziony w nowym SIO',
-                        'REGON ZEAS-u: ' + rowo[1],
+                        'CUW nieznaleziony w nowym SIO',
+                        'REGON CUW-u: ' + rowo[1],
                         'brak',
                         'jednostka pozarejestrowa',
                         rowo[1],
@@ -1408,7 +1408,7 @@ for item in sio_report_list:
                     ])
         elif item[1] is 'osn_brakujace_zeasy_stare_sio.csv':
             for rown in ns_jst_list:
-                if rown[0] != 104:
+                if rown[0] != 160:
                     continue
                 zeas_found = False
                 for rowo in os_data_list:
@@ -1426,9 +1426,9 @@ for item in sio_report_list:
                         cfile.writerow([
                             scalid,
                             rown[6],
-                            'ZEAS nieznaleziony w starym SIO',
+                            'CUW nieznaleziony w starym SIO',
                             'brak',
-                            'REGON ZEAS-u: ' + rown[3],
+                            'REGON CUW-u: ' + rown[3],
                             'jednostka pozarejestrowa',
                             rown[3],
                             rown[1],
