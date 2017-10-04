@@ -213,29 +213,6 @@ def get_os_internaty(tree):
     return rows
 
 
-def get_ns_obwody(path):
-    tree = etree.parse(os.path.join(path, 'obwody_sp2.xls'))
-    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                              namespaces=XLSNS)[0])
-    data = []
-    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
-                        namespaces=XLSNS):
-        try:
-            data.append(xi(i))
-        except:
-            continue
-    tree = etree.parse(os.path.join(path, 'obwody_gm2.xls'))
-    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
-                              namespaces=XLSNS)[0])
-    for i in tree.xpath('//ss:Row/ss:Cell[1]/ss:Data/text()',
-                        namespaces=XLSNS):
-        try:
-            data.append(xi(i))
-        except:
-            continue
-    return set(data)
-
-
 def get_ns_zawody(path):
     tree = etree.parse(os.path.join(path, 'zawody2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
@@ -863,7 +840,6 @@ if not args.skip_new_overwrite:
     ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
     ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
     ns_zawody_list = get_ns_zawody(args.newpath)
-    # obw_rspo_list = get_ns_obwody(args.newpath)
     term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne2.xls'))
     print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                  namespaces=XLSNS)[0])
@@ -878,8 +854,6 @@ if not args.skip_new_overwrite:
         f.write(str(ns_ee_p_list))
     with open(os.path.join(args.newpath, 'ns_zawody_list.txt'), 'w') as f:
         f.write(str(ns_zawody_list))
-    # with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'w') as f:
-    #     f.write(str(obw_rspo_list))
     with open(os.path.join(args.newpath, 'ns_term_list.txt'), 'w') as f:
         f.write(str(ns_term_list))
 else:
@@ -894,8 +868,6 @@ else:
         ns_ee_p_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_zawody_list.txt'), 'r') as f:
         ns_zawody_list = eval(f.read())
-    # with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'r') as f:
-    #     obw_rspo_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_term_list.txt'), 'r') as f:
         ns_term_list = eval(f.read())
 if not args.skip_old_overwrite:
@@ -1661,7 +1633,7 @@ for item in sio_report_list:
         elif item[1] is 'osn_niezgodne_dane_o_obwodowosci.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
-                    if (rowo[0] == rown[0] and rown[18] == 0 and
+                    if (rowo[0] == rown[0] and rown[17] == 0 and
                             rowo[22] == 'true'):
                         cfile.writerow([
                             rowo[23],
@@ -1675,7 +1647,7 @@ for item in sio_report_list:
                             rowo[7],
                             rowo[8],
                             rowo[9]])
-                    elif (rowo[0] == rown[0] and rown[18] == 1 and
+                    elif (rowo[0] == rown[0] and rown[17] == 1 and
                             rowo[22] == 'false'):
                         cfile.writerow([
                             rowo[23],
