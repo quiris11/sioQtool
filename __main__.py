@@ -156,9 +156,9 @@ sio_report_list = ([
     ['NS: different or missing parent',
         'osn_brak_lub_niezgodny_org_nadrzedny.csv',
         '!critical!'],
-    ['NS: problematic characters in names',
-     'osn_problematic_chars_in_names.csv',
-     '!critical!'],
+    # ['NS: problematic characters in names',
+    #  'osn_problematic_chars_in_names.csv',
+    #  '!critical!'],
     ['ALL: all problems', 'all.csv', '!critical!']
     ])
 
@@ -591,19 +591,23 @@ def get_jst_data(path):
     for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
         rtree = etree.ElementTree(i)
         cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
-        if cd[1].text == '103' or cd[1].text == '160':
+        if (cd[1].text == '130' or
+            cd[1].text == '131' or
+            cd[1].text == '132' or
+            cd[1].text == '133' or
+                cd[1].text == '160'):
             ns_type_ids.append(xi(cd[1].text))
             ns_typs.append(xs(cd[2].text))
             ns_names.append(xs(cd[3].text))
             ns_regons.append(xs(cd[8].text))
-            if cd[20].text is None:
+            if cd[21].text is None:
                 ns_emails.append('')
             else:
-                ns_emails.append(xs(cd[20].text))
-            if cd[19].text is None:
+                ns_emails.append(xs(cd[21].text))
+            if cd[20].text is None:
                 ns_tels.append('')
             else:
-                ns_tels.append(xs(cd[19].text))
+                ns_tels.append(xs(cd[20].text))
             ns_org_rej.append(xs(cd[5].text))
     data = zip(ns_type_ids, ns_typs, ns_names, ns_regons, ns_emails, ns_tels,
                ns_org_rej)
@@ -649,7 +653,10 @@ def get_ns_data(path):
             ns_org_rej.append(xs(cd[5].text))
             ns_datas_rozp_dzial.append(xs(cd[32].text))
             ns_publicznosc.append(xs(cd[26].text))
-            ns_kat_uczn.append(xs(cd[25].text))
+            if cd[25].text is None:
+                ns_kat_uczn.append('Bez kategorii')
+            else:
+                ns_kat_uczn.append(xs(cd[25].text))
             if cd[21].text is None:
                 ns_emails.append('')
             else:
@@ -658,7 +665,10 @@ def get_ns_data(path):
                 ns_tels.append('')
             else:
                 ns_tels.append(cd[20].text)
-            ns_specyfika.append(xs(cd[24].text))
+            if cd[24].text is None:
+                ns_specyfika.append('brak specyfiki')
+            else:
+                ns_specyfika.append(xs(cd[24].text))
             ns_typ_org_prow.append(xs(cd[6].text))
             ns_org_prow.append(xs(cd[7].text))
             ns_czesc_miejska.append(xs(cd[23].text))
@@ -1261,8 +1271,7 @@ for item in sio_report_list:
                     cfile.writerow([
                         row[23],
                         jsts_dict[row[23]],
-                        'Niezgodny nr REGON JST lub CUW. Ewentualnie błędny \
-                            typ CUW.',
+                        'Niezgodny nr REGON JST lub CUW.',
                         row[1],
                         nregon,
                         row[0],
