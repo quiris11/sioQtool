@@ -62,8 +62,6 @@ def get_reports(force):
         ['1', 'rspo_aktywne2.xls'],
         ['2', 'ee_przedszk2.xls'],
         ['3', 'ee_sp2.xls'],
-        ['4', 'obwody_sp2.xls'],
-        ['5', 'obwody_gm2.xls'],
         ['6', 'zawody2.xls'],
         ['7', 'rspo_nieaktywne2.xls']
     ]
