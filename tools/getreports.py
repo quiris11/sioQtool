@@ -26,7 +26,7 @@ def get_reports():
         ['62', 'ee_sp.xls'],
         ['63', 'obwody.xls'],
         ['64', 'zawody.xls']
-    ]
+        ]
 
     uname = raw_input("Username: ")
     passwd = getpass.getpass()
@@ -35,8 +35,7 @@ def get_reports():
     data = urllib.urlencode({
         'nazwaUzytkownika': uname,
         'hasloUzytkownika': passwd,
-        'param': 'Start_login'
-    })
+        'param': 'Start_login'})
     opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
     opener.open(url, data)
     print('* Downloading experts lists...')
@@ -44,8 +43,7 @@ def get_reports():
     while w <= 16:
         url = (
             'https://sio.men.gov.pl/dodatki/strefa/index.php?'
-            'param=Support_eksperciNewWindow_' + str(w)
-        )
+            'param=Support_eksperciNewWindow_' + str(w))
         page = opener.open(url)
         bs = page.read()
         m = re.search('<title>(.+?)</title>', bs)
@@ -71,8 +69,7 @@ def get_reports():
             title_old = ''
         url = (
             'https://sio.men.gov.pl/dodatki/strefa/index.php?'
-            'param=Support_download_' + i[0]
-        )
+            'param=Support_download_' + i[0])
         page = opener.open(url)
         with open(os.path.join(home, 'NSIO', 'new_' + i[1]), 'w') as f:
             f.write(page.read())
@@ -95,5 +92,7 @@ def get_reports():
             shutil.copyfile(os.path.join('%s/NSIO/new_%s' % (home, i[1])),
                             os.path.join('%s/NSIO/%s' % (home, i[1])))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
+
+
 if __name__ == '__main__':
     get_reports()
