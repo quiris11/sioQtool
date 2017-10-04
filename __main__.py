@@ -30,6 +30,7 @@ import shutil
 import sys
 import time
 
+
 home = os.path.expanduser("~")
 XSNS = {'xs': 'http://menis.gov.pl/sio/xmlSchema'}
 XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
@@ -90,12 +91,13 @@ def compare_csvs(sio_report_list):
                     fromfile='stary: ' + item[2] + '/src/' + item[1],
                     tofile='nowy: ' + item[2] + '/' + item[1],
                     lineterm='', n=0
-                ):
-                    print(line)
+                        ):
+                        print(line)
         except IOError:
             print('* Error')
             continue
         print('* OK')
+
 
 sio_report_list = ([
     ['EE SP: ponizej zero', 'etapy_eduk_szk_podst_ponizej_zero.csv',
@@ -145,9 +147,9 @@ sio_report_list = ([
     # ['NS: different jst e-mails', 'osn_rozne_jst_email.csv', '!critical!'],
     # ['NS: different jst phones', 'osn_rozne_jst_telefon.csv', '!critical!'],
     ['NS: missing ZEAS in old SIO', 'osn_brakujace_zeasy_stare_sio.csv',
-         '!critical!'],
+        '!critical!'],
     ['NS: missing ZEAS in new SIO', 'osn_brakujace_zeasy_nowe_sio.csv',
-         '!critical!'],
+        '!critical!'],
     ['NS: different dormitories', 'osn_rozne_internaty.csv', '!critical!'],
     ['NS: problematic JST REGONs', 'osn_jst_problematyczne_numery_regon.csv',
         '!critical!'],
@@ -158,7 +160,7 @@ sio_report_list = ([
      'osn_problematic_chars_in_names.csv',
      '!critical!'],
     ['ALL: all problems', 'all.csv', '!critical!']
-])
+    ])
 
 header_list = [
     'RSPO',
@@ -185,7 +187,7 @@ header_list = [
     'typ organu prow',
     'czy obwodowa?',
     'ID organu scalającego'
-]
+    ]
 
 
 def get_os_internaty(tree):
@@ -204,7 +206,7 @@ def get_os_internaty(tree):
                 nrRspo = int(tree.xpath(
                     '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
                     namespaces=XSNS
-                )[0].get('nrRspo'))
+                    )[0].get('nrRspo'))
             except:
                 nrRspo = 0
             rows.append(nrRspo)
@@ -266,7 +268,7 @@ def get_os_zawody(tree):
             nrRspo = int(tree.xpath(
                 '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
                 namespaces=XSNS
-            )[0].get('nrRspo'))
+                )[0].get('nrRspo'))
         except:
             nrRspo = 0
         ztree = etree.ElementTree(zt)
@@ -322,7 +324,7 @@ def os_row(i, a, scalid, rspo_nad, regon_nad, name_nad, parent_tag):
         xs(regon_nad),
         xs(name_nad),
         xs(parent_tag)
-    ]
+        ]
     return lista
 
 
@@ -448,9 +450,8 @@ def get_jst_row(tree):
                         xs(i.get('wojJST')) +
                         xs(i.get('powJST')) +
                         xs(i.get('gmJST'))
-                    )
-                ]
-            ])
+                        )]
+                ])
     return jst_row
 
 
@@ -459,8 +460,7 @@ def get_os_row(tree, scalid):
     i2as = tree.xpath('//i2a', namespaces=XSNS)
     if len(i2as) > 0:
         rspo_nad = 0 if i2as[0].get(
-            'nrRspo'
-        ) is None else i2as[0].get('nrRspo')
+            'nrRspo') is None else i2as[0].get('nrRspo')
         regon_nad = i2as[0].get('regon')
         nazwa_nad = i2as[0].get('nazwa')
     else:
@@ -476,8 +476,7 @@ def get_os_row(tree, scalid):
             '0' if i.get('nrRspo') == rspo_nad else rspo_nad,
             '' if i.get('nrRspo') == rspo_nad else regon_nad,
             '' if i.get('nrRspo') == rspo_nad else nazwa_nad,
-            i.getparent().getparent().tag
-        ))
+            i.getparent().getparent().tag))
     return file_rows
 
 
@@ -504,8 +503,7 @@ def get_os_data(path):
                 os_12_data = os_12_data + get_os_12_row(single_file_tree,
                                                         scalid)
                 os_internaty = os_internaty + get_os_internaty(
-                    single_file_tree
-                )
+                    single_file_tree)
                 if get_os_zawody(single_file_tree) != []:
                     for r in get_os_zawody(single_file_tree):
                         os_zawody.append(r)
@@ -657,6 +655,7 @@ def get_ns_data(path):
     ns_internaty = []
     ns_rspos_nad = []
     ns_names_nad = []
+    ns_obwodowa = []
     for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
         rtree = etree.ElementTree(i)
         cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
@@ -671,9 +670,9 @@ def get_ns_data(path):
             ns_typs.append(xs(cd[2].text))
             ns_names.append(xs(cd[3].text))
             ns_org_rej.append(xs(cd[5].text))
-            ns_datas_rozp_dzial.append(xs(cd[33].text))
-            ns_publicznosc.append(xs(cd[27].text))
-            ns_kat_uczn.append(xs(cd[26].text))
+            ns_datas_rozp_dzial.append(xs(cd[32].text))
+            ns_publicznosc.append(xs(cd[26].text))
+            ns_kat_uczn.append(xs(cd[25].text))
             if cd[21].text is None:
                 ns_emails.append('')
             else:
@@ -682,14 +681,14 @@ def get_ns_data(path):
                 ns_tels.append('')
             else:
                 ns_tels.append(cd[20].text)
-            ns_specyfika.append(xs(cd[25].text))
+            ns_specyfika.append(xs(cd[24].text))
             ns_typ_org_prow.append(xs(cd[6].text))
             ns_org_prow.append(xs(cd[7].text))
             ns_czesc_miejska.append(xs(cd[23].text))
             try:
-                ns_internaty.append(xi(cd[41].text))
+                ns_internaty.append(xi(cd[42].text))
             except:
-                ns_internaty.append(xs(cd[41].text))
+                ns_internaty.append(xs(cd[42].text))
             if cd[37].text is None:
                 ns_rspos_nad.append(0)
             else:
@@ -701,11 +700,15 @@ def get_ns_data(path):
                 ns_names_nad.append('')
             else:
                 ns_names_nad.append(xs(cd[38].text))
+            try:
+                ns_obwodowa.append(xi(cd[43].text))
+            except:
+                ns_obwodowa.append(xs(cd[43].text))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska,
-               ns_internaty, ns_rspos_nad, ns_names_nad)
+               ns_internaty, ns_rspos_nad, ns_names_nad, ns_obwodowa)
     return data
 
 
@@ -743,12 +746,11 @@ def generate_jst_reports():
         'Nazwa jednostki: ',
         'E-mail: ',
         'Telefon: '
-    ]
+        ]
 
     def strip_accents(text):
         return ''.join(c for c in unicodedata.normalize(
-            'NFKD', text
-        ) if unicodedata.category(c) != 'Mn')
+            'NFKD', text) if unicodedata.category(c) != 'Mn')
 
     with open(os.path.join('!critical!', 'temp.csv')) as f:
         csvread = csv.reader(f, delimiter=';', quotechar='"',
@@ -768,7 +770,7 @@ def generate_jst_reports():
                 'Nazwa jednostki',
                 'E-mail',
                 'Telefon'
-            ])
+                ])
             if os.path.exists(os.path.join('!critical!', 'JST2')):
                 shutil.rmtree(os.path.join('!critical!', 'JST2'))
                 os.makedirs(os.path.join('!critical!', 'JST2'))
@@ -787,14 +789,12 @@ def generate_jst_reports():
                                    .replace(':', '_').replace(u'\u0142', 'l')\
                                    .replace(u'\u0141', 'L')
                     nfname = "".join(x for x in nfname if (
-                        x.isalnum() or x.isspace() or x in ('_', '-', '.')
-                    ))
+                        x.isalnum() or x.isspace() or x in ('_', '-', '.')))
                     with open(
                         os.path.join(
                             '!critical!',
                             'JST2',
-                            '%s (%s).txt' % (nfname, r[0])), 'a'
-                    ) as j:
+                            '%s (%s).txt' % (nfname, r[0])), 'a') as j:
                         csv.writer(j, delimiter='\n', quotechar="'",
                                    lineterminator='\n\n\n',
                                    quoting=csv.QUOTE_MINIMAL).writerow([
@@ -808,9 +808,9 @@ def generate_jst_reports():
                                        l[7] + str(r[7]),
                                        l[8] + str(r[8]),
                                        l[9] + str(r[9]),
-                                       l[10] + str(r[10])
-                                   ])
+                                       l[10] + str(r[10])])
     os.remove(os.path.join('!critical!', 'temp.csv'))
+
 
 start = time.clock()
 if args.oldpath.endswith('.krt'):
@@ -863,7 +863,7 @@ if not args.skip_new_overwrite:
     ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
     ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
     ns_zawody_list = get_ns_zawody(args.newpath)
-    obw_rspo_list = get_ns_obwody(args.newpath)
+    # obw_rspo_list = get_ns_obwody(args.newpath)
     term_tree = etree.parse(os.path.join(args.newpath, 'rspo_nieaktywne2.xls'))
     print('* ' + term_tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                  namespaces=XLSNS)[0])
@@ -878,8 +878,8 @@ if not args.skip_new_overwrite:
         f.write(str(ns_ee_p_list))
     with open(os.path.join(args.newpath, 'ns_zawody_list.txt'), 'w') as f:
         f.write(str(ns_zawody_list))
-    with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'w') as f:
-        f.write(str(obw_rspo_list))
+    # with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'w') as f:
+    #     f.write(str(obw_rspo_list))
     with open(os.path.join(args.newpath, 'ns_term_list.txt'), 'w') as f:
         f.write(str(ns_term_list))
 else:
@@ -894,8 +894,8 @@ else:
         ns_ee_p_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_zawody_list.txt'), 'r') as f:
         ns_zawody_list = eval(f.read())
-    with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'r') as f:
-        obw_rspo_list = eval(f.read())
+    # with open(os.path.join(args.newpath, 'obw_rspo_list.txt'), 'r') as f:
+    #     obw_rspo_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_term_list.txt'), 'r') as f:
         ns_term_list = eval(f.read())
 if not args.skip_old_overwrite:
@@ -907,8 +907,7 @@ if not args.skip_old_overwrite:
         jst_dict_rew,
         os_ee_sp_p_list,
         os_ee_sp_12_list,
-        os_internaty_list
-    ) = get_os_data(oldpath)
+        os_internaty_list) = get_os_data(oldpath)
     with open(os.path.join(args.newpath, 'os_data_list.txt'), 'w') as f:
         f.write(str(os_data_list))
     with open(os.path.join(args.newpath, 'os_zawody_list.txt'), 'w') as f:
@@ -947,8 +946,7 @@ for item in sio_report_list:
         if (
             item[1].startswith('os_') or
             item[1].startswith('etapy_') or
-            item[1].startswith('osn_')
-        ):
+                item[1].startswith('osn_')):
             cfile.writerow([
                 'ID organu scalającego',
                 'Organ scalający',
@@ -960,8 +958,7 @@ for item in sio_report_list:
                 'Typ jednostki',
                 'Nazwa jednostki',
                 'E-mail',
-                'Telefon'
-            ])
+                'Telefon'])
         if (item[1] is 'etapy_eduk_szk_podst_ponizej_zero.csv'):
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_p_list:
@@ -977,8 +974,7 @@ for item in sio_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6]
-                        ])
+                            rn[6]])
         elif (item[1] is
                 'etapy_eduk_przedszk_i_inne_formy_ponizej_zero.csv'):
             for rn in ns_ee_p_list:
@@ -995,8 +991,7 @@ for item in sio_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6]
-                        ])
+                            rn[6]])
         elif item[1] is 'etapy_eduk_szk_podst_zero.csv':
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_p_list:
@@ -1012,8 +1007,7 @@ for item in sio_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6]
-                        ])
+                            rn[6]])
         elif item[1] is 'etapy_eduk_przedszk_i_inne_formy_zero.csv':
             for rn in ns_ee_p_list:
                 for ro in os_ee_sp_p_list:
@@ -1029,8 +1023,7 @@ for item in sio_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6]
-                        ])
+                            rn[6]])
         elif item[1] is 'etapy_eduk_szk_podst_pierwszy_etap.csv':
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_12_list:
@@ -1047,9 +1040,7 @@ for item in sio_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6]
-
-                        ])
+                            rn[6]])
         elif item[1] is 'etapy_eduk_szk_podst_drugi_etap.csv':
             for rn in ns_ee_sp_list:
                 for ro in os_ee_sp_12_list:
@@ -1066,8 +1057,7 @@ for item in sio_report_list:
                             rn[4],
                             rn[3],
                             rn[5],
-                            rn[6]
-                        ])
+                            rn[6]])
         elif item[1] is 'os_all_items.csv':
             for row in os_data_list:
                 cfile.writerow([
@@ -1081,8 +1071,7 @@ for item in sio_report_list:
                     type_dict[row[4]],
                     row[7],
                     row[8],
-                    row[9]
-                ])
+                    row[9]])
         elif item[1] is 'os_brak_nr_rspo.csv':
             for row in os_data_list:
                 if row[0] is 0 and row[4] not in (102, 103, 104, 109):
@@ -1097,8 +1086,7 @@ for item in sio_report_list:
                         type_dict[row[4]],
                         row[7],
                         row[8],
-                        row[9]
-                    ])
+                        row[9]])
         elif item[1] is 'os_brak_adresu_email.csv':
             for row in os_data_list:
                 if row[8] is '':
@@ -1113,8 +1101,7 @@ for item in sio_report_list:
                         type_dict[row[4]],
                         row[7],
                         row[8],
-                        row[9]
-                    ])
+                        row[9]])
         elif item[1] is 'os_zdublowane_regony.csv':
             regon_list = [row[1] for row in os_data_list]
             dup_regon_list = duplicated_list(regon_list)
@@ -1131,8 +1118,7 @@ for item in sio_report_list:
                         type_dict[row[4]],
                         row[7],
                         row[8],
-                        row[9]
-                    ])
+                        row[9]])
         elif item[1] is 'os_zdublowane_rspo.csv':
             rspo_list = [row[0] for row in os_data_list]
             dup_rspo_list = duplicated_list(rspo_list)
@@ -1149,12 +1135,11 @@ for item in sio_report_list:
                         type_dict[row[4]],
                         row[7],
                         row[8],
-                        row[9]
-                    ])
+                        row[9]])
         elif (
             item[1] is
-            'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio.csv'
-        ):
+                'osn_nieznalezione_w_nowym_sio_zawody_wykazane_w_starym_sio\
+                    .csv'):
             found = []
             ns_term_rspos = []
             for i in ns_term_list:
@@ -1184,8 +1169,7 @@ for item in sio_report_list:
                                     type_dict[rowo[4]],
                                     rowo[7],
                                     rowo[8],
-                                    rowo[9]
-                                ])
+                                    rowo[9]])
         elif item[1] is 'os_niepoprawne_numery_regon.csv':
             ns_long_regons = []
             for i in ns_data_list:
@@ -1211,8 +1195,7 @@ for item in sio_report_list:
                         type_dict[row[4]],
                         row[7],
                         row[8],
-                        row[9]
-                    ])
+                        row[9]])
         elif item[1] is 'os_niepoprawne_numery_rspo.csv':
             for row in os_data_list:
                 for i in ns_data_list:
@@ -1232,8 +1215,7 @@ for item in sio_report_list:
                             type_dict[row[4]],
                             row[7],
                             row[8],
-                            row[9]
-                        ])
+                            row[9]])
                 for i in ns_term_list:
                     if len(i[1]) == 9:
                         ns_long_regon = i[1] + '00000'
@@ -1251,8 +1233,7 @@ for item in sio_report_list:
                             type_dict[row[4]],
                             row[7],
                             row[8],
-                            row[9]
-                        ])
+                            row[9]])
         elif item[1] is 'osn_niezgodne_numery_regon.csv':
             for row in os_data_list:
                 for i in ns_data_list:
@@ -1272,8 +1253,7 @@ for item in sio_report_list:
                             type_dict[row[4]],
                             row[7],
                             row[8],
-                            row[9]
-                        ])
+                            row[9]])
                 for i in ns_term_list:
                     if len(i[1]) == 9:
                         ns_long_regon = i[1] + '00000'
@@ -1291,8 +1271,7 @@ for item in sio_report_list:
                             type_dict[row[4]],
                             row[7],
                             row[8],
-                            row[9]
-                        ])
+                            row[9]])
         elif item[1] is 'osn_jst_problematyczne_numery_regon.csv':
             for row in os_data_list:
                 if row[4] not in (103, 104, 109):
@@ -1310,7 +1289,8 @@ for item in sio_report_list:
                     cfile.writerow([
                         row[23],
                         jsts_dict[row[23]],
-                        'Niezgodny nr REGON JST lub CUW. Ewentualnie błędny typ CUW.',
+                        'Niezgodny nr REGON JST lub CUW. Ewentualnie błędny \
+                            typ CUW.',
                         row[1],
                         nregon,
                         row[0],
@@ -1318,8 +1298,7 @@ for item in sio_report_list:
                         type_dict[row[4]],
                         row[7],
                         row[8],
-                        row[9]
-                    ])
+                        row[9]])
         elif item[1] is 'osn_niepoprawne_pole_kategoria_uczniow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1331,8 +1310,7 @@ for item in sio_report_list:
                         if (
                             rown[4] == 'Szkoła policealna'
                             ' (ponadgimnazjalna)' and
-                            kat_ucz_dict[rowo[6]][0] == 'Bez kategorii'
-                        ):
+                                kat_ucz_dict[rowo[6]][0] == 'Bez kategorii'):
                             kfound = True
                         if not kfound:
                             cfile.writerow([
@@ -1346,8 +1324,7 @@ for item in sio_report_list:
                                 rown[4],
                                 rown[3],
                                 rown[5],
-                                rown[6]
-                            ])
+                                rown[6]])
         elif item[1] is 'osn_niepoprawne_pole_typ.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1363,8 +1340,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_niepoprawne_pole_publicznosc.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1380,8 +1356,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_brakujace_zeasy_nowe_sio.csv':
             for rowo in os_data_list:
                 if rowo[4] != 109:
@@ -1404,8 +1379,7 @@ for item in sio_report_list:
                         type_dict[rowo[4]],
                         rowo[7],
                         rowo[8],
-                        rowo[9]
-                    ])
+                        rowo[9]])
         elif item[1] is 'osn_brakujace_zeasy_stare_sio.csv':
             for rown in ns_jst_list:
                 if rown[0] != 160:
@@ -1434,8 +1408,7 @@ for item in sio_report_list:
                             rown[1],
                             rown[2],
                             rown[4],
-                            rown[5]
-                        ])
+                            rown[5]])
         elif item[1] is 'osn_rozne_jst_telefon.csv':
             for rowo in os_data_list:
                 om = 'brak' if rowo[9] == '' else rowo[9]
@@ -1458,8 +1431,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_rozne_jst_email.csv':
             for rowo in os_data_list:
                 om = 'brak' if rowo[8] == '' else rowo[8]
@@ -1480,8 +1452,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
                     omed = 'brak' if rowo[19] == '' else rowo[19]
                     if (rowo[1] == ns_regon and
                             omed.lower() not in rown[4].lower() and
@@ -1499,8 +1470,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_rozne_adresy_email.csv':
             for rowo in os_data_list:
                 om = 'brak' if rowo[8] == '' else rowo[8]
@@ -1518,8 +1488,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_rozne_nr_telefonu.csv':
             for rowo in os_data_list:
                 om = 'brak' if rowo[9] == '' else rowo[9]
@@ -1538,8 +1507,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_brak_lub_niezgodny_org_nadrzedny.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1555,18 +1523,15 @@ for item in sio_report_list:
                             jsts_dict[rowo[23]],
                             'Niezgodność lub brak podmiotu nadrzędnego',
                             'Nr RSPO nadrzędnego: ' + (
-                                'brak' if rowo[24] == 0 else str(rowo[24])
-                            ),
+                                'brak' if rowo[24] == 0 else str(rowo[24])),
                             'Nr RSPO nadrzędnego: ' + (
-                                'brak' if rown[15] == 0 else str(rown[15])
-                            ),
+                                'brak' if rown[15] == 0 else str(rown[15])),
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_rozne_internaty.csv':
             for rowo in os_data_list:
                 if rowo[0] == 0:
@@ -1575,8 +1540,7 @@ for item in sio_report_list:
                     for rown in ns_data_list:
                         if (
                             rowo[0] == rown[0] and
-                            rown[14] == 0
-                        ):
+                                rown[14] == 0):
                             cfile.writerow([
                                 rowo[23],
                                 jsts_dict[rowo[23]],
@@ -1588,14 +1552,12 @@ for item in sio_report_list:
                                 type_dict[rowo[4]],
                                 rowo[7],
                                 rowo[8],
-                                rowo[9]
-                            ])
+                                rowo[9]])
                 else:
                     for rown in ns_data_list:
                         if (
                             rowo[0] == rown[0] and
-                            rown[14] == 1
-                        ):
+                                rown[14] == 1):
                             cfile.writerow([
                                 rowo[23],
                                 jsts_dict[rowo[23]],
@@ -1607,8 +1569,7 @@ for item in sio_report_list:
                                 type_dict[rowo[4]],
                                 rowo[7],
                                 rowo[8],
-                                rowo[9]
-                            ])
+                                rowo[9]])
         elif item[1] is 'osn_problematic_chars_in_names.csv':
             for rowo in os_data_list:
                 if rowo[0] == 0:
@@ -1627,16 +1588,14 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_niezgodny_typ_organu_prow.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if (
                         rowo[0] == rown[0] and
                         typ_organu_prow_dict[rowo[21]] != rown[11] and
-                        rown[13] == 'Nie dotyczy'
-                    ):
+                            rown[13] == 'Nie dotyczy'):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
@@ -1648,14 +1607,12 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
                     elif (
                         rowo[0] == rown[0] and
                         rown[13] == 'Część gminna' and
                         (typ_organu_prow_dict[rowo[21]] != rown[11] and
-                         typ_organu_prow_dict[rowo[21]] != 'Gmina')
-                    ):
+                         typ_organu_prow_dict[rowo[21]] != 'Gmina')):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
@@ -1667,13 +1624,11 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
                     elif (
                         rowo[0] == rown[0] and
                         rown[13] == 'Część powiatowa' and
-                        typ_organu_prow_dict[rowo[21]] != rown[11]
-                    ):
+                            typ_organu_prow_dict[rowo[21]] != rown[11]):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
@@ -1685,8 +1640,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_niepoprawne_pole_specyfika.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
@@ -1703,11 +1657,12 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif item[1] is 'osn_niezgodne_dane_o_obwodowosci.csv':
             for rowo in os_data_list:
-                    if (rowo[0] not in obw_rspo_list and rowo[22] == 'true'):
+                for rown in ns_data_list:
+                    if (rowo[0] == rown[0] and rown[18] == 0 and
+                            rowo[22] == 'true'):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
@@ -1719,9 +1674,9 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
-                    elif (rowo[0] in obw_rspo_list and rowo[22] == 'false'):
+                            rowo[9]])
+                    elif (rowo[0] == rown[0] and rown[18] == 1 and
+                            rowo[22] == 'false'):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
@@ -1733,8 +1688,7 @@ for item in sio_report_list:
                             type_dict[rowo[4]],
                             rowo[7],
                             rowo[8],
-                            rowo[9]
-                        ])
+                            rowo[9]])
         elif (item[1] is
                 'osn_brakujace_w_starym_sio_numery_regon_z_nowego_sio.csv'):
             os_regons = []
@@ -1752,8 +1706,9 @@ for item in sio_report_list:
                     roz_date = datetime.strptime(row[7], '%Y-%m-%d')
                 except:
                     roz_date = datetime.strptime('9999-01-01', '%Y-%m-%d')
-                if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
-                        and roz_date < BORDER_DATE):
+                if (reg_long not in os_regons and
+                        'MINISTERSTWO' not in row[2] and
+                        roz_date < BORDER_DATE):
                     try:
                         cfile.writerow([
                             jst_dict_rew[row[2]],
@@ -1767,8 +1722,7 @@ for item in sio_report_list:
                             row[4],
                             row[3],
                             row[5],
-                            row[6]
-                        ])
+                            row[6]])
                     except KeyError:
                         cfile.writerow([
                             'niescalona jst',
@@ -1782,8 +1736,7 @@ for item in sio_report_list:
                             row[4],
                             row[3],
                             row[5],
-                            row[6]
-                        ])
+                            row[6]])
         elif (item[1] is
                 'osn_nieistniejace_szkoly_wykazane_w_starym_sio.csv'):
             ns_regons = []
@@ -1812,8 +1765,7 @@ for item in sio_report_list:
                         type_dict[row[4]],
                         row[7],
                         row[8],
-                        row[9]
-                    ])
+                        row[9]])
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
