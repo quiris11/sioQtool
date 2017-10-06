@@ -1169,7 +1169,7 @@ for item in sio_report_list:
                     cfile.writerow([
                         row[23],
                         jsts_dict[row[23]],
-                        'Niepoprawny numer REGON w starym SIO',
+                        'Nieznaleziony REGON ze starego SIO w nowym SIO',
                         row[1],
                         'nie badano',
                         row[0],
