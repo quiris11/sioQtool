@@ -9,20 +9,20 @@ specyfika_dict = {
     0: 'brak specyfiki',
     1: 'specjalna',
     100: 'brak specyfiki'
-}
+    }
 
 kat_ucz_dict = {
     1: ['Dzieci lub młodzież', 'Młodzież'],
     2: ['Dorośli'],
     3: ['Bez kategorii']
-}
+    }
 
 publ_dict = {
     1: 'publiczna',
     2: 'niepubliczna o uprawnieniach szkoły publicznej',
     3: 'niepubliczna bez uprawnień szkoły publicznej',
     4: 'niepubliczna'
-}
+    }
 
 type_dict = {
     1: 'Przedszkole',
@@ -40,10 +40,10 @@ type_dict = {
     20: 'Szkoła specjalna przysposabiająca do pracy dla uczniów z '
         'upośledzeniem umysłowym w stopniu umiarkowanym lub znacznym oraz '
         'dla uczniów z  więcej niż jedną niepełnosprawnością',
-    21: 'Sześcioletnia ogólnokształcąca szkoła muzyczna I stopnia',
+    21: 'Ogólnokształcąca szkoła muzyczna I stopnia',
     22: 'Szkoła muzyczna I stopnia',  # changed in NSIO
     23: 'Szkoła muzyczna I stopnia',  # changed in NSIO
-    24: 'Sześcioletnia ogólnokształcąca szkoła muzyczna II stopnia',
+    24: 'Ogólnokształcąca szkoła muzyczna II stopnia',
     25: 'Sześcioletnia szkoła muzyczna II stopnia',
     26: 'Sześcioletnia ogólnokształcąca szkoła sztuk pięknych',
     27: 'Czteroletnie liceum plastyczne',
@@ -101,12 +101,16 @@ type_dict = {
     82: 'Poznańska szkoła chóralna',
     83: 'Niepubliczna placówka kształcenia ustawicznego i praktycznego ze '
         'szkołami',
+    90: 'Bednarska Szkoła Realna',
+    91: 'Szkoła policealna muzyczna',
+    92: 'Szkoła policealna plastyczna',
+    93: 'Branżowa szkoła I stopnia',
     100: 'Zespół szkół i placówek oświatowych',
     102: 'Kuratorium oświaty (wraz z delegaturami)',
     103: 'Jednostka Samorządu Terytorialnego',
     104: 'ZEAS (zespół obsługi ekonomiczno-administracyjnej szkół)',
     109: 'CUW (centrum usług wspólnych)'
-}
+    }
 
 zawod_dict = {
     1: 'Korektor i stroiciel instrumentów muzycznych',
@@ -453,7 +457,7 @@ zawod_dict = {
     361: 'Technik automatyk',
     362: 'Szkutnik',
     363: 'Mechanik operator maszyn do produkcji drzewnej'
-}
+    }
 
 typ_organu_prow_dict = {
     1: 'Gmina',
@@ -487,7 +491,7 @@ typ_organu_prow_dict = {
     35: 'Administracja rządowa na szczeblu centralnym',
     36: 'Administracja rządowa na szczeblu wojewódzkim',
     67: 'Delegatura kuratorium oświaty'
-}
+    }
 
 jst_dict = {
     26: 'WOJEWÓDZTWO ŚWIĘTOKRZYSKIE',
@@ -607,4 +611,4 @@ jst_dict = {
     261305: 'GMINA SECEMIN',
     261306: 'GMINA WŁOSZCZOWA',
     266101: 'KIELCE MIASTO NA PRAWACH POWIATU'
-}
+    }
