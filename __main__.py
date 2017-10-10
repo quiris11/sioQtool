@@ -558,9 +558,9 @@ def get_ns_ee_data(path, typ):
             ns_ee_irrelevant.append(xs(cd[8].text))
         ns_regons.append(xs(cd[13].text))
         ns_org_rej.append(xs(cd[10].text))
-        ns_datas_rozp_dzial.append(xs(cd[34].text))
-        ns_publicznosc.append(xs(cd[31].text))
-        ns_kat_uczn.append(xs(cd[30].text))
+        ns_datas_rozp_dzial.append(xs(cd[33].text))
+        ns_publicznosc.append(xs(cd[30].text))
+        ns_kat_uczn.append(xs(cd[29].text))
         if cd[25].text is None:
             ns_emails.append('')
         else:
