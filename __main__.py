@@ -38,7 +38,7 @@ XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
 
 BORDER_DATE = datetime.strptime('2017-09-30', '%Y-%m-%d')
-BORDER_DATEZ = datetime.strptime('2016-08-31', '%Y-%m-%d')
+BORDER_DATEZ = datetime.strptime('2017-09-01', '%Y-%m-%d')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('oldpath', nargs='?', default=os.path.join(home, 'OSIO'),
@@ -1616,6 +1616,21 @@ for item in sio_report_list:
                             'Niezgodność typu organu prowadzącego',
                             typ_organu_prow_dict[rowo[21]],
                             rown[11],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]])
+                    elif (
+                        rowo[0] == rown[0] and
+                            rown[12] == 'DANE DO UZUPEŁNIENIA'):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Niepoprawny organ prowadzący w RSPO',
+                            typ_organu_prow_dict[rowo[21]],
+                            rown[12],
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
