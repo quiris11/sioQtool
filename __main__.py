@@ -637,6 +637,7 @@ def get_ns_data(path):
     ns_rspos_nad = []
     ns_names_nad = []
     ns_obwodowa = []
+    ns_typ_id = []
     for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
         rtree = etree.ElementTree(i)
         cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
@@ -691,11 +692,19 @@ def get_ns_data(path):
                 ns_obwodowa.append(xi(cd[43].text))
             except:
                 ns_obwodowa.append(xs(cd[43].text))
+            if cd[1].text is None:
+                ns_typ_id.append(0)
+            else:
+                try:
+                    ns_typ_id.append(xi(cd[1].text))
+                except:
+                    ns_typ_id.append(xs(cd[1].text))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
                ns_tels, ns_datas_rozp_dzial, ns_publicznosc, ns_kat_uczn,
                ns_specyfika, ns_typ_org_prow, ns_org_prow, ns_czesc_miejska,
-               ns_internaty, ns_rspos_nad, ns_names_nad, ns_obwodowa)
+               ns_internaty, ns_rspos_nad, ns_names_nad, ns_obwodowa, ns_typ_id
+               )
     return data
 
 
@@ -1309,7 +1318,7 @@ for item in sio_report_list:
         elif item[1] is 'osn_niepoprawne_pole_typ.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
-                    if rowo[0] == rown[0] and type_dict[rowo[4]] != rown[4]:
+                    if rowo[0] == rown[0] and rowo[4] != rown[18]:
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
