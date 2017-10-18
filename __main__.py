@@ -1319,6 +1319,8 @@ for item in sio_report_list:
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     if rowo[0] == rown[0] and rowo[4] != rown[18]:
+                        if (rowo[4] == 22 or rowo[4] == 23) and rown[18] == 85:
+                            continue
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
