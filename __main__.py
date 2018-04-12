@@ -156,6 +156,9 @@ sio_report_list = ([
     ['NS: different or missing parent',
         'osn_brak_lub_niezgodny_org_nadrzedny.csv',
         '!critical!'],
+    ['NS: incorrect name of „branżówka” school',
+        'osn_nieskorygowana_nazwa_branzowki.csv',
+        '!critical!'],
     # ['NS: problematic characters in names',
     #  'osn_problematic_chars_in_names.csv',
     #  '!critical!'],
@@ -1341,6 +1344,27 @@ for item in sio_report_list:
                             rowo[23],
                             jsts_dict[rowo[23]],
                             'Niezgodność pola „Publiczność”',
+                            publ_dict[rowo[5]],
+                            rown[8],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]])
+        elif item[1] is 'osn_nieskorygowana_nazwa_branzowki.csv':
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    # print(rowo[7])
+                    # print(rown[3])
+                    if rowo[0] == rown[0] and (
+                            'zasadnicza' in rowo[7].lower() or
+                            'zasadnicza' in rown[3].lower()):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            'Nieskorygowana nazwa „branżówki” w \
+                                starym lub nowym SIO',
                             publ_dict[rowo[5]],
                             rown[8],
                             rowo[0],
