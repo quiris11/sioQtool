@@ -9,20 +9,20 @@ specyfika_dict = {
     0: 'brak specyfiki',
     1: 'specjalna',
     100: 'brak specyfiki'
-    }
+}
 
 kat_ucz_dict = {
     1: ['Dzieci lub młodzież', 'Młodzież'],
     2: ['Dorośli'],
     3: ['Bez kategorii']
-    }
+}
 
 publ_dict = {
     1: 'publiczna',
     2: 'niepubliczna o uprawnieniach szkoły publicznej',
     3: 'niepubliczna bez uprawnień szkoły publicznej',
     4: 'niepubliczna'
-    }
+}
 
 type_dict = {
     1: 'Przedszkole',
@@ -110,7 +110,7 @@ type_dict = {
     103: 'Jednostka Samorządu Terytorialnego',
     104: 'ZEAS (zespół obsługi ekonomiczno-administracyjnej szkół)',
     109: 'CUW (centrum usług wspólnych)'
-    }
+}
 
 zawod_dict = {
     1: 'Korektor i stroiciel instrumentów muzycznych',
@@ -457,7 +457,7 @@ zawod_dict = {
     361: 'Technik automatyk',
     362: 'Szkutnik',
     363: 'Mechanik operator maszyn do produkcji drzewnej'
-    }
+}
 
 typ_organu_prow_dict = {
     1: 'Gmina',
@@ -491,7 +491,7 @@ typ_organu_prow_dict = {
     35: 'Administracja rządowa na szczeblu centralnym',
     36: 'Administracja rządowa na szczeblu wojewódzkim',
     67: 'Delegatura kuratorium oświaty'
-    }
+}
 
 jst_dict = {
     26: 'WOJEWÓDZTWO ŚWIĘTOKRZYSKIE',
@@ -611,4 +611,4 @@ jst_dict = {
     261305: 'GMINA SECEMIN',
     261306: 'GMINA WŁOSZCZOWA',
     266101: 'KIELCE MIASTO NA PRAWACH POWIATU'
-    }
+}

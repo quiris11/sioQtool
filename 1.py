@@ -94,6 +94,7 @@ def compare_csvs(sio_report_list):
             continue
         print('* OK')
 
+
 sio_report_list = ([
     ['EE SP: ponizej zero', 'etapy_eduk_szk_podst_ponizej_zero.csv',
      '!critical!'],
@@ -187,7 +188,7 @@ def get_os_internaty(tree):
                     '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
                     namespaces=XSNS
                 )[0].get('nrRspo'))
-            except:
+            except BaseException:
                 nrRspo = 0
             rows.append(nrRspo)
     return rows
@@ -202,7 +203,7 @@ def get_ns_obwody(path):
                         namespaces=XLSNS):
         try:
             data.append(xi(i))
-        except:
+        except BaseException:
             continue
     return set(data)
 
@@ -239,7 +240,7 @@ def get_os_zawody(tree):
                 '//identyfikacja[@numerIdent="' + numerIdent + '"]/i2c',
                 namespaces=XSNS
             )[0].get('nrRspo'))
-        except:
+        except BaseException:
             nrRspo = 0
         ztree = etree.ElementTree(zt)
         zs = ztree.xpath('//zawod', namespaces=XSNS)
@@ -297,10 +298,10 @@ def os_row(i, a, scalid):
 def get_os_12_row(tree, scalid):
     def get_l_ucz(wiersz):
         try:
-            l = int(wiersz.get('kol2'))
-        except:
-            l = 0
-        return l
+            li = int(wiersz.get('kol2'))
+        except BaseException:
+            li = 0
+        return li
     file_rows = []
     for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
         ids = tree.xpath('//' + typ + '/identyfikacja', namespaces=XSNS)
@@ -312,7 +313,7 @@ def get_os_12_row(tree, scalid):
                     i.get('numerIdent') +
                     '"]/i2c',
                     namespaces=XSNS)[0].get('nrRspo'))
-            except:
+            except BaseException:
                 nrRspo = 0
             u31s = tree.xpath(
                 '//' + typ + '/uczniowieSzkolyPodst/'
@@ -348,7 +349,7 @@ def get_os_ee_row(tree, scalid):
                     i.get('numerIdent') +
                     '"]/i2c',
                     namespaces=XSNS)[0].get('nrRspo'))
-            except:
+            except BaseException:
                 nrRspo = 0
             u331s = tree.xpath(
                 '//' + typ + '/uczniowieSzkolyPodst/'
@@ -365,11 +366,11 @@ def get_os_ee_row(tree, scalid):
             for u in u331s:
                 try:
                     l_ucz_pon_zero = int(u.get('kol2'))
-                except:
+                except BaseException:
                     l_ucz_pon_zero = 0
                 try:
                     l_ucz_zero = int(u332s[u331s.index(u)].get('kol2'))
-                except:
+                except BaseException:
                     l_ucz_zero = 0
                 file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero,
                                  scalid])
@@ -382,7 +383,7 @@ def get_os_ee_row(tree, scalid):
             try:
                 nrRspo = int(ttree.xpath('//identyfikacja/i2c',
                              namespaces=XSNS)[0].get('nrRspo'))
-            except:
+            except BaseException:
                 nrRspo = 0
             u331p = ttree.xpath(
                 '//dzieciWgOddzialow/u3_3/u3_3_1',
@@ -393,11 +394,11 @@ def get_os_ee_row(tree, scalid):
             for u in u331p:
                 try:
                     l_ucz_pon_zero = int(u.get('kol2'))
-                except:
+                except BaseException:
                     l_ucz_pon_zero = 0
                 try:
                     l_ucz_zero = int(u332p[u331p.index(u)].get('kol2'))
-                except:
+                except BaseException:
                     l_ucz_zero = 0
                 file_rows.append([nrRspo, l_ucz_pon_zero, l_ucz_zero,
                                  scalid])
@@ -515,7 +516,7 @@ def get_ns_ee_data(path, typ):
                         namespaces=XLSNS):
         try:
             ns_rspos.append(xi(i))
-        except:
+        except BaseException:
             ns_rspos.append(xs(i))
     for i in tree.xpath('//ss:Cell[@ss:Index="13"]/ss:Data/text()',
                         namespaces=XLSNS):
@@ -581,7 +582,7 @@ def get_ns_data(path):
                         namespaces=XLSNS):
         try:
             ns_rspos.append(xi(i))
-        except:
+        except BaseException:
             ns_rspos.append(xs(i))
     for i in tree.xpath('//ss:Cell[@ss:Index="10"]/ss:Data/text()',
                         namespaces=XLSNS):
@@ -633,7 +634,7 @@ def get_ns_data(path):
                         namespaces=XLSNS):
         try:
             ns_internaty.append(xi(i))
-        except:
+        except BaseException:
             ns_internaty.append(xs(i))
 
     data = zip(ns_rspos, ns_regons, ns_org_rej, ns_names, ns_typs, ns_emails,
@@ -644,17 +645,17 @@ def get_ns_data(path):
 
 
 def load_exceptions():
-    l = []
+    li = []
     try:
         with open(os.path.join(args.newpath, 'exceptions.csv')) as f:
             csvread = csv.reader(f, delimiter=';', quotechar='"',
                                  quoting=csv.QUOTE_NONNUMERIC)
             for r in csvread:
                 if r[0] == 'missregon':
-                    l.append(r[1])
-    except:
+                    li.append(r[1])
+    except BaseException:
         pass
-    return l
+    return li
 
 
 def generate_jst_reports():
@@ -665,7 +666,7 @@ def generate_jst_reports():
                 with open(os.path.join(item[2], item[1])) as infile:
                     for line in infile:
                         outfile.write(line)
-    l = [
+    li = [
         'ID organu scalającego: ',
         'Organ scalający: ',
         'Opis problemu: ',
@@ -732,19 +733,20 @@ def generate_jst_reports():
                         csv.writer(j, delimiter='\n', quotechar="'",
                                    lineterminator='\n\n\n',
                                    quoting=csv.QUOTE_MINIMAL).writerow([
-                                       l[0] + str(r[0]),
-                                       l[1] + str(r[1]),
-                                       l[2] + str(r[2]),
-                                       l[3] + str(r[3]),
-                                       l[4] + str(r[4]),
-                                       l[5] + str(r[5]),
-                                       l[6] + str(r[6]),
-                                       l[7] + str(r[7]),
-                                       l[8] + str(r[8]),
-                                       l[9] + str(r[9]),
-                                       l[10] + str(r[10])
+                                       li[0] + str(r[0]),
+                                       li[1] + str(r[1]),
+                                       li[2] + str(r[2]),
+                                       li[3] + str(r[3]),
+                                       li[4] + str(r[4]),
+                                       li[5] + str(r[5]),
+                                       li[6] + str(r[6]),
+                                       li[7] + str(r[7]),
+                                       li[8] + str(r[8]),
+                                       li[9] + str(r[9]),
+                                       li[10] + str(r[10])
                                    ])
     os.remove(os.path.join('!critical!', 'temp.csv'))
+
 
 start = time.clock()
 if args.oldpath.endswith('.krt'):
@@ -1067,8 +1069,8 @@ for item in sio_report_list:
                     ])
         elif item[1] is 'os_nieprawidlowe_adresy_email.csv':
             for row in os_data_list:
-                if (not validate_email(row[8])
-                        and row[8] is not '') or '@02.pl' in row[8]:
+                if (not validate_email(row[8]) and
+                        row[8] is not '') or '@02.pl' in row[8]:
                     cfile.writerow([
                         row[23],
                         jsts_dict[row[23]],
@@ -1462,10 +1464,11 @@ for item in sio_report_list:
                     reg_long = row[1]
                 try:
                     roz_date = datetime.strptime(row[7], '%Y-%m-%d')
-                except:
+                except BaseException:
                     roz_date = datetime.strptime('9999-01-01', '%Y-%m-%d')
-                if (reg_long not in os_regons and 'MINISTERSTWO' not in row[2]
-                        and roz_date < BORDER_DATE):
+                if (reg_long not in os_regons and
+                        'MINISTERSTWO' not in row[2] and
+                        roz_date < BORDER_DATE):
                     try:
                         cfile.writerow([
                             jst_dict_rew[row[2]],
@@ -1533,20 +1536,20 @@ for item in sio_report_list:
                 for m in ms:
                     if args.ns_mail_tough_check:
                         print('* Checking: ' + m)
-                        if (not validate_email(m, check_mx=True)
-                                and m is not '') or '@02.pl' in m:
+                        if (not validate_email(m, check_mx=True) and
+                                m is not '') or '@02.pl' in m:
                             cfile.writerow(row)
                     else:
-                        if (not validate_email(m)
-                                and m is not '') or '@02.pl' in m:
+                        if (not validate_email(m) and
+                                m is not '') or '@02.pl' in m:
                             cfile.writerow(row)
         elif item[1] is 'ns_all_items.csv':
             for row in ns_data_list:
                 cfile.writerow(row)
         elif item[1] is 'ns_brak_adresu_email.csv':
             for row in ns_data_list:
-                if ((row[5] is '' or 'E-mail' in row[5])
-                        and ('MINISTERSTWO' not in row[2])):
+                if ((row[5] is '' or 'E-mail' in row[5]) and
+                        ('MINISTERSTWO' not in row[2])):
                     cfile.writerow(row)
 
 generate_jst_reports()

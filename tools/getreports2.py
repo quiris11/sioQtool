@@ -8,7 +8,15 @@
 
 def get_regions_reports():
     import os
-    import urllib2
+    try:
+        from urllib.request import build_opener
+    except ImportError:
+        from urllib2 import build_opener
+
+    try:
+        from urllib.request import HTTPCookieProcessor
+    except ImportError:
+        from urllib2 import HTTPCookieProcessor
 
     home = os.path.expanduser("~")
 
@@ -29,16 +37,16 @@ def get_regions_reports():
         ['39', 'warminsko-mazurskie'],
         ['40', 'wielkopolskie'],
         ['41', 'zachodniopomorskie'],
-        ]
+    ]
 
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+    opener = build_opener(HTTPCookieProcessor())
 
     for i in report_list:
         print('* Downloading: ' + i[1])
         url = (
             'https://raporty-sio2.men.gov.pl/raports/getraport?'
             'idPodmiot=' + i[0] + '&idRaport=1'
-            )
+        )
         page = opener.open(url)
         with open(
                 os.path.join(home, 'NSIO', 'woj_' + i[1] + '.xls'), 'w') as f:
@@ -49,7 +57,15 @@ def get_reports(force):
     import os
     import shutil
     from lxml import etree
-    import urllib2
+    try:
+        from urllib.request import build_opener
+    except ImportError:
+        from urllib2 import build_opener
+
+    try:
+        from urllib.request import HTTPCookieProcessor
+    except ImportError:
+        from urllib2 import HTTPCookieProcessor
 
     XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
              'x': 'urn:schemas-microsoft-com:office:excel',
@@ -62,9 +78,9 @@ def get_reports(force):
         ['3', 'ee_sp2.xls'],
         ['6', 'zawody2.xls'],
         ['7', 'rspo_nieaktywne2.xls']
-        ]
+    ]
 
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+    opener = build_opener(HTTPCookieProcessor())
 
     print('* Downloading reports...')
     for i in report_list:
@@ -72,21 +88,21 @@ def get_reports(force):
             tree = etree.parse(os.path.join('%s/NSIO/%s' % (home, i[1])))
             title_old = tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                    namespaces=XLSNS)[0]
-        except:
+        except BaseException:
             print('Error! Incorrect file: %s/NSIO/%s' % (home, i[1]))
             title_old = ''
         url = (
             'https://raporty-sio2.men.gov.pl/raports/getraport?'
             'idPodmiot=38&idRaport=' + i[0]
-            )
+        )
         page = opener.open(url)
-        with open(os.path.join(home, 'NSIO', 'new_' + i[1]), 'w') as f:
+        with open(os.path.join(home, 'NSIO', 'new_' + i[1]), 'wb') as f:
             f.write(page.read())
         try:
             tree = etree.parse(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
             title_new = tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                    namespaces=XLSNS)[0]
-        except:
+        except BaseException:
             print('Error! Incorrect file: %s/NSIO/new_%s' % (home, i[1]))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
             continue

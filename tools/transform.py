@@ -30,7 +30,7 @@ def transform(path, extension):
         shutil.rmtree(os.path.join('OSIO'))
         try:
             shutil.copyfile(os.path.join(path), exp)
-        except:
+        except BaseException:
             sys.exit('Error! File does not exist...')
         unpack_exp(exp)
         os.remove(exp)
@@ -47,7 +47,7 @@ def transform(path, extension):
                             'OSIO',
                             os.path.basename(single_file_path[:-4])
                         ))
-                    except:
+                    except BaseException:
                         pass
                     print('* Unpacking EXP file: ' +
                           os.path.basename(single_file_path[:-4]))

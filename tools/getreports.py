@@ -14,6 +14,7 @@ def get_reports():
     import urllib
     import urllib2
     import re
+    from builtins import input
 
     XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
              'x': 'urn:schemas-microsoft-com:office:excel',
@@ -26,9 +27,9 @@ def get_reports():
         ['62', 'ee_sp.xls'],
         ['63', 'obwody.xls'],
         ['64', 'zawody.xls']
-        ]
+    ]
 
-    uname = raw_input("Username: ")
+    uname = input("Username: ")
     passwd = getpass.getpass()
 
     url = 'https://sio.men.gov.pl/dodatki/strefa/index.php'
@@ -64,7 +65,7 @@ def get_reports():
             tree = etree.parse(os.path.join('%s/NSIO/%s' % (home, i[1])))
             title_old = tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                    namespaces=XLSNS)[0]
-        except:
+        except BaseException:
             print('Error! Incorrect file: %s/NSIO/%s' % (home, i[1]))
             title_old = ''
         url = (
@@ -77,7 +78,7 @@ def get_reports():
             tree = etree.parse(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
             title_new = tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                    namespaces=XLSNS)[0]
-        except:
+        except BaseException:
             print('Error! Incorrect file: %s/NSIO/new_%s' % (home, i[1]))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
             continue
