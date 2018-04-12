@@ -159,6 +159,9 @@ sio_report_list = ([
     ['NS: incorrect name of „branżówka” school',
         'osn_nieskorygowana_nazwa_branzowki.csv',
         '!critical!'],
+    ['NS: problem with item names',
+        'osn_niezgodne_nazwy_jednostek.csv',
+        '!critical!'],
     # ['NS: problematic characters in names',
     #  'osn_problematic_chars_in_names.csv',
     #  '!critical!'],
@@ -265,7 +268,10 @@ def duplicated_list(mylist):
 def xs(s):
     if s is None:
         return ''
-    return unicode(s.strip()).encode('utf8')
+    try:
+        return unicode(s.strip()).encode('utf8')
+    except NameError:
+        return s.strip()
 
 
 def xi(s):
@@ -783,7 +789,10 @@ def generate_jst_reports():
                     continue
                 else:
                     csvwrite.writerow(r)
-                    nfname = strip_accents(r[1].decode('utf8'))
+                    try:
+                        nfname = strip_accents(r[1].decode('utf8'))
+                    except AttributeError:
+                        nfname = strip_accents(r[1])
                     nfname = nfname.replace(u'\u2013', '-').replace('/', '')\
                                    .replace(':', '_').replace(u'\u0142', 'l')\
                                    .replace(u'\u0141', 'L')
@@ -934,7 +943,7 @@ else:
         os_internaty_list = eval(f.read())
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
-    with open(os.path.join(item[2], item[1]), 'wb') as f:
+    with open(os.path.join(item[2], item[1]), 'w') as f:
         cfile = csv.writer(f, delimiter=";", quotechar='"',
                            quoting=csv.QUOTE_NONNUMERIC)
         if (
@@ -1355,18 +1364,40 @@ for item in sio_report_list:
         elif item[1] is 'osn_nieskorygowana_nazwa_branzowki.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
-                    # print(rowo[7])
-                    # print(rown[3])
                     if rowo[0] == rown[0] and (
                             'zasadnicza' in rowo[7].lower() or
                             'zasadnicza' in rown[3].lower()):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
-                            'Nieskorygowana nazwa „branżówki” w \
-                                starym lub nowym SIO',
-                            publ_dict[rowo[5]],
-                            rown[8],
+                            ('Nieskorygowana nazwa „branżówki” w '
+                                'starym lub nowym SIO'),
+                            rowo[7],
+                            rown[3],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]])
+        elif item[1] is 'osn_niezgodne_nazwy_jednostek.csv':
+            for rowo in os_data_list:
+                for rown in ns_data_list:
+                    onuni = unicode(rowo[7].decode('utf-8')).lower().strip()
+                    nnuni = unicode(rown[3].decode('utf-8')).lower().strip()
+                    if rowo[0] == rown[0] and onuni != nnuni:
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            ('Niezgodne nazwy w starym i nowym SIO. '
+                                'Nazwy muszą być napisane zgodnie z zasadami '
+                                'pisowni języka polskiego oraz '
+                                'powinny być zgodne ze statutem. '
+                                'Narzędzie do sprawdzenia poprawności nazwy: '
+                                'https://languagetool.org/pl/. '
+                                'Wielkość liter nie jest sprawdzana!'),
+                            rowo[7],
+                            rown[3],
                             rowo[0],
                             rowo[1],
                             type_dict[rowo[4]],
@@ -1816,7 +1847,7 @@ for i in sio_report_list:
                         os.path.splitext(i[1])[0] + '.xlsx'))
     worksheet = workbook.add_worksheet()
     bold = workbook.add_format({'bold': True})
-    with open(os.path.join(i[2], i[1]), 'rb') as f:
+    with open(os.path.join(i[2], i[1]), 'r') as f:
         reader = csv.reader(f, delimiter=';', quotechar='"',
                             quoting=csv.QUOTE_NONNUMERIC)
         for r, row in enumerate(reader):

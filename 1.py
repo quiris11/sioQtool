@@ -256,7 +256,10 @@ def duplicated_list(mylist):
 def xs(s):
     if s is None:
         return ''
-    return unicode(s.strip()).encode('utf8')
+    try:
+        return unicode(s.strip()).encode('utf8')
+    except NameError:
+        return s.strip()
 
 
 def xi(s):
