@@ -77,7 +77,8 @@ def get_reports(force):
         ['2', 'ee_przedszk2.xls'],
         ['3', 'ee_sp2.xls'],
         ['6', 'zawody2.xls'],
-        ['7', 'rspo_nieaktywne2.xls']
+        ['7', 'rspo_nieaktywne2.xls'],
+        ['27', 'licz_ucz_oddz_wg_klas2.xls']
     ]
 
     opener = build_opener(HTTPCookieProcessor())
