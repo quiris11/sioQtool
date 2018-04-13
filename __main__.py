@@ -1383,8 +1383,14 @@ for item in sio_report_list:
         elif item[1] is 'osn_niezgodne_nazwy_jednostek.csv':
             for rowo in os_data_list:
                 for rown in ns_data_list:
-                    onuni = unicode(rowo[7].decode('utf-8')).lower().strip()
-                    nnuni = unicode(rown[3].decode('utf-8')).lower().strip()
+                    try:
+                        onuni = unicode(rowo[7].decode(
+                            'utf-8')).lower().strip()
+                        nnuni = unicode(rown[3].decode(
+                            'utf-8')).lower().strip()
+                    except NameError:
+                        onuni = rowo[7].lower().strip()
+                        nnuni = rown[3].lower().strip()
                     if rowo[0] == rown[0] and onuni != nnuni:
                         cfile.writerow([
                             rowo[23],
@@ -1395,6 +1401,8 @@ for item in sio_report_list:
                                 'powinny być zgodne ze statutem. '
                                 'Narzędzie do sprawdzenia poprawności nazwy: '
                                 'https://languagetool.org/pl/. '
+                                'Polskie cudzysłowy: dolny „ (Alt + 0132) oraz'
+                                ' górny ” (Alt + 0148). '
                                 'Wielkość liter nie jest sprawdzana!'),
                             rowo[7],
                             rown[3],
