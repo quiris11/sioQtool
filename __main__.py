@@ -162,9 +162,9 @@ sio_report_list = ([
     ['NS: problem with item names',
         'osn_niezgodne_nazwy_jednostek.csv',
         '!critical!'],
-    # ['NS: problematic characters in names',
-    #  'osn_problematic_chars_in_names.csv',
-    #  '!critical!'],
+    ['NS: no students in new SIO',
+        'ns_brak_przypisanych_uczniow.csv',
+        '!critical!'],
     ['ALL: all problems', 'all.csv', '!critical!']
 ])
 
@@ -623,6 +623,37 @@ def get_jst_data(path):
     return data
 
 
+def get_ns_liczba_uczniow_oddzialow(path):
+    tree = etree.parse(os.path.join(path, 'licz_ucz_oddz_wg_klas2.xls'))
+    print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                              namespaces=XLSNS)[0])
+    data = []
+    ns_rspos = []
+    ns_licz_uczniow = []
+    ns_licz_oddzialow = []
+
+    for i in tree.xpath('//ss:Row', namespaces=XLSNS)[2:]:
+        rtree = etree.ElementTree(i)
+        cd = rtree.xpath('//ss:Cell/ss:Data', namespaces=XLSNS)
+        if cd[0].text is None:
+                continue
+        else:
+            try:
+                ns_rspos.append(xi(cd[0].text))
+            except BaseException:
+                ns_rspos.append(xs(cd[0].text))
+            try:
+                ns_licz_uczniow.append(xi(cd[5].text))
+            except BaseException:
+                ns_licz_uczniow.append(xs(cd[5].text))
+            try:
+                ns_licz_oddzialow.append(xi(cd[6].text))
+            except BaseException:
+                ns_licz_oddzialow.append(xs(cd[6].text))
+    data = zip(ns_rspos, ns_licz_uczniow, ns_licz_oddzialow)
+    return data
+
+
 def get_ns_data(path):
     tree = etree.parse(os.path.join(path, 'rspo_aktywne2.xls'))
     print('* %s' % tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
@@ -867,6 +898,7 @@ missregons = load_exceptions()
 if not args.skip_new_overwrite:
     print('! Preparing new SIO data from source files...')
     ns_data_list = get_ns_data(args.newpath)
+    ns_l_ucz_oddz = get_ns_liczba_uczniow_oddzialow(args.newpath)
     ns_jst_list = get_jst_data(args.newpath)
     ns_ee_sp_list = get_ns_ee_data(os.path.join(args.newpath), 'sp')
     ns_ee_p_list = get_ns_ee_data(os.path.join(args.newpath), 'przedszk')
@@ -877,6 +909,8 @@ if not args.skip_new_overwrite:
     ns_term_list = get_terminated(term_tree)
     with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'w') as f:
         f.write(str(ns_data_list))
+    with open(os.path.join(args.newpath, 'ns_l_ucz_oddz.txt'), 'w') as f:
+        f.write(str(ns_l_ucz_oddz))
     with open(os.path.join(args.newpath, 'ns_jst_list.txt'), 'w') as f:
         f.write(str(ns_jst_list))
     with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'w') as f:
@@ -891,6 +925,8 @@ else:
     print('* Loading prepared new SIO data from txt files...')
     with open(os.path.join(args.newpath, 'ns_data_list.txt'), 'r') as f:
         ns_data_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'ns_l_ucz_oddz.txt'), 'r') as f:
+        ns_l_ucz_oddz = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_jst_list.txt'), 'r') as f:
         ns_jst_list = eval(f.read())
     with open(os.path.join(args.newpath, 'ns_ee_sp_list.txt'), 'r') as f:
@@ -1199,6 +1235,24 @@ for item in sio_report_list:
                         row[7],
                         row[8],
                         row[9]])
+        elif item[1] is 'ns_brak_przypisanych_uczniow.csv':
+            for rowo in os_data_list:
+                for rown in ns_l_ucz_oddz:
+                    if rowo[0] == rown[0] and rown[1] == 0:
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            ('Brak przypisanych uczniów w nowym SIO. '
+                                'Komunikat w tej sprawie: '
+                                'https://goo.gl/2WRcg5'),
+                            'Nie badano',
+                            rown[1],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]])
         elif item[1] is 'os_niepoprawne_numery_rspo.csv':
             for row in os_data_list:
                 for i in ns_data_list:
