@@ -1452,11 +1452,13 @@ for item in sio_report_list:
                             ('Niezgodne nazwy w starym i nowym SIO. '
                                 'Nazwy muszą być napisane zgodnie z zasadami '
                                 'pisowni języka polskiego oraz '
-                                'powinny być zgodne ze statutem. '
+                                'powinny być zgodne ze statutem. Przepisy '
+                                'prawa o nazwach: https://goo.gl/nwe3vp'
                                 'Narzędzie do sprawdzenia poprawności nazwy: '
                                 'https://languagetool.org/pl/. '
                                 'Polskie cudzysłowy: dolny „ (Alt + 0132) oraz'
                                 ' górny ” (Alt + 0148). '
+                                'Po skrócie „im.” musi być spacja! '
                                 'Wielkość liter nie jest sprawdzana!'),
                             rowo[7],
                             rown[3],
