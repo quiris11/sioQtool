@@ -1453,7 +1453,7 @@ for item in sio_report_list:
                                 'Nazwy muszą być napisane zgodnie z zasadami '
                                 'pisowni języka polskiego oraz '
                                 'powinny być zgodne ze statutem. Przepisy '
-                                'prawa o nazwach: https://goo.gl/nwe3vp'
+                                'prawa o nazwach: https://goo.gl/nwe3vp '
                                 'Narzędzie do sprawdzenia poprawności nazwy: '
                                 'https://languagetool.org/pl/. '
                                 'Polskie cudzysłowy: dolny „ (Alt + 0132) oraz'
