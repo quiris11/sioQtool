@@ -1459,6 +1459,10 @@ for item in sio_report_list:
                                 'Polskie cudzysłowy: dolny „ (Alt + 0132) oraz'
                                 ' górny ” (Alt + 0148). '
                                 'Po skrócie „im.” musi być spacja! '
+                                'Miejscowość, w której siedzibę ma publiczna '
+                                'szkoła musi być częścią nazwy. '
+                                'Patron szkoły publicznej jest '
+                                'częścią nazwy szkoły. '
                                 'Wielkość liter nie jest sprawdzana!'),
                             rowo[7],
                             rown[3],
