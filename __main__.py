@@ -1449,7 +1449,7 @@ for item in sio_report_list:
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
-                            ('Niezgodne nazwy w starym i nowym SIO. '
+                            ('Niezgodne nazwy w starym SIO i w RSPO. '
                                 'Nazwy muszą być napisane zgodnie z zasadami '
                                 'pisowni języka polskiego oraz '
                                 'powinny być zgodne ze statutem. Przepisy '
@@ -1464,6 +1464,26 @@ for item in sio_report_list:
                                 'Patron szkoły publicznej jest '
                                 'częścią nazwy szkoły. '
                                 'Wielkość liter nie jest sprawdzana!'),
+                            rowo[7],
+                            rown[3],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]])
+                    elif rowo[0] == rown[0] and 'niepubliczna' not in rown[
+                        8] and (
+                            (onuni.count(' ') < 3 and onuni.count(
+                                ' w ') == 0) or
+                            (nnuni.count(' ') < 3) and nnuni.count(
+                                ' w ') == 0):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            ('Nazwa w starym SIO lub w RSPO niezgodna z '
+                                'przepisami rozporządzenia: '
+                                'https://goo.gl/nwe3vp'),
                             rowo[7],
                             rown[3],
                             rowo[0],
