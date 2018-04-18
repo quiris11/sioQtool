@@ -312,7 +312,6 @@ def os_row(i, a, scalid, rspo_nad, regon_nad, name_nad, parent_tag):
         xs(parent_tag),
         xs(i.get('imiePat'))
     ]
-    print(xs(i.get('imiePat')))
     return lista
 
 
