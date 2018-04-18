@@ -1436,6 +1436,7 @@ for item in sio_report_list:
                             rowo[8],
                             rowo[9]])
         elif item[1] is 'osn_niezgodne_nazwy_jednostek.csv':
+            imienia = [' im. ', ' imienia ']
             for rowo in os_data_list:
                 for rown in ns_data_list:
                     try:
@@ -1493,9 +1494,9 @@ for item in sio_report_list:
                             rowo[7],
                             rowo[8],
                             rowo[9]])
-                    if rowo[0] == rown[0] and rowo[28] != '' and (
-                            onuni.count(' im. ') == 0 or
-                            nnuni.count(' im. ') == 0):
+                    if rowo[0] == rown[0] and rowo[28] != '' and not (
+                            any(x in onuni for x in imienia) or
+                            any(x in nnuni for x in imienia)):
                         cfile.writerow([
                             rowo[23],
                             jsts_dict[rowo[23]],
