@@ -309,8 +309,10 @@ def os_row(i, a, scalid, rspo_nad, regon_nad, name_nad, parent_tag):
         xi(rspo_nad),
         xs(regon_nad),
         xs(name_nad),
-        xs(parent_tag)
+        xs(parent_tag),
+        xs(i.get('imiePat'))
     ]
+    print(xs(i.get('imiePat')))
     return lista
 
 
@@ -1484,6 +1486,25 @@ for item in sio_report_list:
                             ('Nazwa w starym SIO lub w RSPO niezgodna z '
                                 'przepisami rozporządzenia: '
                                 'https://goo.gl/nwe3vp'),
+                            rowo[7],
+                            rown[3],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]])
+                    if rowo[0] == rown[0] and rowo[28] != '' and (
+                            onuni.count(' im. ') == 0 or
+                            nnuni.count(' im. ') == 0):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            ('Brak patrona: „%s” (wykazanego w starym SIO) '
+                             'w nazwie '
+                             'szkoły w starym SIO lub w RSPO. '
+                             'Jeśli patrona nie ma, należy w starym SIO '
+                             'pole „Patron” zostawić puste.' % (rowo[28])),
                             rowo[7],
                             rown[3],
                             rowo[0],
