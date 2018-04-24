@@ -1474,6 +1474,33 @@ for item in sio_report_list:
                             rowo[7],
                             rowo[8],
                             rowo[9]])
+                    elif rowo[0] == rown[0] and (onuni.count('"') > 0 or
+                                                 nnuni.count('"') > 0):
+                        cfile.writerow([
+                            rowo[23],
+                            jsts_dict[rowo[23]],
+                            ('W nazwie występują amerykańskie cudzysłowy. '
+                             'Zasady pisowni języka polskiego nakazują '
+                             'używanie polskich cudzysłowów: „ oraz ” '
+                             'Aby uzyskać dolny cudzysłów należy nacisnąć i '
+                             'trzymając wciśnięty lewy klawisz ALT wpisać '
+                             'cztery cyfry z klawiatury numerycznej: 0132 i '
+                             'następnie puścić lewy klawisz ALT. '
+                             'Aby uzyskać górny cudzysłów należy nacisnąć i '
+                             'trzymając wciśnięty lewy klawisz ALT wpisać '
+                             'cztery cyfry z klawiatury numerycznej: 0148 i '
+                             'następnie puścić lewy klawisz ALT. '
+                             'Proszę sprawdzić, czy klawiatura numeryczna '
+                             'działa. Jeśli nie, to klawiszem NumLock należy '
+                             'włączyć działanie klawiatury numerycznej. '),
+                            rowo[7],
+                            rown[3],
+                            rowo[0],
+                            rowo[1],
+                            type_dict[rowo[4]],
+                            rowo[7],
+                            rowo[8],
+                            rowo[9]])
                     elif rowo[0] == rown[0] and 'niepubliczna' not in rown[
                         8] and (
                             (onuni.count(' ') < 3 and onuni.count(
