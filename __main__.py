@@ -37,8 +37,8 @@ XLSNS = {'o': 'urn:schemas-microsoft-com:office:office',
          'x': 'urn:schemas-microsoft-com:office:excel',
          'ss': 'urn:schemas-microsoft-com:office:spreadsheet'}
 
-BORDER_DATE = datetime.strptime('2018-03-31', '%Y-%m-%d')
-BORDER_DATEZ = datetime.strptime('2017-09-01', '%Y-%m-%d')
+BORDER_DATE = datetime.strptime('2018-09-30', '%Y-%m-%d')
+BORDER_DATEZ = datetime.strptime('2017-08-31', '%Y-%m-%d')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('oldpath', nargs='?', default=os.path.join(home, 'OSIO'),
