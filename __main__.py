@@ -693,46 +693,46 @@ def get_ns_data(path):
             ns_typs.append(xs(cd[2].text))
             ns_names.append(xs(cd[3].text))
             ns_org_rej.append(xs(cd[5].text))
-            ns_datas_rozp_dzial.append(xs(cd[33].text))
-            ns_publicznosc.append(xs(cd[26].text))
-            if cd[25].text is None:
+            ns_datas_rozp_dzial.append(xs(cd[34].text))
+            ns_publicznosc.append(xs(cd[27].text))
+            if cd[26].text is None:
                 ns_kat_uczn.append('Bez kategorii')
             else:
-                ns_kat_uczn.append(xs(cd[25].text))
-            if cd[21].text is None:
+                ns_kat_uczn.append(xs(cd[26].text))
+            if cd[22].text is None:
                 ns_emails.append('')
             else:
-                ns_emails.append(cd[21].text)
+                ns_emails.append(cd[22].text)
             if cd[20].text is None:
                 ns_tels.append('')
             else:
                 ns_tels.append(cd[20].text)
-            if cd[24].text is None:
+            if cd[25].text is None:
                 ns_specyfika.append('brak specyfiki')
             else:
-                ns_specyfika.append(xs(cd[24].text))
+                ns_specyfika.append(xs(cd[25].text))
             ns_typ_org_prow.append(xs(cd[6].text))
             ns_org_prow.append(xs(cd[7].text))
-            ns_czesc_miejska.append(xs(cd[23].text))
+            ns_czesc_miejska.append(xs(cd[24].text))
             try:
-                ns_internaty.append(xi(cd[43].text))
+                ns_internaty.append(xi(cd[44].text))
             except BaseException:
-                ns_internaty.append(xs(cd[43].text))
-            if cd[38].text is None:
+                ns_internaty.append(xs(cd[44].text))
+            if cd[39].text is None:
                 ns_rspos_nad.append(0)
             else:
                 try:
-                    ns_rspos_nad.append(xi(cd[38].text))
+                    ns_rspos_nad.append(xi(cd[39].text))
                 except BaseException:
-                    ns_rspos_nad.append(xs(cd[38].text))
-            if cd[40].text is None:
+                    ns_rspos_nad.append(xs(cd[39].text))
+            if cd[41].text is None:
                 ns_names_nad.append('')
             else:
-                ns_names_nad.append(xs(cd[40].text))
+                ns_names_nad.append(xs(cd[41].text))
             try:
-                ns_obwodowa.append(xi(cd[44].text))
+                ns_obwodowa.append(xi(cd[45].text))
             except BaseException:
-                ns_obwodowa.append(xs(cd[44].text))
+                ns_obwodowa.append(xs(cd[45].text))
             if cd[1].text is None:
                 ns_typ_id.append(0)
             else:
@@ -1245,7 +1245,7 @@ for item in sio_report_list:
                             jsts_dict[rowo[23]],
                             ('Brak przypisanych uczniów w nowym SIO. '
                                 'Komunikat w tej sprawie: '
-                                'https://goo.gl/2WRcg5'),
+                                'https://goo.gl/ac1huH'),
                             'Nie badano',
                             rown[1],
                             rowo[0],
