@@ -103,6 +103,16 @@ def get_reports(force):
             tree = etree.parse(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
             title_new = tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
                                    namespaces=XLSNS)[0]
+        except etree.XMLSyntaxError:
+            print("XML Error")
+            with open(
+                    os.path.join('%s/NSIO/new_%s' % (home, i[1])), 'rb+') as f:
+                s = f.read().replace('BLACK&WHITE', 'BLACK and WHITE')
+                tree = etree.fromstring(s)
+                title_new = tree.xpath('//ss:Row[2]/ss:Cell/ss:Data/text()',
+                                       namespaces=XLSNS)[0]
+                f.seek(0)
+                f.write(s)
         except BaseException:
             print('Error! Incorrect file: %s/NSIO/new_%s' % (home, i[1]))
             os.remove(os.path.join('%s/NSIO/new_%s' % (home, i[1])))
