@@ -358,6 +358,83 @@ def get_os_12_row(tree, scalid):
     return file_rows
 
 
+def get_os_u31_row(tree, scalid):
+    def get_l_ucz(wiersz):
+        try:
+            li = int(wiersz.get('kol2'))
+        except BaseException:
+            li = 0
+        return li
+    file_rows = []
+    ids = tree.xpath('//identyfikacja', namespaces=XSNS)
+    for i in ids:
+        lu = 0
+        try:
+            nrRspo = int(tree.xpath(
+                '//identyfikacja[@numerIdent="' +
+                i.get('numerIdent') +
+                '"]/i2c',
+                namespaces=XSNS)[0].get('nrRspo'))
+        except BaseException:
+            nrRspo = 0
+        u331s = tree.xpath(
+            '//oddzialyPrzedszkolne[@numerIdent="' +
+            i.get('numerIdent')[:-1] + '1' +
+            '"]/dzieciWgOddzialow/u3_3/u3_3_1',
+            namespaces=XSNS)
+        u332s = tree.xpath(
+            '//oddzialyPrzedszkolne[@numerIdent="' +
+            i.get('numerIdent')[:-1] + '1' +
+            '"]/dzieciWgOddzialow/u3_3/u3_3_2',
+            namespaces=XSNS)
+        u31s = tree.xpath(
+            '//oddzialy[@numerIdent="' +
+            i.get('numerIdent') +
+            '"]//wierszU3_1',
+            namespaces=XSNS)
+        for u in u331s:
+            try:
+                lu += int(u.get('kol2'))
+            except BaseException:
+                lu += 0
+            try:
+                lu += int(u332s[u331s.index(u)].get('kol2'))
+            except BaseException:
+                lu += 0
+        for u in u31s:
+            lu += get_l_ucz(u)
+        file_rows.append([nrRspo, lu, scalid])
+        for typ in ('punktPrzedszkolny',
+                    'zespolWychowaniaPrzedszkolnego',
+                    'przedszkole'):
+            typels = tree.xpath('//' + typ, namespaces=XSNS)
+            for t in typels:
+                ttree = etree.ElementTree(t)
+                try:
+                    nrRspo = int(ttree.xpath('//identyfikacja/i2c',
+                                 namespaces=XSNS)[0].get('nrRspo'))
+                except BaseException:
+                    nrRspo = 0
+                u331p = ttree.xpath(
+                    '//dzieciWgOddzialow/u3_3/u3_3_1',
+                    namespaces=XSNS)
+                u332p = ttree.xpath(
+                    '//dzieciWgOddzialow/u3_3/u3_3_2',
+                    namespaces=XSNS)
+                lup = 0
+                for u in u331p:
+                    try:
+                        lup += int(u.get('kol2'))
+                    except BaseException:
+                        break
+                    try:
+                        lup += int(u332p[u331p.index(u)].get('kol2'))
+                    except BaseException:
+                        lup += 0
+                file_rows.append([nrRspo, lup, scalid])
+    return file_rows
+
+
 def get_os_ee_row(tree, scalid):
     file_rows = []
     for typ in ('szkolaPodst', 'filiaSzkolyPodst'):
@@ -473,6 +550,7 @@ def get_os_data(path):
     os_zawody = []
     os_ee_data = []
     os_12_data = []
+    os_u31_data = []
     os_internaty = []
     for root, dirs, files in os.walk(path):
         for single_file in files:
@@ -489,6 +567,8 @@ def get_os_data(path):
                                                         scalid)
                 os_12_data = os_12_data + get_os_12_row(single_file_tree,
                                                         scalid)
+                os_u31_data = os_u31_data + get_os_u31_row(single_file_tree,
+                                                           scalid)
                 os_internaty = os_internaty + get_os_internaty(
                     single_file_tree)
                 if get_os_zawody(single_file_tree) != []:
@@ -497,7 +577,7 @@ def get_os_data(path):
     jsts_dict = dict(jsts)
     jst_dict_rew = dict((r[1], r[0]) for r in jsts)
     return(data, os_zawody, jsts_dict, jst_dict_rew, os_ee_data, os_12_data,
-           os_internaty)
+           os_internaty, os_u31_data)
 
 
 def get_terminated(tree):
@@ -947,7 +1027,8 @@ if not args.skip_old_overwrite:
         jst_dict_rew,
         os_ee_sp_p_list,
         os_ee_sp_12_list,
-        os_internaty_list) = get_os_data(oldpath)
+        os_internaty_list,
+        os_u31_list) = get_os_data(oldpath)
     with open(os.path.join(args.newpath, 'os_data_list.txt'), 'w') as f:
         f.write(str(os_data_list))
     with open(os.path.join(args.newpath, 'os_zawody_list.txt'), 'w') as f:
@@ -962,6 +1043,8 @@ if not args.skip_old_overwrite:
         f.write(str(os_ee_sp_12_list))
     with open(os.path.join(args.newpath, 'os_internaty_list.txt'), 'w') as f:
         f.write(str(os_internaty_list))
+    with open(os.path.join(args.newpath, 'os_u31_list.txt'), 'w') as f:
+        f.write(str(os_u31_list))
 else:
     print('* Loading prepared old SIO data from txt files...')
     with open(os.path.join(args.newpath, 'os_data_list.txt'), 'r') as f:
@@ -978,6 +1061,8 @@ else:
         os_ee_sp_12_list = eval(f.read())
     with open(os.path.join(args.newpath, 'os_internaty_list.txt'), 'r') as f:
         os_internaty_list = eval(f.read())
+    with open(os.path.join(args.newpath, 'os_u31_list.txt'), 'r') as f:
+        os_u31_list = eval(f.read())
 for item in sio_report_list:
     print('* Generating %s...' % item[0])
     with open(os.path.join(item[2], item[1]), 'w') as f:
@@ -1240,20 +1325,22 @@ for item in sio_report_list:
             for rowo in os_data_list:
                 for rown in ns_l_ucz_oddz:
                     if rowo[0] == rown[0] and rown[1] == 0:
-                        cfile.writerow([
-                            rowo[23],
-                            jsts_dict[rowo[23]],
-                            ('Brak przypisanych uczniów w nowym SIO. '
-                                'Komunikat w tej sprawie: '
-                                'https://goo.gl/ac1huH'),
-                            'Nie badano',
-                            rown[1],
-                            rowo[0],
-                            rowo[1],
-                            type_dict[rowo[4]],
-                            rowo[7],
-                            rowo[8],
-                            rowo[9]])
+                        for rowucz in os_u31_list:
+                            if rowo[0] == rowucz[0] and rowucz[1] != 0:
+                                cfile.writerow([
+                                    rowo[23],
+                                    jsts_dict[rowo[23]],
+                                    ('Brak przypisanych uczniów w nowym SIO. '
+                                        'Komunikat w tej sprawie: '
+                                        'https://goo.gl/ac1huH'),
+                                    'Nie badano',
+                                    rown[1],
+                                    rowo[0],
+                                    rowo[1],
+                                    type_dict[rowo[4]],
+                                    rowo[7],
+                                    rowo[8],
+                                    rowo[9]])
         elif item[1] is 'os_niepoprawne_numery_rspo.csv':
             for row in os_data_list:
                 for i in ns_data_list:
